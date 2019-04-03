@@ -1,5 +1,9 @@
 # SimpleOpenGL
 
+## Directory Structure
+
+All the source files are in the SimpleOpenGL folder. The other folders are just external libraries.
+
 ## To get Running (on Xcode at least):
 
 Linker flags: `-lglfw`
