@@ -15,6 +15,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "shader_s.h"
+#include "parse_obj.h"
 #include <vector>
 
 class Object {
@@ -24,9 +25,9 @@ class Object {
     
 public:
     
-    std::vector<float> vertices;
+    std::vector<double> vertices;
     
-    Object(Shader *s, std::vector<float> verts):shader(s),vertices(verts){
+    Object(Shader *s, std::vector<double> verts):shader(s),vertices(verts){
         glGenVertexArrays(2, &VAO);
         glGenBuffers(2, &VBO);
         
@@ -36,14 +37,14 @@ public:
         
         
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(float), vertices.data(), GL_STATIC_DRAW);
-
+        //glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(float), vertices.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(double), vertices.data(), GL_STATIC_DRAW);
         
         // position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6 * sizeof(double), (void*)0);
         glEnableVertexAttribArray(0);
-        // texture coord attribute
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        // normal attribute
+        glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 6 * sizeof(double), (void*)(3 * sizeof(double)));
         glEnableVertexAttribArray(1);
 
     }
