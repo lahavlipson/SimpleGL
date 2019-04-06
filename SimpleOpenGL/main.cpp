@@ -10,6 +10,8 @@
 
 #include "shader_s.h"
 
+#include "object.h"
+
 #include <iostream>
 
 #pragma clang diagnostic pop
@@ -164,6 +166,7 @@ int main()
     
     
 
+    Object cubeObj(&ourShader, std::vector<float>(vertices, vertices+36*5));
 
     
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
@@ -194,9 +197,6 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-        // activate shader
-        ourShader.use();
-        
         // pass projection matrix to shader (note that in this case it could change every frame)
         glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         ourShader.setMat4("projection", projection);
@@ -206,18 +206,17 @@ int main()
         ourShader.setMat4("view", view);
         ourShader.setVec3("objectColor", 1.0f, 0.5f, 0.71f);
         
-        // render boxes
-        glBindVertexArray(VAO);
+       
+        cubeObj.bind();
+        
         for (unsigned int i = 0; i < 10; i++)
         {
-            // calculate the model matrix for each object and pass it to shader before drawing
-            glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-            model = glm::translate(model, cubePositions[i]);
+            cubeObj.resetModel();
+            cubeObj.translate(cubePositions[i]);
             float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            ourShader.setMat4("model", model);
+            cubeObj.rotate(angle, glm::vec3(1.0f, 0.3f, 0.5f));
             
-            glDrawArrays(GL_TRIANGLES, 0, 36);
+            cubeObj.draw();
         }
         
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
