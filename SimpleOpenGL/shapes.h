@@ -10,9 +10,9 @@
 #define box_h
 
 #include "glp.h"
-#include "object.h"
+#include "mesh.h"
 
-class Box : public Object {
+class Box : public Mesh {
 public:
     
     Box(Shader *s, double w=1, double h=1, double d=1){
@@ -22,7 +22,7 @@ public:
     }
 };
 
-class Pyramid : public Object {
+class Pyramid : public Mesh {
 public:
     
     Pyramid(Shader *s, int sides=10, double h=3, double r=1){

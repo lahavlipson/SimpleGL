@@ -28,7 +28,7 @@
 #include <vector>
 
 
-class Object {
+class Mesh {
     
 public:
     
@@ -40,12 +40,9 @@ public:
     
 public:
     
-    Object(){
-        
-    }
+    Mesh(){}
     
-    Object(Shader *s):shader(s){
-        vertices = glp::box(glm::dvec3(1.2, 1.2, 0.4));
+    Mesh(Shader *s):shader(s){
         initVAO();
     };
     
@@ -76,9 +73,9 @@ public:
         model = glm::translate(model, translation);
     }
     
-    ~Object(){
-        glDeleteVertexArrays(2, &VAO);
-        glDeleteBuffers(2, &VBO);
+    ~Mesh(){
+        glDeleteVertexArrays(1, &VAO);
+        glDeleteBuffers(1, &VBO);
     }
 };
 

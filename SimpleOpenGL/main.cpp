@@ -11,7 +11,7 @@
 #include "shader_s.h"
 
 
-#include "object.h"
+#include "mesh.h"
 #include "shapes.h"
 
 #include <iostream>

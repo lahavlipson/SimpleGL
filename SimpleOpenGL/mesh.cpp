@@ -7,12 +7,11 @@
 //
 
 
-#include "object.h"
+#include "mesh.h"
 
-
-void Object::initVAO(){
-    glGenVertexArrays(2, &VAO);
-    glGenBuffers(2, &VBO);
+void Mesh::initVAO(){
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
     
     glBindVertexArray(VAO);
     
