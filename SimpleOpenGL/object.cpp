@@ -6,11 +6,24 @@
 //  Copyright © 2019 Lahav Lipson. All rights reserved.
 //
 
+
 #include "object.h"
 
-void Object::rotate(float angle, glm::vec3 axis){
-    model = glm::rotate(model, glm::radians(angle), axis);
-}
-void Object::translate(glm::vec3 translation){
-    model = glm::translate(model, translation);
+
+void Object::initVAO(){
+    glGenVertexArrays(2, &VAO);
+    glGenBuffers(2, &VBO);
+    
+    glBindVertexArray(VAO);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    //glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(float), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(double), vertices.data(), GL_STATIC_DRAW);
+    
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6 * sizeof(double), (void*)0);
+    glEnableVertexAttribArray(0);
+    // normal attribute
+    glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 6 * sizeof(double), (void*)(3 * sizeof(double)));
+    glEnableVertexAttribArray(1);
 }

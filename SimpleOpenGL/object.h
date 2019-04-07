@@ -9,70 +9,72 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
 #include <stdio.h>
 #include <iostream>
 #include <glm/glm.hpp>
+
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "shader_s.h"
 #include "parse_obj.h"
+#include "glp.h"
+
+#pragma clang diagnostic pop
+
 #include <vector>
+
 
 class Object {
     
+public:
+    
     Shader *shader = nullptr;
-
+    glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+    std::vector<double> vertices;
+    glm::vec3 color = {0,0,0};
+    unsigned int VBO, VAO;
     
 public:
     
-    std::vector<double> vertices;
-    
-    Object(Shader *s, std::vector<double> verts):shader(s),vertices(verts){
-        glGenVertexArrays(2, &VAO);
-        glGenBuffers(2, &VBO);
+    Object(){
         
-        glBindVertexArray(VAO);
-        
-        std::cout << verts.size() << " SEE?\n";
-        
-        
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        //glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(float), vertices.data(), GL_STATIC_DRAW);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(double), vertices.data(), GL_STATIC_DRAW);
-        
-        // position attribute
-        glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6 * sizeof(double), (void*)0);
-        glEnableVertexAttribArray(0);
-        // normal attribute
-        glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 6 * sizeof(double), (void*)(3 * sizeof(double)));
-        glEnableVertexAttribArray(1);
-
     }
     
+    Object(Shader *s):shader(s){
+        vertices = glp::box(glm::dvec3(1.2, 1.2, 0.4));
+        initVAO();
+    };
     
-
+    void initVAO();
+    
+    inline void setColor(glm::vec3 c){
+        color = c;
+    }
+    
     inline void resetModel(){
         model = glm::mat4(1.0f);
     }
     
     inline void bind(){
         glBindVertexArray(VAO);
-        
-        
     }
     
     inline void draw(){
         shader->setMat4("model", model);
+        shader->setVec3("objectColor", color[0], color[1], color[2]);
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
-    void rotate(float angle, glm::vec3 axis);
-    void translate(glm::vec3 translation);
     
-    float color[3] = {0,0,0};
-    glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-    
-    
-    unsigned int VBO, VAO;
+    inline void rotate(float angle, glm::vec3 axis){
+        model = glm::rotate(model, glm::radians(angle), axis);
+    }
+    inline void translate(glm::vec3 translation){
+        model = glm::translate(model, translation);
+    }
     
     ~Object(){
         glDeleteVertexArrays(2, &VAO);

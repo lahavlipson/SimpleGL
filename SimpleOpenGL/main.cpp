@@ -9,9 +9,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "shader_s.h"
-#include "glp.h"
+
 
 #include "object.h"
+#include "shapes.h"
 
 #include <iostream>
 
@@ -92,9 +93,6 @@ int main()
     Shader ourShader("/Users/lahavlipson/Coursework/Spring_2019/C++/SimpleOpenGL/SimpleOpenGL/vertex_shader.glsl", "/Users/lahavlipson/Coursework/Spring_2019/C++/SimpleOpenGL/SimpleOpenGL/frag_shader.glsl");
     
     
-    std::vector<double> vertices = glp::box(glm::dvec3(1.2, 1.2, 1.2));
-    
-    
     
     // world space positions of our cubes
     glm::vec3 cubePositions[] = {
@@ -109,25 +107,10 @@ int main()
         glm::vec3( 1.5f,  0.2f, -1.5f),
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
-    unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    
-    glBindVertexArray(VAO);
-    
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(double), vertices.data(), GL_STATIC_DRAW);
-    
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6 * sizeof(double), (void*)0);
-    glEnableVertexAttribArray(0);
-    // normal attribute
-    glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 6 * sizeof(double), (void*)(3 * sizeof(double)));
-    glEnableVertexAttribArray(1);
-    
-    
 
-    Object cubeObj(&ourShader, vertices);
+
+    Pyramid cubeObj(&ourShader);
+    cubeObj.setColor( {1,0.5,0.71});
 
     
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
@@ -135,8 +118,6 @@ int main()
     ourShader.use();
     ourShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
     ourShader.setVec3("lightPos", lightPos);
-//    ourShader.setInt("texture1", 0);
-//    ourShader.setInt("texture2", 1);
     
     
     // render loop
@@ -165,18 +146,16 @@ int main()
         // camera/view transformation
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         ourShader.setMat4("view", view);
-        ourShader.setVec3("objectColor", 1.0f, 0.5f, 0.71f);
         
        
         cubeObj.bind();
         
-        for (unsigned int i = 0; i < 1; i++)
+        for (unsigned int i = 0; i < 10; i++)
         {
             cubeObj.resetModel();
             cubeObj.translate(cubePositions[i]);
             float angle = 20.0f * i;
             cubeObj.rotate(angle, glm::vec3(1.0f, 0.3f, 0.5f));
-            
             cubeObj.draw();
         }
         
@@ -185,11 +164,6 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    
-    // optional: de-allocate all resources once they've outlived their purpose:
-    // ------------------------------------------------------------------------
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
     
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
