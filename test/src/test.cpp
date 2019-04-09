@@ -44,8 +44,13 @@ float lastFrame = 0.0f;
 // lighting
 glm::vec3 lightPos(6.2f, 7.0f, 5.0f);
 
-int main()
+int main(int argc, char *argv[])
 {
+    if (argc < 3) {
+        std::cout << "Usage: " << *argv << " <vshader_fpath> <fshader_fpath>.\n";
+        return 0;
+    }
+
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
@@ -62,7 +67,7 @@ int main()
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
-        std::cout << "Failed to create GLFW window" << std::endl;
+        std::cout << "Failed to create GLFW window\n";
         glfwTerminate();
         return -1;
     }
@@ -86,11 +91,10 @@ int main()
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
     
+
     // build and compile our shader zprogram
     // ------------------------------------
-    Shader ourShader("/Users/crystalren/Desktop/SimpleOpenGL/src/vertex_shader.glsl", "/Users/crystalren/Desktop/SimpleOpenGL/src/frag_shader.glsl");
-    
-    
+    Shader ourShader(*(argv+1), *(argv+2));
     
     // world space positions of our cubes
     glm::vec3 cubePositions[] = {
