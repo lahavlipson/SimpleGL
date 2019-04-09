@@ -2,8 +2,8 @@
 
 ## Directory Structure
 
-All the library source files are src/ folder. The include/ folder contains required 3rd party libraries.
-And the test files and demo files are in test/src/.
+All the library source files are `src/` folder. The `include/` folder contains required 3rd party libraries.
+And the test files and demo files are in `test/src/`.
 
 ## To compile the library:
 
