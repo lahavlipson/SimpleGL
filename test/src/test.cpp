@@ -1,20 +1,18 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+
+#include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "shader_s.h"
-
-
 #include "mesh.h"
 #include "shapes.h"
 
-#include <iostream>
+#include "test.hpp"
 
 #pragma clang diagnostic pop
 
@@ -90,7 +88,7 @@ int main()
     
     // build and compile our shader zprogram
     // ------------------------------------
-    Shader ourShader("/Users/lahavlipson/Coursework/Spring_2019/C++/SimpleOpenGL/SimpleOpenGL/vertex_shader.glsl", "/Users/lahavlipson/Coursework/Spring_2019/C++/SimpleOpenGL/SimpleOpenGL/frag_shader.glsl");
+    Shader ourShader("/Users/crystalren/Desktop/SimpleOpenGL/src/vertex_shader.glsl", "/Users/crystalren/Desktop/SimpleOpenGL/src/frag_shader.glsl");
     
     
     
