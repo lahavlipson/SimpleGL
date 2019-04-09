@@ -2,22 +2,16 @@
 
 ## Directory Structure
 
-All the source files are in the SimpleOpenGL folder. The other folders are just external libraries.
+All the library source files are `src/` folder. The `include/` folder contains required 3rd party libraries.
+And the test files and demo files are in `test/src/`.
 
-## To get Running (on Xcode at least):
+## To compile the library:
 
-Linker flags: `-lglfw`
+Make sure glfw3 is installed first. Run `brew install glfw3` if using Mac OS.
 
-Header Search Paths: `full/path/to/SimpleOpenGL/build/Third_prty_libs/Includes`
+Run `make`. This will generate a libSimplegl.a file in the generated build/ directory.
 
-Run `brew install glfw3` then set
-Library Search Paths: `/usr/local/Cellar/glfw/3.2.1/lib`
+Run `make test` to create the test executable which will be created in the build/ directory as well.
 
-Editor->Add Build Setting->Add User-Defined Setting.
-Name the user defined setting `CC` and set its value to `/usr/local/opt/llvm/bin/clang`
-
-Go into Build Phases and under Link Binary with Libraries, add the following frameworks:
-- Cocoa
-- IOKit
-- OpenGL
-- CoreVideo
+Run `make clean` to remove all the created files including the libSimplegl.a file and the created
+object and executable files.
