@@ -1,6 +1,7 @@
 #ifndef glp_h
 #define glp_h
-
+// created by Ethan Lipson
+// see: https://www.ethanlipson.com/glp
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>

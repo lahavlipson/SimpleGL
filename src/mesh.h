@@ -20,7 +20,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "shader_s.h"
-#include "glp.h"
+#include <glp/glp.h>
 
 #pragma clang diagnostic pop
 
