@@ -11,6 +11,7 @@
 
 #include "mesh.h"
 #include "shapes.h"
+#include "scene.hpp"
 
 #include "test.hpp"
 
@@ -40,9 +41,6 @@ float fov   =  45.0f;
 // timing
 float deltaTime = 0.0f;    // time between current frame and last frame
 float lastFrame = 0.0f;
-
-// lighting
-glm::vec3 lightPos(6.2f, 7.0f, 5.0f);
 
 int main(int argc, char *argv[])
 {
@@ -79,22 +77,15 @@ int main(int argc, char *argv[])
     // tell GLFW to capture our mouse
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
-    // glad: load all OpenGL function pointers
-    // ---------------------------------------
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return -1;
-    }
     
-    // configure global opengl state
-    // -----------------------------
-    glEnable(GL_DEPTH_TEST);
     
-
     // build and compile our shader zprogram
     // ------------------------------------
-    Shader ourShader(*(argv+1), *(argv+2));
+    Scene scene(*(argv+1), *(argv+2));
+    
+    
+    
+
     
     // world space positions of our cubes
     glm::vec3 cubePositions[] = {
@@ -111,15 +102,8 @@ int main(int argc, char *argv[])
     };
 
 
-    Pyramid cubeObj(&ourShader);
+    Box cubeObj(&scene.shader);
     cubeObj.setColor( {1,0.5,0.71});
-
-    
-    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    // -------------------------------------------------------------------------------------------
-    ourShader.use();
-    ourShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-    ourShader.setVec3("lightPos", lightPos);
     
     
     // render loop
@@ -143,11 +127,11 @@ int main(int argc, char *argv[])
         
         // pass projection matrix to shader (note that in this case it could change every frame)
         glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        ourShader.setMat4("projection", projection);
+        scene.shader.setMat4("projection", projection);
         
         // camera/view transformation
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        ourShader.setMat4("view", view);
+        scene.shader.setMat4("view", view);
         
        
         cubeObj.bind();
