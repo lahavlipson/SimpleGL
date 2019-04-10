@@ -27,27 +27,43 @@
 #include <vector>
 
 
+struct Translation {
+    glm::vec3 rotationAxis;
+    double rotationDeg;
+    glm::vec3 translation;
+    glm::vec3 color;
+};
+
+/*
+ 
+ NOTE: WE MAY WANT TO MAKE THIS CLASS ABSTRACT
+ 
+ */
+
 class Mesh {
     
 public:
     
     Shader *shader = nullptr;
     glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-    std::vector<double> vertices;
     glm::vec3 color = {0,0,0};
-    unsigned int VBO, VAO;
+//    static unsigned int VBO, VAO;
+//
+//    static int instanceCount;
     
 public:
     
-    Mesh(){
-        initVAO();
-    }
+    Mesh(){}
     
-    Mesh(Shader *s):shader(s){
-        initVAO();
-    };
+    /*Mesh(Shader *s):shader(s){
+        if (instanceCount++ == 0)
+            initVAO();
+    };*/
     
-    void initVAO();
+    virtual void initVAO(std::vector<double> vertices) = 0;
+    
+    virtual inline void bind() = 0;
+
     
     inline void setColor(glm::vec3 c){
         color = c;
@@ -55,10 +71,6 @@ public:
     
     inline void resetModel(){
         model = glm::mat4(1.0f);
-    }
-    
-    inline void bind(){
-        glBindVertexArray(VAO);
     }
     
     inline void draw(){
@@ -74,10 +86,11 @@ public:
         model = glm::translate(model, translation);
     }
     
-    ~Mesh(){
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
-    }
+//    ~Mesh(){
+//        instanceCount--;
+////        glDeleteVertexArrays(1, &VAO);
+////        glDeleteBuffers(1, &VBO);
+//    }
 };
 
 #endif /* Object_hpp */

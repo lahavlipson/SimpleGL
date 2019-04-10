@@ -48,6 +48,7 @@ int main(int argc, char *argv[]){
     }
     Scene s(*(argv+1), *(argv+2));
     
+    Mesh *cubeObj0 = new Box;
     Mesh *cubeObj = new Box;
     cubeObj->setColor( {1,0.5,0.71});
     s.meshes.push_back(cubeObj);
