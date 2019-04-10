@@ -17,7 +17,6 @@ unsigned int Pyramid::instanceCount = 0;
 unsigned int Pyramid::VBO;
 unsigned int Pyramid::VAO;
 
-
 void Box::initVAO(std::vector<double> vertices){
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
