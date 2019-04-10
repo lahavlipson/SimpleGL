@@ -2,8 +2,9 @@
 
 ## Directory Structure
 
-All the library source files are `src/` folder. The `include/` folder contains required 3rd party libraries.
-And the test files and demo files are in `test/src/`.
+All the library source files are `src/` folder. 
+The `include/` folder contains required 3rd party libraries or code.
+And the test and demo files are in `test/src/`.
 
 ## Getting Started:
 
@@ -18,3 +19,10 @@ object and executable files.
 
 ## Sample Usage:
 
+TODO
+
+## Troubleshooting:
+
+If you get this error when running `make`: `xcrun: error: invalid active developer path (/Library/Developer/CommandLineTools), missing xcrun at: /Library/Developer/CommandLineTools/usr/bin/xcrun`
+
+And you're running on a Mac, please install the xcode commandline tools: `xcode-select --install`
