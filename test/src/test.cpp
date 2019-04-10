@@ -51,6 +51,12 @@ int main(int argc, char *argv[]){
     }
     Scene s(*(argv+1), *(argv+2));
     
+    Mesh *cubeObj = new Box;
+    cubeObj->setColor( {1,0.5,0.71});
+    s.meshes.push_back(cubeObj);
+    
+    s.render();
+    
     return 0;
 }
 
@@ -113,7 +119,7 @@ Scene::Scene(char *vs, char *fs)
     
    
 
-    render();
+    
     
     
 }
@@ -134,8 +140,10 @@ void Scene::render(){
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
     
-    Pyramid cubeObj(&shader);
-    cubeObj.setColor( {1,0.5,0.71});
+    
+    for (Mesh* mp : meshes) {
+        mp->shader = &shader;
+    }
     
     // render loop
     // -----------
@@ -164,16 +172,17 @@ void Scene::render(){
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         shader.setMat4("view", view);
         
+        Mesh *cubeObj = meshes[0];
        
-        cubeObj.bind();
+        cubeObj->bind();
         
         for (unsigned int i = 0; i < 10; i++)
         {
-            cubeObj.resetModel();
-            cubeObj.translate(cubePositions[i]);
+            cubeObj->resetModel();
+            cubeObj->translate(cubePositions[i]);
             float angle = 20.0f * i;
-            cubeObj.rotate(angle, glm::vec3(1.0f, 0.3f, 0.5f));
-            cubeObj.draw();
+            cubeObj->rotate(angle, glm::vec3(1.0f, 0.3f, 0.5f));
+            cubeObj->draw();
         }
         
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

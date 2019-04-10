@@ -39,7 +39,9 @@ public:
     
 public:
     
-    Mesh(){}
+    Mesh(){
+        initVAO();
+    }
     
     Mesh(Shader *s):shader(s){
         initVAO();

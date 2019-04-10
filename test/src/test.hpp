@@ -1,4 +1,6 @@
 
+
+
 class Scene {
 public:
     Scene(char *vs, char *fs);
@@ -8,5 +10,7 @@ public:
     Shader shader;
     
     void render();
+    
+    std::vector<Mesh *> meshes;
     
 };

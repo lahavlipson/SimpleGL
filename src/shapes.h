@@ -15,7 +15,7 @@
 class Box : public Mesh {
 public:
     
-    Box(Shader *s, double w=1, double h=1, double d=1){
+    Box(Shader *s = nullptr, double w=1, double h=1, double d=1){
         this->shader = s;
         vertices = glp::box(glm::dvec3(w, h, d));
         initVAO();
@@ -25,7 +25,7 @@ public:
 class Pyramid : public Mesh {
 public:
     
-    Pyramid(Shader *s, int sides=10, double h=3, double r=1){
+    Pyramid(Shader *s = nullptr, int sides=10, double h=3, double r=1){
         this->shader = s;
         vertices = glp::pyramid(sides, h, r);
         initVAO();
