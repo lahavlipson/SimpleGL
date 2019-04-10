@@ -44,12 +44,19 @@ float lastFrame = 0.0f;
 // lighting
 glm::vec3 lightPos(6.2f, 7.0f, 5.0f);
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
     if (argc < 3) {
         std::cout << "Usage: " << *argv << " <vshader_fpath> <fshader_fpath>.\n";
-        return 0;
+        abort();
     }
+    Scene s(*(argv+1), *(argv+2));
+    
+    return 0;
+}
+
+Scene::Scene(char *vs, char *fs)
+{
+    
 
     // glfw: initialize and configure
     // ------------------------------
@@ -64,12 +71,12 @@ int main(int argc, char *argv[])
     
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window\n";
         glfwTerminate();
-        return -1;
+        abort();
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -84,7 +91,7 @@ int main(int argc, char *argv[])
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
-        return -1;
+        abort();
     }
     
     // configure global opengl state
@@ -94,7 +101,24 @@ int main(int argc, char *argv[])
 
     // build and compile our shader zprogram
     // ------------------------------------
-    Shader ourShader(*(argv+1), *(argv+2));
+    shader = Shader(vs, fs);
+    
+    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
+    // -------------------------------------------------------------------------------------------
+    shader.use();
+    shader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+    shader.setVec3("lightPos", lightPos);
+    
+    
+    
+   
+
+    render();
+    
+    
+}
+
+void Scene::render(){
     
     // world space positions of our cubes
     glm::vec3 cubePositions[] = {
@@ -109,18 +133,9 @@ int main(int argc, char *argv[])
         glm::vec3( 1.5f,  0.2f, -1.5f),
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
-
-
-    Pyramid cubeObj(&ourShader);
+    
+    Pyramid cubeObj(&shader);
     cubeObj.setColor( {1,0.5,0.71});
-
-    
-    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    // -------------------------------------------------------------------------------------------
-    ourShader.use();
-    ourShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-    ourShader.setVec3("lightPos", lightPos);
-    
     
     // render loop
     // -----------
@@ -143,11 +158,11 @@ int main(int argc, char *argv[])
         
         // pass projection matrix to shader (note that in this case it could change every frame)
         glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        ourShader.setMat4("projection", projection);
+        shader.setMat4("projection", projection);
         
         // camera/view transformation
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        ourShader.setMat4("view", view);
+        shader.setMat4("view", view);
         
        
         cubeObj.bind();
@@ -170,7 +185,6 @@ int main(int argc, char *argv[])
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();
-    return 0;
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
