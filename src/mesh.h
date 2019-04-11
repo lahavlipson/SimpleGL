@@ -6,26 +6,33 @@
 //  Copyright © 2019 Lahav Lipson. All rights reserved.
 //
 
-#ifndef OBJECT_H
-#define OBJECT_H
+#ifndef MESH_H
+#define MESH_H
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdocumentation"
-
-#include <stdio.h>
 #include <iostream>
-#include <glm/glm.hpp>
-
-
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include "shader_s.h"
-#include <glp/glp.h>
-
-#pragma clang diagnostic pop
-
 #include <vector>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include "shader_s.h"
+#include "glp_wrapper.hpp"
+
+
+
+struct Translation {
+    glm::vec3 rotationAxis;
+    double rotationDeg;
+    glm::vec3 translation;
+    glm::vec3 color;
+};
+
+/*
+ 
+ NOTE: WE MAY WANT TO MAKE THIS CLASS ABSTRACT
+ 
+ */
 
 class Mesh {
     
@@ -33,19 +40,28 @@ public:
     
     Shader *shader = nullptr;
     glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-    std::vector<double> vertices;
     glm::vec3 color = {0,0,0};
-    unsigned int VBO, VAO;
+    std::vector<double> vertices;
+//    static unsigned int VBO, VAO;
+//
+//    static int instanceCount;
     
 public:
     
-    Mesh(){}
+    Mesh(){
+        // init VAO
+        // bind VAO
+    }
     
-    Mesh(Shader *s):shader(s){
-        initVAO();
-    };
+    /*Mesh(Shader *s):shader(s){
+        if (instanceCount++ == 0)
+            initVAO();
+    };*/
     
-    void initVAO();
+    virtual void initVAO(std::vector<double> vertices) = 0;
+    
+    virtual inline void bind() = 0;
+
     
     inline void setColor(glm::vec3 c){
         color = c;
@@ -55,14 +71,10 @@ public:
         model = glm::mat4(1.0f);
     }
     
-    inline void bind(){
-        glBindVertexArray(VAO);
-    }
-    
     inline void draw(){
         shader->setMat4("model", model);
         shader->setVec3("objectColor", color[0], color[1], color[2]);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawArrays(GL_TRIANGLES, 0, (int) (vertices.size() / 6));
     }
     
     inline void rotate(float angle, glm::vec3 axis){
@@ -73,8 +85,9 @@ public:
     }
     
     ~Mesh(){
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
+//        instanceCount--;
+////        glDeleteVertexArrays(1, &VAO);
+////        glDeleteBuffers(1, &VBO);
     }
 };
 
