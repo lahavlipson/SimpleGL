@@ -15,6 +15,7 @@ dist_files := $(shell find $(SRC_DIRS) -name *.hpp) $(BUILD_DIR)/$(TARGET_EXEC)
 SRCS      := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 OBJS      := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS      := $(OBJS:.o=.d)
+
 #INC_DIRS  := $(shell find $(SRC_DIRS) -type d) /usr/local/Cellar/boost/1.66.0
 #INC_FLAGS := $(addprefix -I,$(INC_DIRS)) -I/usr/local/Cellar/boost/1.66.0/include
 
@@ -57,10 +58,9 @@ clean:
 test: $(TEST_EXEC)
 
 $(TEST_EXEC): $(BUILD_DIR)/test.o
-	$(CXX) $< -o $@ $(TEST_LD_FLAGS) -L./build -lSimplegl
+	$(CXX) $< -o $@ $(TEST_LD_FLAGS)
 
-
-$(BUILD_DIR)/test.o: $(TEST_SRC_DIR)/test.cpp $(TEST_SRC_DIR)/test.hpp
+$(BUILD_DIR)/test.o: $(TEST_SRC_DIR)/test.cpp
 	$(CXX) $(CPPFLAGS) -c $< -o $(BUILD_DIR)/test.o
 
 MKDIR_P ?= mkdir -p
