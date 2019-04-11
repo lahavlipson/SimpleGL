@@ -2,7 +2,6 @@
 #define MESH_HPP
 
 #include <iostream>
-#include <utility>
 #include <vector>
 
 #include <glad/glad.h>
@@ -10,13 +9,16 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// render_info: contains color and model matrix for each instance
+// and is used in the render loop in Scene class.
 typedef std::pair<glm::vec3, glm::mat4> render_info;
 
 class Mesh {
 public:
 
-    Mesh(std::vector<double>& vertices, glm::vec3 color, glm::mat4 model) : 
-        v_size(vertices.size()) {
+    // When first initializing, generate buffers and store the vertices data.
+    Mesh(std::vector<double>& vertices, glm::vec3 color, glm::mat4 model)
+        : v_size(vertices.size()) {
 
         add_instance(color, model);
 
@@ -54,8 +56,13 @@ public:
         return v_size;
     }
 
+    // Methods for manipulating a specific instance of this Mesh.
     inline void set_color(int i, glm::vec3 c) {
         render_infos[i].first = c;
+    }
+
+    inline void set_model(int i, glm::mat4 m) {
+        render_infos[i].second = m;
     }
     
     inline void reset_model(int i) {
@@ -72,9 +79,10 @@ public:
             render_infos[i].second, translation);
     }
     
+    // Delete the buffers on destrunction.
     ~Mesh(){
-        // glDeleteVertexArrays(1, &vao_id);
-        // glDeleteBuffers(1, &vbo_id);
+        glDeleteVertexArrays(1, &vao_id);
+        glDeleteBuffers(1, &vbo_id);
     }
 
 private:

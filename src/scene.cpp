@@ -87,20 +87,26 @@ Scene::~Scene() {
 }
 
 mesh_id Scene::add_mesh(Shape s, std::vector<double> p, 
-                        glm::vec3 color, glm::mat4 model) {
+                        glm::vec3 color, glm::mat4 model, bool isDefault) {
     int id = 0;
-    if (meshMap.find(s) == meshMap.end()) { // contains(s) is c++20
-        std::vector<double> vertices = createGLPObj(s, p);
-        meshMap.insert(std::make_pair(s, new Mesh(vertices, color, model)));
-    } else {
+    if (meshMap.find(s) != meshMap.end()) { // contains(s) is c++20
+        // adding an instance of this shape to the scene
         Mesh *mesh_ptr = meshMap[s];
         id = mesh_ptr->add_instance(color, model);
+    } else { 
+        // first time adding this shape to the scene
+        std::vector<double> vertices = createGLPObj(s, p, isDefault);
+        meshMap.insert(std::make_pair(s, new Mesh(vertices, color, model)));
     }
     return std::make_pair(s, id);
 }
 
 void Scene::set_color(mesh_id m_id, glm::vec3 c) {
     meshMap[m_id.first]->set_color(m_id.second, c);
+}
+
+void Scene::set_model(mesh_id m_id, glm::mat4 m) {
+    meshMap[m_id.first]->set_model(m_id.second, m);
 }
 
 void Scene::reset_model(mesh_id m_id) {

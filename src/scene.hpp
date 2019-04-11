@@ -12,6 +12,8 @@
 #include "mesh.hpp"
 #include "shader.hpp"
 
+// mesh_id: represents the id to a specific instance of Mesh
+// to modify its model matrix and color.
 typedef std::pair<Shape, int> mesh_id;
 
 class Scene {
@@ -20,7 +22,9 @@ public:
     ~Scene();
 
     mesh_id add_mesh(Shape s, std::vector<double> p,
-                     glm::vec3 color, glm::mat4 model);
+                     glm::vec3 color, glm::mat4 model, bool isDefault = true);
+
+    // Methods for manipulating mesh instances.
     void set_color(mesh_id m_id, glm::vec3 c);
     void set_model(mesh_id m_id, glm::mat4 model);
     void reset_model(mesh_id m_id);
@@ -29,6 +33,7 @@ public:
 
     void render();
 
+    // GLFW callbacks.
     static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
     static void mouse_callback(GLFWwindow *window, double xpos, double ypos);
     static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
