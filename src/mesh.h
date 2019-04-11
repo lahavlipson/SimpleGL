@@ -6,23 +6,19 @@
 //  Copyright © 2019 Lahav Lipson. All rights reserved.
 //
 
-#ifndef OBJECT_H
-#define OBJECT_H
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdocumentation"
+#ifndef MESH_H
+#define MESH_H
 
 #include <iostream>
-#include <glm/glm.hpp>
+#include <vector>
 
+#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 #include "shader_s.h"
-#include <glp/glp.h>
+#include "glp_wrapper.hpp"
 
-#pragma clang diagnostic pop
-
-#include <vector>
 
 
 struct Translation {
