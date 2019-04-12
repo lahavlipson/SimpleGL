@@ -68,12 +68,12 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     
     // build and compile our shader program
     // ------------------------------------
-    shader = Shader(vs, fs);
+    shader = new Shader(vs, fs);
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     // -------------------------------------------------------------------------------------------
-    shader.use();
-    shader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-    shader.setVec3("lightPos", 6.2f, 7.0f, 5.0f);
+    shader->use();
+    shader->setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+    shader->setVec3("lightPos", 6.2f, 7.0f, 5.0f);
 }
 
 Scene::~Scene() {
@@ -81,6 +81,8 @@ Scene::~Scene() {
     for (auto& p : meshMap) {
         delete p.second;
     }
+    // Delete shader.
+    delete shader;
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();
@@ -143,18 +145,18 @@ void Scene::render() {
         // pass projection matrix to shader
         glm::mat4 projection = glm::perspective(
             glm::radians(fov), (float)scr_width/(float)scr_height, 0.1f, 100.0f);
-        shader.setMat4("projection", projection);
+        shader->setMat4("projection", projection);
         // pass camera/view transformation to shade
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos+cameraFront, cameraUp);
-        shader.setMat4("view", view);
+        shader->setMat4("view", view);
         
         for (auto& entry : meshMap) {
             Mesh *mesh_ptr = entry.second;
         	mesh_ptr->bindVAO();
             int v_size = mesh_ptr->get_v_size();
 	        for (auto& info : mesh_ptr->mesh_infos()) {
-                shader.setVec3("objectColor", info.first);
-	            shader.setMat4("model", info.second);
+                shader->setVec3("objectColor", info.first);
+	            shader->setMat4("model", info.second);
 	            glDrawArrays(GL_TRIANGLES, 0, (int) (v_size / 6));
 	        }
         }

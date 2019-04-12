@@ -42,7 +42,7 @@ public:
 private:
     unsigned int scr_width, scr_height;
     GLFWwindow *window = nullptr;
-    Shader shader;
+    Shader *shader;
     std::unordered_map<Shape, Mesh *> meshMap;
 };
 

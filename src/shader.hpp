@@ -14,7 +14,6 @@
 
 class Shader {
 public:
-    unsigned int ID;
     Shader() {};
     // constructor generates the shader on the fly
     // ------------------------------------------------------------------------
@@ -74,7 +73,16 @@ public:
     void use() const {
         glUseProgram(ID);
     }
-    
+
+    // shader destructor
+    // ------------------------------------------------------------------------
+    ~Shader() {
+        glUseProgram(0);
+        if (ID != 0) {
+            glDeleteProgram(ID);
+        }
+    }
+
     // utility uniform functions
     // ------------------------------------------------------------------------
     void setBool(const std::string &name, bool value) const {
@@ -127,6 +135,9 @@ public:
     }
     
 private:
+    // shader program id
+    unsigned int ID;
+
     // utility function for checking shader compilation/linking errors.
     // ------------------------------------------------------------------------
     void checkCompileErrors(GLuint shader, std::string type) {
