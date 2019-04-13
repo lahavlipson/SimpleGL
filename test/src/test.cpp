@@ -1,7 +1,10 @@
+/*
+ * A hello-world test for the SimpleGL library.
+ */
+
 #include <iostream>
 
-#include "mesh.h"
-#include "shapes.h"
+#include "glp_wrapper.hpp"
 #include "scene.hpp"
 
 int main(int argc, char *argv[]){
@@ -9,10 +12,41 @@ int main(int argc, char *argv[]){
         std::cout << "Usage: " << *argv << " <vshader_fpath> <fshader_fpath>.\n";
         return 0;
     }
+    
+    // initialize the scene.
     Scene s(*(argv+1), *(argv+2));
 
-    Mesh *cubeObj = new Box;
-    cubeObj->setColor({1,0.5,0.71});
-    s.meshes.push_back(cubeObj);
+    // world space positions for the ten boxes
+    glm::vec3 box_positions[] = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+    // add the ten boxes
+    std::vector<double> box_params = {1,1,1};
+    glm::mat4 model = glm::mat4(1.0f);
+    glm::vec3 color = glm::vec3(1.0,0.5,0.71);
+    for (unsigned int i = 0; i < 10; i++) {
+        mesh_id m_id = s.add_mesh(Shape::box, box_params, color, model);
+        s.translate(m_id, box_positions[i]);
+        float angle = 20.0f * i;
+        s.rotate(m_id, angle, glm::vec3(1.0f, 0.3f, 0.5f));
+    }
+    // add two spheres
+    color = glm::vec3(0.7, 0.5, 0.5);
+    std::vector<double> sphere_params = {3, 0.1};
+    mesh_id m_id = s.add_mesh(Shape::sphere, sphere_params, color, model);
+    s.translate(m_id, glm::vec3(-0.2,-0.2,-0.2));
+    m_id = s.add_mesh(Shape::sphere, sphere_params, color, model);
+    s.translate(m_id, glm::vec3(-0.6,-0.6,-0.6));
+
+    // render the scene.
     s.render();
 }

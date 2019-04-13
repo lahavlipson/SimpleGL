@@ -15,7 +15,7 @@ And the test and demo files are in `test/src/`.
 - ar (command line tool)
 - glfw3
 
-## Getting Started:
+## Getting Started
 
 Make sure glfw3 is installed first. Run `brew install glfw3` if using Mac OS.
 
@@ -26,11 +26,11 @@ Run `make test` to create the test executable which will be created in the build
 Run `make clean` to remove all the created files including the libSimplegl.a file and the created
 object and executable files.
 
-## Sample Usage:
+## Sample Usage
 
 TODO
 
-## Troubleshooting:
+## Troubleshooting
 
 If you get this error when running `make`: `xcrun: error: invalid active developer path (/Library/Developer/CommandLineTools), missing xcrun at: /Library/Developer/CommandLineTools/usr/bin/xcrun`
 
@@ -39,3 +39,8 @@ And you're running on a Mac, please install the xcode commandline tools: `xcode-
 ## Notes
 
 This README heavily referenced from https://github.com/wodeni/Animate-plus-plus/blob/master/README.md
+
+## TODO
+
+parse .obj files
+

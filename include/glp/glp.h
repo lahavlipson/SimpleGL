@@ -2,6 +2,7 @@
 #define glp_h
 // created by Ethan Lipson
 // see: https://www.ethanlipson.com/glp
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
@@ -9,15 +10,11 @@
 #define PI 3.141592653589
 #define EPSILON 0.0000000001
 
-
-
 inline void pushBackVec3(std::vector<double> &vertices, glm::dvec3 vec) {
     for (int i = 0; i < 3; i++) {
         vertices.push_back(vec[i]);
     }
 }
-
-
 
 namespace glp {
     /** Creates a sphere by recursively dividing the faces
