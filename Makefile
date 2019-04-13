@@ -16,14 +16,8 @@ SRCS      := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 OBJS      := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS      := $(OBJS:.o=.d)
 
-#INC_DIRS  := $(shell find $(SRC_DIRS) -type d) /usr/local/Cellar/boost/1.66.0
-#INC_FLAGS := $(addprefix -I,$(INC_DIRS)) -I/usr/local/Cellar/boost/1.66.0/include
-
 INC_DIRS  := $(shell find $(SRC_DIRS) -type d) /usr/local/Cellar/glfw/3.2.1
 INC_FLAGS := $(addprefix -I,$(INC_DIRS)) -I/usr/local/Cellar/glfw/3.2.1/include
-
-#LDFLAGS   := $(INC_FLAGS) -L/usr/local/Cellar/boost/1.66.0/lib -lboost_regex-mt
-#CPPFLAGS  ?= $(INC_FLAGS) -MMD -MP -std=c++1z
 
 LDFLAGS   := $(INC_FLAGS) -L/usr/local/Cellar/glfw/3.2.1/lib -lglfw
 CPPFLAGS  ?= $(INC_FLAGS) -MP -MMD -std=c++17 -O2 -Wall -Werror
