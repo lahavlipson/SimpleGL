@@ -18,7 +18,7 @@ typedef std::pair<Shape, int> mesh_id;
 
 class Scene {
 public:
-    Scene(char *vs, char *fs, int width = 800, int height = 600);
+    Scene(char *vs= NULL, char *fs= NULL, int width = 800, int height = 600);
     ~Scene();
 
     mesh_id add_mesh(Shape s, std::vector<double> p,
