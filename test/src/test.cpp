@@ -43,6 +43,11 @@ int main(int argc, char *argv[]){
     m_id = s.add_mesh(Shape::sphere, sphere_params, color, model);
     s.translate(m_id, glm::vec3(-0.6,-0.6,-0.6));
 
+    
+    // add .obj
+    mesh_id obj_id = s.add_mesh(Shape::obj, sphere_params, color, model);
+    
+    
     // render the scene.
     s.render();
 }

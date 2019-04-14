@@ -42,5 +42,5 @@ This README heavily referenced from https://github.com/wodeni/Animate-plus-plus/
 
 ## TODO
 
-parse .obj files
+~~parse .obj files~~
 
