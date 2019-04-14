@@ -79,6 +79,10 @@ public:
             render_infos[i].second, translation);
     }
     
+    inline void scale(int i, glm::vec3 scale) {
+        render_infos[i].second = glm::scale(render_infos[i].second, scale);
+    }
+    
     // Delete the buffers on destrunction.
     ~Mesh(){
         glDeleteVertexArrays(1, &vao_id);

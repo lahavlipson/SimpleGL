@@ -123,6 +123,14 @@ void Scene::translate(mesh_id m_id, glm::vec3 translation) {
     meshMap[m_id.first]->translate(m_id.second, translation);
 }
 
+void Scene::scale(mesh_id m_id, glm::vec3 factor) {
+    meshMap[m_id.first]->scale(m_id.second, factor);
+}
+
+void Scene::scale(mesh_id m_id, double factor) {
+    meshMap[m_id.first]->scale(m_id.second, {factor, factor, factor});
+}
+
 void Scene::rotate(mesh_id m_id, float angle, glm::vec3 axis) {
     meshMap[m_id.first]->rotate(m_id.second, angle, axis);
 }

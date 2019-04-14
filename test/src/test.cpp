@@ -45,7 +45,8 @@ int main(int argc, char *argv[]){
 
     if (argc > 1) {
         // add .obj
-        s.add_mesh(Shape::obj, *(argv+1), color, model);
+        mesh_id obj_m_id = s.add_mesh(Shape::obj, *(argv+1), color, model);
+        s.scale(obj_m_id, 0.08);
     }
     
     

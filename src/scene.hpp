@@ -31,6 +31,8 @@ public:
     void reset_model(mesh_id m_id);
     void translate(mesh_id m_id, glm::vec3 translation);
     void rotate(mesh_id m_id, float angle, glm::vec3 axis);
+    void scale(mesh_id m_id, glm::vec3 factor);
+    void scale(mesh_id m_id, double factor);
 
     void render();
 
