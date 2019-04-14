@@ -33,7 +33,8 @@ static const std::string FRAG_SHADER = "#version 330 core\n"
 "    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 20);\n"
 "    vec3 specular = specularStrength * spec * lightColor;\n"
 "    vec3 result = (ambient + diffuse + specular) * objectColor;\n"
-"    FragColor = vec4(result, 1.0);}";
+"    FragColor = vec4(result, 1.0);\n"
+"}\n";
 
 static const std::string VERTEX_SHADER = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
@@ -46,12 +47,12 @@ static const std::string VERTEX_SHADER = "#version 330 core\n"
 "void main(){\n"
 "    gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
 "    FragPos = vec3(model * vec4(aPos, 1.0));\n"
-"    Normal = aNormal;}";
+"    Normal = aNormal;\n"
+"}\n";
 
 class Shader {
 public:
-    // constructor generates the shader on the fly
-
+    // ------------------------------------------------------------------------
     // constructor for shaders using the default shader code we provide
     Shader() {
         const char *vShaderCode = VERTEX_SHADER.c_str();

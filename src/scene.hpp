@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <unordered_map>
+#include <variant>
 
 #include "mesh.hpp"
 #include "shader.hpp"
@@ -18,25 +19,27 @@ typedef std::pair<Shape, int> mesh_id;
 
 class Scene {
 public:
-    Scene(char *vs= NULL, char *fs= NULL, int width = 800, int height = 600);
+    Scene(char *vs= nullptr, char *fs= nullptr, const int width = 800, const int height = 600);
     ~Scene();
 
-    mesh_id add_mesh(Shape s, std::vector<double> p,
-                     glm::vec3 color, glm::mat4 model, bool isDefault = true);
+    mesh_id add_mesh(const Shape s, const std::variant<std::vector<double>, std::string> p,
+                     const glm::vec3 color, const glm::mat4 model, const bool isDefault = true);
 
     // Methods for manipulating mesh instances.
-    void set_color(mesh_id m_id, glm::vec3 c);
-    void set_model(mesh_id m_id, glm::mat4 model);
-    void reset_model(mesh_id m_id);
-    void translate(mesh_id m_id, glm::vec3 translation);
-    void rotate(mesh_id m_id, float angle, glm::vec3 axis);
+    void set_color(const mesh_id m_id, const glm::vec3 c);
+    void set_model(const mesh_id m_id, const glm::mat4 model);
+    void reset_model(const mesh_id m_id);
+    void translate(const mesh_id m_id, const glm::vec3 translation);
+    void rotate(const mesh_id m_id, const float angle, glm::vec3 axis);
+    void scale(const mesh_id m_id, const glm::vec3 factor);
+    void scale(const mesh_id m_id, const double factor);
 
     void render();
 
     // GLFW callbacks.
-    static void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-    static void mouse_callback(GLFWwindow *window, double xpos, double ypos);
-    static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+    static void framebuffer_size_callback(GLFWwindow *window, const int width, const int height);
+    static void mouse_callback(GLFWwindow *window, const double xpos, const double ypos);
+    static void scroll_callback(GLFWwindow *window, const double xoffset, const double yoffset);
     static void process_input(GLFWwindow *window);
 
 private:

@@ -9,7 +9,7 @@ glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 
 bool firstMouse = true;
-// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction
+// yaw is initialized to -90 degrees since a yaw of 0 results in a direction
 // vector pointing to the right, so we initially rotate a bit to the left.
 float yaw   = -90.0f;
 float pitch =  0.0f;
@@ -39,10 +39,10 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     // --------------------
     scr_width = width;
     scr_height = height;
-    window = glfwCreateWindow(scr_width, scr_height, "SimpleGL", NULL, NULL);
+    window = glfwCreateWindow(scr_width, scr_height, "SimpleGL", nullptr, nullptr);
     lastX = (float) scr_width / 2.0;
     lastY = (float) scr_height / 2.0;
-    if (window == NULL) {
+    if (window == nullptr) {
         std::cout << "Failed to create GLFW window\n";
         glfwTerminate();
         abort();
@@ -69,10 +69,11 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     
     // build and compile our shader program
     // ------------------------------------
-    if (vs && fs)
+    if (vs && fs) {
         shader = new Shader(vs, fs);
-    else
+    } else {
         shader = new Shader();
+    }
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     // -------------------------------------------------------------------------------------------
     shader->use();
@@ -92,7 +93,7 @@ Scene::~Scene() {
     glfwTerminate();
 }
 
-mesh_id Scene::add_mesh(Shape s, std::vector<double> p, 
+mesh_id Scene::add_mesh(Shape s, std::variant<std::vector<double>, std::string> p, 
                         glm::vec3 color, glm::mat4 model, bool isDefault) {
     int id = 0;
     if (meshMap.find(s) != meshMap.end()) { // contains(s) is c++20
@@ -121,6 +122,14 @@ void Scene::reset_model(mesh_id m_id) {
 
 void Scene::translate(mesh_id m_id, glm::vec3 translation) {
     meshMap[m_id.first]->translate(m_id.second, translation);
+}
+
+void Scene::scale(mesh_id m_id, glm::vec3 factor) {
+    meshMap[m_id.first]->scale(m_id.second, factor);
+}
+
+void Scene::scale(mesh_id m_id, double factor) {
+    meshMap[m_id.first]->scale(m_id.second, {factor, factor, factor});
 }
 
 void Scene::rotate(mesh_id m_id, float angle, glm::vec3 axis) {

@@ -28,7 +28,8 @@ object and executable files.
 
 ## Sample Usage
 
-TODO
+After running `make`, run `./build/test <obj_file_path>` to render the default scene.
+TODO: More on how to use the API of Scene class.
 
 ## Troubleshooting
 
@@ -42,5 +43,4 @@ This README heavily referenced from https://github.com/wodeni/Animate-plus-plus/
 
 ## TODO
 
-parse .obj files
-
+add more test cases and composite objects
