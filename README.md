@@ -44,3 +44,5 @@ This README heavily referenced from https://github.com/wodeni/Animate-plus-plus/
 ## TODO
 
 add more test cases and composite objects
+add error checking
+add version of test.cpp that doesn't use our library
