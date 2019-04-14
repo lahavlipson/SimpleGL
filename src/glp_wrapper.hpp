@@ -1,14 +1,21 @@
 #ifndef GLP_WRAPPER_HPP
 #define GLP_WRAPPER_HPP
 
+#include <variant>
 #include <glp/glp.h>
 #include <obj_loader/obj_loader.h>
 
-const std::string filepath = "/Users/lahavlipson/Coursework/Spring_2019/C++/SimpleOpenGL/test/obj_files/bison.obj";
-
 enum Shape { custom, sphere, truncatedCone, cylinder, cone, pyramid, torus, box, obj };
 
-inline std::vector<double> createGLPObj(Shape s, std::vector<double> p, bool isDefault = true) {
+inline std::vector<double> createGLPObj(Shape s, std::variant<std::vector<double>, std::string> varP, bool isDefault = true) {
+	std::vector<double> p;
+	std::string filepath;
+	
+	if(std::holds_alternative<std::vector<double>>(varP))
+		p = std::get<std::vector<double>>(varP);
+	else
+		filepath = std::get<std::string>(varP);
+
 	switch(s) {
 	case custom:
 		// p is the vertices for Shape::custom, directly return

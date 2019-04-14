@@ -92,7 +92,7 @@ Scene::~Scene() {
     glfwTerminate();
 }
 
-mesh_id Scene::add_mesh(Shape s, std::vector<double> p, 
+mesh_id Scene::add_mesh(Shape s, std::variant<std::vector<double>, std::string> p, 
                         glm::vec3 color, glm::mat4 model, bool isDefault) {
     int id = 0;
     if (meshMap.find(s) != meshMap.end()) { // contains(s) is c++20

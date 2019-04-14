@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <unordered_map>
+#include <variant>
 
 #include "mesh.hpp"
 #include "shader.hpp"
@@ -21,7 +22,7 @@ public:
     Scene(char *vs= NULL, char *fs= NULL, int width = 800, int height = 600);
     ~Scene();
 
-    mesh_id add_mesh(Shape s, std::vector<double> p,
+    mesh_id add_mesh(Shape s, std::variant<std::vector<double>, std::string> p,
                      glm::vec3 color, glm::mat4 model, bool isDefault = true);
 
     // Methods for manipulating mesh instances.

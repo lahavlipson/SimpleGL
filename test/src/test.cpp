@@ -7,8 +7,8 @@
 #include "glp_wrapper.hpp"
 #include "scene.hpp"
 
+// takes one command line argument to a filepath to a .obj file to be rendered
 int main(int argc, char *argv[]){
-    
     // initialize the scene.
     Scene s;
 
@@ -43,9 +43,10 @@ int main(int argc, char *argv[]){
     m_id = s.add_mesh(Shape::sphere, sphere_params, color, model);
     s.translate(m_id, glm::vec3(-0.6,-0.6,-0.6));
 
-    
-    // add .obj
-    mesh_id obj_id = s.add_mesh(Shape::obj, sphere_params, color, model);
+    if (argc > 1) {
+        // add .obj
+        s.add_mesh(Shape::obj, *(argv+1), color, model);
+    }
     
     
     // render the scene.
