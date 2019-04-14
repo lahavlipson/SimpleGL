@@ -39,10 +39,10 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     // --------------------
     scr_width = width;
     scr_height = height;
-    window = glfwCreateWindow(scr_width, scr_height, "SimpleGL", NULL, NULL);
+    window = glfwCreateWindow(scr_width, scr_height, "SimpleGL", nullptr, nullptr);
     lastX = (float) scr_width / 2.0;
     lastY = (float) scr_height / 2.0;
-    if (window == NULL) {
+    if (window == nullptr) {
         std::cout << "Failed to create GLFW window\n";
         glfwTerminate();
         abort();

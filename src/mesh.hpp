@@ -13,14 +13,16 @@
 // and is used in the render loop in Scene class.
 typedef std::pair<glm::vec3, glm::mat4> render_info;
 
+typedef glm::vec3 color;
+
 class Mesh {
 public:
 
     // When first initializing, generate buffers and store the vertices data.
-    Mesh(std::vector<double>& vertices, glm::vec3 color, glm::mat4 model)
+    Mesh(std::vector<double>& vertices, const color col, const glm::mat4 model)
         : v_size(vertices.size()) {
 
-        add_instance(color, model);
+        add_instance(col, model);
 
         glGenVertexArrays(1, &vao_id);
         glBindVertexArray(vao_id);
@@ -39,12 +41,12 @@ public:
         glEnableVertexAttribArray(1);  
     }
     
-    inline int add_instance(glm::vec3 color, glm::mat4 model) {
-        render_infos.push_back(render_info(color, model));
+    inline int add_instance(const color col, const glm::mat4 model) {
+        render_infos.push_back(render_info(col, model));
         return render_infos.size() - 1;
     }
 
-    inline void bindVAO() {
+    inline void bindVAO() const {
         glBindVertexArray(vao_id);
     }
 
@@ -52,34 +54,34 @@ public:
         return render_infos;
     }
 
-    inline int get_v_size() {
+    inline int get_v_size() const {
         return v_size;
     }
 
     // Methods for manipulating a specific instance of this Mesh.
-    inline void set_color(int i, glm::vec3 c) {
+    inline void set_color(const int i, const color c) {
         render_infos[i].first = c;
     }
 
-    inline void set_model(int i, glm::mat4 m) {
+    inline void set_model(const int i, const glm::mat4 m) {
         render_infos[i].second = m;
     }
     
-    inline void reset_model(int i) {
+    inline void reset_model(const int i) {
         render_infos[i].second = glm::mat4(1.0f);
     }
     
-    inline void rotate(int i, float angle, glm::vec3 axis) {
+    inline void rotate(const int i, const float angle, const glm::vec3 axis) {
         render_infos[i].second = glm::rotate(
             render_infos[i].second, glm::radians(angle), axis);
     }
 
-    inline void translate(int i, glm::vec3 translation) {
+    inline void translate(const int i, const glm::vec3 translation) {
         render_infos[i].second = glm::translate(
             render_infos[i].second, translation);
     }
     
-    inline void scale(int i, glm::vec3 scale) {
+    inline void scale(const int i, const glm::vec3 scale) {
         render_infos[i].second = glm::scale(render_infos[i].second, scale);
     }
     
