@@ -9,7 +9,7 @@ glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 
 bool firstMouse = true;
-// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction
+// yaw is initialized to -90 degrees since a yaw of 0 results in a direction
 // vector pointing to the right, so we initially rotate a bit to the left.
 float yaw   = -90.0f;
 float pitch =  0.0f;
@@ -69,10 +69,11 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     
     // build and compile our shader program
     // ------------------------------------
-    if (vs && fs)
+    if (vs && fs) {
         shader = new Shader(vs, fs);
-    else
+    } else {
         shader = new Shader();
+    }
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     // -------------------------------------------------------------------------------------------
     shader->use();

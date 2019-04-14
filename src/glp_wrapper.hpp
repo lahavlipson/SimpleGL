@@ -65,9 +65,8 @@ inline std::vector<double> createGLPObj(
 			return glp::box(glm::dvec3(p[0],p[1],p[2]));
 		}
 		return glp::box(glm::dvec3(p[0],p[1],p[2]), glm::dvec3(p[3],p[4],p[5]));
-	}
 
-	case obj: {
+	case obj: 
 		objl::Loader loader;
 		loader.LoadFile(filepath);
 		std::vector<double> output;
