@@ -35,6 +35,7 @@ int main(int argc, char *argv[]){
         float angle = 20.0f * i;
         s.rotate(m_id, angle, glm::vec3(1.0f, 0.3f, 0.5f));
     }
+    
     // add two spheres
     color = glm::vec3(0.7, 0.5, 0.5);
     std::vector<double> sphere_params = {3, 0.1};
@@ -43,12 +44,11 @@ int main(int argc, char *argv[]){
     m_id = s.add_mesh(Shape::sphere, sphere_params, color, model);
     s.translate(m_id, glm::vec3(-0.6,-0.6,-0.6));
 
+    // add one obj
     if (argc > 1) {
-        // add .obj
         mesh_id obj_m_id = s.add_mesh(Shape::obj, *(argv+1), color, model);
         s.scale(obj_m_id, 0.08);
     }
-    
     
     // render the scene.
     s.render();
