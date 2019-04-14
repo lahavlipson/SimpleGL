@@ -21,6 +21,7 @@ float lastY =  0.0f;
 float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
 
+// Note: either both of the shaders are default or neither are default
 Scene::Scene(char *vs, char *fs, int width, int height) {
     // glfw: initialize and configure
     // ------------------------------
@@ -68,7 +69,10 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     
     // build and compile our shader program
     // ------------------------------------
-    shader = new Shader(vs, fs);
+    if (vs && fs)
+        shader = new Shader(vs, fs);
+    else
+        shader = new Shader();
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     // -------------------------------------------------------------------------------------------
     shader->use();

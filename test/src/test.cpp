@@ -8,13 +8,9 @@
 #include "scene.hpp"
 
 int main(int argc, char *argv[]){
-    if (argc < 3) {
-        std::cout << "Usage: " << *argv << " <vshader_fpath> <fshader_fpath>.\n";
-        return 0;
-    }
     
     // initialize the scene.
-    Scene s(*(argv+1), *(argv+2));
+    Scene s;
 
     // world space positions for the ten boxes
     glm::vec3 box_positions[] = {

@@ -12,11 +12,75 @@
 #include <sstream>
 #include <iostream>
 
+static const std::string FRAG_SHADER = "#version 330 core\n"
+"out vec4 FragColor;\n"
+"in vec3 Normal;\n"
+"in vec3 FragPos;\n"
+"uniform vec3 viewPos;\n"
+"uniform vec3 lightPos;\n"
+"uniform vec3 objectColor;\n"
+"uniform vec3 lightColor;\n"
+"float specularStrength = 0.5;\n"
+"void main(){\n"
+"    float ambientStrength = 0.5;\n"
+"    vec3 ambient = ambientStrength * lightColor;\n"
+"    vec3 norm = normalize(Normal);\n"
+"    vec3 lightDir = normalize(lightPos - FragPos);\n"
+"    float diff = max(dot(norm, lightDir), 0.0);\n"
+"    vec3 diffuse = diff * lightColor;\n"
+"    vec3 viewDir = normalize(viewPos - FragPos);\n"
+"    vec3 reflectDir = reflect(-lightDir, norm);\n"
+"    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 20);\n"
+"    vec3 specular = specularStrength * spec * lightColor;\n"
+"    vec3 result = (ambient + diffuse + specular) * objectColor;\n"
+"    FragColor = vec4(result, 1.0);}";
+
+static const std::string VERTEX_SHADER = "#version 330 core\n"
+"layout (location = 0) in vec3 aPos;\n"
+"layout (location = 1) in vec3 aNormal;\n"
+"out vec3 FragPos;\n"
+"out vec3 Normal;\n"
+"uniform mat4 model;\n"
+"uniform mat4 view;\n"
+"uniform mat4 projection;\n"
+"void main(){\n"
+"    gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
+"    FragPos = vec3(model * vec4(aPos, 1.0));\n"
+"    Normal = aNormal;}";
+
 class Shader {
 public:
-    Shader() {};
     // constructor generates the shader on the fly
+
+    // constructor for shaders using the default shader code we provide
+    Shader() {
+        const char *vShaderCode = VERTEX_SHADER.c_str();
+        const char *fShaderCode = FRAG_SHADER.c_str();
+        // compile shaders
+        unsigned int vertex, fragment;
+        // vertex shader
+        vertex = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertex, 1, &vShaderCode, NULL);
+        glCompileShader(vertex);
+        checkCompileErrors(vertex, "VERTEX");
+        // fragment shader
+        fragment = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragment, 1, &fShaderCode, NULL);
+        glCompileShader(fragment);
+        checkCompileErrors(fragment, "FRAGMENT");
+        // shader program
+        ID = glCreateProgram();
+        glAttachShader(ID, vertex);
+        glAttachShader(ID, fragment);
+        glLinkProgram(ID);
+        checkCompileErrors(ID, "PROGRAM");
+        // delete the shaders as they're already linked and no longer necessery
+        glDeleteShader(vertex);
+        glDeleteShader(fragment);
+    }
+
     // ------------------------------------------------------------------------
+    // constructor for shader from a specified file path
     Shader(const char *vertexPath, const char *fragmentPath) {
         // 1. retrieve the vertex/fragment source code from filePath
         std::string vertexCode;
