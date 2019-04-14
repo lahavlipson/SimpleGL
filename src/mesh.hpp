@@ -12,7 +12,7 @@
 // render_info: contains color and model matrix for each instance
 // and is used in the render loop in Scene class.
 typedef std::pair<glm::vec3, glm::mat4> render_info;
-
+// color: use vec3 as rgb color.
 typedef glm::vec3 color;
 
 class Mesh {

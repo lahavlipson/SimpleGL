@@ -9,7 +9,8 @@
 enum Shape { custom, sphere, truncatedCone, cylinder, cone, pyramid, torus, box, obj };
 
 inline std::vector<double> createGLPObj(
-    const Shape s, const std::variant<std::vector<double>, std::string> varP, const bool isDefault = true) {
+    const Shape s, const std::variant<std::vector<double>, std::string> varP, 
+    const bool isDefault = true) {
     
 	std::vector<double> p;
 	std::string filepath;
