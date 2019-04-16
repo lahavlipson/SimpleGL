@@ -23,6 +23,8 @@ Run `make`. This will generate a libSimplegl.a file in the generated build/ dire
 
 Run `make test` to create the test executable which will be created in the build/ directory as well.
 
+Run `make compare` to create the comparison executable which does not use SimpleGL at all. This  will be created in the build/ directory.
+
 Run `make clean` to remove all the created files including the libSimplegl.a file and the created
 object and executable files.
 
