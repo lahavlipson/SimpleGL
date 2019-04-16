@@ -266,6 +266,14 @@ int main(int argc, char *argv[]) {
             glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model[0][0]);            
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+
+        // render spheres
+            //TODO
+
+        // render .obj files
+        if (argc > 3) {
+            //TODO
+        }
         
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
