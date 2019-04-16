@@ -6,6 +6,7 @@ VERSION = 0.1.0
 TARGET_EXEC  ?= libSimplegl.a
 BUILD_DIR    ?= ./build
 TEST_EXEC    ?= $(BUILD_DIR)/test
+TEST_CMPARE_EXEC    ?= $(BUILD_DIR)/compare
 SRC_DIRS     ?= ./src ./include
 TEST_SRC_DIR ?= test/src
 CXX ?= g++
@@ -56,5 +57,13 @@ $(TEST_EXEC): $(BUILD_DIR)/test.o
 
 $(BUILD_DIR)/test.o: $(TEST_SRC_DIR)/test.cpp
 	$(CXX) $(CPPFLAGS) -c $< -o $(BUILD_DIR)/test.o
+
+compare: $(TEST_CMPARE_EXEC)
+
+$(TEST_CMPARE_EXEC): $(BUILD_DIR)/compare.o
+	$(CXX) $< -o $@ $(TEST_LD_FLAGS)
+
+$(BUILD_DIR)/compare.o: $(TEST_SRC_DIR)/compare.cpp
+	$(CXX) $(CPPFLAGS) -c $< -o $(BUILD_DIR)/compare.o
 
 MKDIR_P ?= mkdir -p
