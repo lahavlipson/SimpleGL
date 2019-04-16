@@ -19,18 +19,20 @@ And the test and demo files are in `test/src/`.
 
 Make sure glfw3 is installed first. Run `brew install glfw3` if using Mac OS.
 
-Run `make`. This will generate a libSimplegl.a file in the generated build/ directory.
+Run `make`. This will generate a libSimplegl.a file in the generated `build/` directory.
 
-Run `make test` to create the test executable which will be created in the build/ directory as well.
+Run `make test` to create the test executables which will be created in the `build/` directory as well. The test executables are named `test1`, `test2`, and so on.
 
-Run `make compare` to create the comparison executable which does not use SimpleGL at all. This  will be created in the build/ directory.
+Run `make compare` to create the comparison executables which does not use SimpleGL at all. This  will be created in the `build/` directory. The comparison executables named `compare1`, `compare2`, etc correspond to the test executables with the same number.
 
-Run `make clean` to remove all the created files including the libSimplegl.a file and the created
-object and executable files.
+Run `make clean` to remove all the created files including the `libSimplegl.a` file and the created
+build directory and everything therein.
 
 ## Sample Usage
 
-After running `make`, run `./build/test <obj_file_path>` to render the default scene.
+After running `make`, run `./build/test1 <obj_file_path>` to render the default scene with an optional .obj file item.
+
+### Scene Class API
 TODO: More on how to use the API of Scene class.
 
 ## Troubleshooting
@@ -49,8 +51,7 @@ This README heavily referenced from https://github.com/wodeni/Animate-plus-plus/
 - add error checking
    - make sure the user doesn't create more than one scene instance
    - make sure the user calls render() exactly one time. Otherwise our program crashes!
-- create physics demo of bunny bouncing on springs 
-   - add a version of this that doesn't use our library (we can use the first commit as a starting point)
+- create physics demo of bunny bouncing on springs along with a comparison (no SimpleGL) executable
 - make the parameter list a dictionary (i.e. std::map<std::string, double>) as opposed to a std::vector<double>
    - maybe we should limit the parameter list to non-linear transformations
 - add a default color for objects
