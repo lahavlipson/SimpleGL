@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <obj_loader/obj_loader.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -162,23 +163,20 @@ int main(int argc, char *argv[]) {
     glUseProgram(ID);
     glUniform3f(glGetUniformLocation(ID, "lightColor"),  1.0f, 1.0f, 1.0f);
     glUniform3f(glGetUniformLocation(ID, "lightPos"),  6.2f, 7.0f, 5.0f);
-    
+    unsigned int VBO, VAO, vao_sphere, vbo_sphere, vao_obj, vbo_obj;
+
     // render loop
-    // -----------
     while (!glfwWindowShouldClose(window))
     {
         // per-frame time logic
-        // --------------------
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         
         // input
-        // -----
         processInput(window);
         
         // render
-        // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
@@ -198,7 +196,6 @@ int main(int argc, char *argv[]) {
         glUniform3f(glGetUniformLocation(ID, "objectColor"), 1.0f, 0.5f, 0.71f);
         
         // render boxes
-        unsigned int VBO, VAO;
         glGenVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
         glGenBuffers(1, &VBO);    
@@ -225,7 +222,6 @@ int main(int argc, char *argv[]) {
         // render spheres
         auto color = glm::vec3(0.7, 0.5, 0.5);
         auto verticesSphere = glp::sphere(3, .1);
-        unsigned int vao_sphere, vbo_sphere;
         glGenVertexArrays(1, &vao_sphere);
         glBindVertexArray(vao_sphere);  
         glGenBuffers(1, &vbo_sphere);
@@ -251,10 +247,36 @@ int main(int argc, char *argv[]) {
         glUniform3fv(glGetUniformLocation(ID, "objectColor"), 1, &color[0]);
         glDrawArrays(GL_TRIANGLES, 0, (int) (verticesSphere.size() / 6));
 
-
         // render .obj files
         if (argc > 3) {
-            //TODO
+            objl::Loader loader;
+            loader.LoadFile(*(argv+3));
+            std::vector<double> verticesObj;
+            for (int i = 0; i < loader.LoadedVertices.size(); i++){
+                verticesObj.push_back(loader.LoadedVertices[i].Position.X);
+                verticesObj.push_back(loader.LoadedVertices[i].Position.Y);
+                verticesObj.push_back(loader.LoadedVertices[i].Position.Z);
+                verticesObj.push_back(loader.LoadedVertices[i].Normal.X);
+                verticesObj.push_back(loader.LoadedVertices[i].Normal.Y);
+                verticesObj.push_back(loader.LoadedVertices[i].Normal.Z);
+            }
+            assert (verticesObj.size() == 6 * loader.LoadedVertices.size());
+            glGenVertexArrays(1, &vao_obj);
+            glBindVertexArray(vao_obj);  
+            glGenBuffers(1, &vbo_obj);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo_obj);
+            glBufferData(GL_ARRAY_BUFFER, verticesObj.size()*sizeof(double), verticesObj.data(), GL_STATIC_DRAW);
+            // position attribute
+            glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
+            glEnableVertexAttribArray(0);
+            // normal attribute
+            glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE,6*sizeof(double), (void*)(3*sizeof(double)));
+            glEnableVertexAttribArray(1);  
+            glBindVertexArray(vao_obj);
+            glm::mat4 model3 = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+            glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model3[0][0]);  
+            model3 = glm::scale(model3, glm::vec3(.08,.08,.08));          
+            glDrawArrays(GL_TRIANGLES, 0, (int) (verticesObj.size() / 6));
         }
         
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -265,9 +287,12 @@ int main(int argc, char *argv[]) {
     
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    //glDeleteVertexArrays(1, &VAO);
-    //glDeleteBuffers(1, &VBO);
-    
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &vao_obj);
+    glDeleteBuffers(1, &vbo_obj);
+    glDeleteVertexArrays(1, &vao_sphere);
+    glDeleteBuffers(1, &vbo_sphere);   
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();
