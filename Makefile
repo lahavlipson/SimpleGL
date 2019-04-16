@@ -5,8 +5,10 @@ VERSION = 0.1.0
 
 TARGET_EXEC  ?= libSimplegl.a
 BUILD_DIR    ?= ./build
-TEST_EXEC    ?= $(BUILD_DIR)/test
-TEST_CMPARE_EXEC    ?= $(BUILD_DIR)/compare
+TEST_EXEC1    ?= $(BUILD_DIR)/test1
+TEST_CMPARE_EXEC1    ?= $(BUILD_DIR)/compare1
+TEST_EXEC2    ?= $(BUILD_DIR)/test2
+TEST_CMPARE_EXEC2    ?= $(BUILD_DIR)/compare2
 SRC_DIRS     ?= ./src ./include
 TEST_SRC_DIR ?= test/src
 CXX ?= g++
@@ -43,6 +45,7 @@ release: $(BUILD_DIR)/$(TARGET_EXEC)
 	rm -rf $(PACKAGE)-$(VERSION)
 
 all: clean $(BUILD_DIR)/$(TARGET_EXEC)
+
 clean:
 	$(RM) -r $(BUILD_DIR) release
 	rm -rf $(PACKAGE)-$(VERSION)
@@ -50,20 +53,32 @@ clean:
 
 -include $(DEPS)
 
-test: $(TEST_EXEC)
+test: $(TEST_EXEC1) $(TEST_EXEC2)
 
-$(TEST_EXEC): $(BUILD_DIR)/test.o
+$(TEST_EXEC1): $(BUILD_DIR)/test1.o
 	$(CXX) $< -o $@ $(TEST_LD_FLAGS)
 
-$(BUILD_DIR)/test.o: $(TEST_SRC_DIR)/test.cpp
-	$(CXX) $(CPPFLAGS) -c $< -o $(BUILD_DIR)/test.o
+$(BUILD_DIR)/test1.o: $(TEST_SRC_DIR)/test1.cpp
+	$(CXX) $(CPPFLAGS) -c $< -o $(BUILD_DIR)/test1.o
 
-compare: $(TEST_CMPARE_EXEC)
-
-$(TEST_CMPARE_EXEC): $(BUILD_DIR)/compare.o
+$(TEST_EXEC2): $(BUILD_DIR)/test2.o
 	$(CXX) $< -o $@ $(TEST_LD_FLAGS)
 
-$(BUILD_DIR)/compare.o: $(TEST_SRC_DIR)/compare.cpp
-	$(CXX) $(CPPFLAGS) -c $< -o $(BUILD_DIR)/compare.o
+$(BUILD_DIR)/test2.o: $(TEST_SRC_DIR)/test2.cpp
+	$(CXX) $(CPPFLAGS) -c $< -o $(BUILD_DIR)/test2.o
+
+compare: $(TEST_CMPARE_EXEC1) $(TEST_CMPARE_EXEC2)
+
+$(TEST_CMPARE_EXEC1): $(BUILD_DIR)/compare1.o
+	$(CXX) $< -o $@ $(TEST_LD_FLAGS)
+
+$(BUILD_DIR)/compare1.o: $(TEST_SRC_DIR)/compare1.cpp
+	$(CXX) $(CPPFLAGS) -c $< -o $(BUILD_DIR)/compare1.o
+
+$(TEST_CMPARE_EXEC2): $(BUILD_DIR)/compare2.o
+	$(CXX) $< -o $@ $(TEST_LD_FLAGS)
+
+$(BUILD_DIR)/compare2.o: $(TEST_SRC_DIR)/compare2.cpp
+	$(CXX) $(CPPFLAGS) -c $< -o $(BUILD_DIR)/compare2.o
 
 MKDIR_P ?= mkdir -p
