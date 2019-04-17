@@ -49,10 +49,5 @@ This README heavily referenced from https://github.com/wodeni/Animate-plus-plus/
 
 - add composite objects
 - add error checking
-   - make sure the user doesn't create more than one scene instance
-   - make sure the user calls render() exactly one time. Otherwise our program crashes!
 - create physics demo of bunny bouncing on springs along with a comparison (no SimpleGL) executable
-- make the parameter list a dictionary (i.e. std::map<std::string, double>) as opposed to a std::vector<double>
-   - maybe we should limit the parameter list to non-linear transformations
-- add a default color for objects
 - put shader.hpp in 3rd party libs. We didn't create it ourselves, and we don't wanna confuse the TAs
