@@ -30,7 +30,7 @@ int main(int argc, char *argv[]){
     glm::mat4 model = glm::mat4(1.0f);
     glm::vec3 color = glm::vec3(1.0,0.5,0.71);
     for (unsigned int i = 0; i < 10; i++) {
-        mesh_id m_id = s.add_mesh(Shape::box, {}, color, model);
+        mesh_id m_id = s.add_mesh(Shape::box, color);
         s.translate(m_id, box_positions[i]);
         float angle = 20.0f * i;
         s.rotate(m_id, angle, glm::vec3(1.0f, 0.3f, 0.5f));
@@ -39,15 +39,15 @@ int main(int argc, char *argv[]){
     // add two spheres
     color = glm::vec3(0.7, 0.5, 0.5);
     std::vector<double> sphere_params = {3, 0.1};
-    mesh_id m_id = s.add_mesh(Shape::sphere, {}, color, model);
+    mesh_id m_id = s.add_mesh(Shape::sphere, color);
     s.translate(m_id, glm::vec3(-0.2,-0.2,-0.2));
     std::map<std::string, double> mymap = {{"one", 1.0}, {"two", 2.0}, {"three", 3.0}};
-    m_id = s.add_mesh(Shape::sphere, mymap, color, model);
+    m_id = s.add_mesh(Shape::sphere, color, mymap);
     s.translate(m_id, glm::vec3(-0.6,-0.6,-0.6));
 
     // add one obj
     if (argc > 1) {
-        mesh_id obj_m_id = s.add_mesh(Shape::obj, *(argv+1), color, model);
+        mesh_id obj_m_id = s.add_mesh(Shape::obj, color, *(argv+1));
         s.scale(obj_m_id, 0.08);
     }
     

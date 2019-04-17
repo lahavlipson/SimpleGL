@@ -93,9 +93,9 @@ Scene::~Scene() {
     glfwTerminate();
 }
 
-mesh_id Scene::add_mesh(Shape s, std::variant<std::map<std::string, double>, std::string> p, 
-                        glm::vec3 color, glm::mat4 model, bool isDefault) {
+mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, std::variant<std::map<std::string, double>, std::string> p, bool isDefault) {
     int id = 0;
+    glm::mat4 model = glm::mat4(1.0f);
     if (meshMap.find(s) != meshMap.end()) { // contains(s) is c++20
         // adding an instance of this shape to the scene
         Mesh *mesh_ptr = meshMap[s];

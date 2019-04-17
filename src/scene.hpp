@@ -23,8 +23,7 @@ public:
     Scene(char *vs= nullptr, char *fs= nullptr, const int width = 800, const int height = 600);
     ~Scene();
 
-    mesh_id add_mesh(const Shape s, const std::variant<std::map<std::string, double>, std::string> p,
-                     const glm::vec3 color, const glm::mat4 model, const bool isDefault = true);
+    mesh_id add_mesh(const Shape s, const glm::vec3 color = {0.4, 0.4, 0.4}, const std::variant<std::map<std::string, double>, std::string> p = {}, const bool isDefault = true);
 
     // Methods for manipulating mesh instances.
     void set_color(const mesh_id m_id, const glm::vec3 c);
