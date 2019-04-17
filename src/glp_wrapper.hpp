@@ -15,8 +15,14 @@ inline std::vector<double> createGLPObj(
     
 	std::map<std::string, double> params;
 	std::string filepath;
+    int accuracy = 6;
+    int sides = 3;
 	if (std::holds_alternative<std::map<std::string, double>>(varP)) {
 		params = std::get<std::map<std::string, double>>(varP);
+        if ( params.find("accuracy") != params.end() )
+            accuracy = params["accuracy"];
+        if ( params.find("sides") != params.end() )
+            sides = params["sides"];
 	} else {
 		filepath = std::get<std::string>(varP);
 	}
@@ -25,33 +31,33 @@ inline std::vector<double> createGLPObj(
 		
 	case sphere:
 		if (isDefault) {
-			return glp::sphere((int) 1, 1);
+			return glp::sphere(accuracy, 1);
 		}
-		return glp::sphere((int) 1, 1, glm::dvec3(1,1,1));
+		return glp::sphere(accuracy, 1, glm::dvec3(1,1,1));
 
 	case truncatedCone:
 		if (isDefault) {
-			return glp::truncatedCone((int) 1, 1, 1, 1);
+			return glp::truncatedCone(accuracy, 1, 1, 1);
 		}
-		return glp::truncatedCone((int) 1, 1, 1, 1, glm::dvec3(1,1,1));
+		return glp::truncatedCone(accuracy, 1, 1, 1, glm::dvec3(1,1,1));
 
 	case cylinder:
 		if (isDefault) {
-			return glp::cylinder((int) 1, 1, 1);
+			return glp::cylinder(accuracy, 1, 1);
 		}
-		return glp::cylinder((int) 1, 1, 1, glm::dvec3(1,1,1));
+		return glp::cylinder(accuracy, 1, 1, glm::dvec3(1,1,1));
 
 	case cone:
 		if (isDefault) {
-			return glp::cone((int) 1, 1, 1);
+			return glp::cone(accuracy, 1, 1);
 		}
-		return glp::cone((int) 1, 1, 1, glm::dvec3(1,1,1));
+		return glp::cone(accuracy, 1, 1, glm::dvec3(1,1,1));
 	
 	case pyramid:
 		if (isDefault) {
-			return glp::pyramid((int) 1, 1, 1);
+			return glp::pyramid(sides, 1, 1);
 		}
-		return glp::pyramid((int) 1, 1, 1, glm::dvec3(1,1,1));
+		return glp::pyramid(sides, 1, 1, glm::dvec3(1,1,1));
 
 	case torus:
 		if (isDefault) {

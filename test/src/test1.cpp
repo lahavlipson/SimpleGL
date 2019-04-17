@@ -39,16 +39,26 @@ int main(int argc, char *argv[]){
     // add two spheres
     color = glm::vec3(0.7, 0.5, 0.5);
     std::vector<double> sphere_params = {3, 0.1};
-    mesh_id m_id = s.add_mesh(Shape::sphere, color);
+    std::map<std::string, double> mymap = {{"accuracy",7}};
+    mesh_id m_id = s.add_mesh(Shape::sphere, color, mymap );
     s.translate(m_id, glm::vec3(-0.2,-0.2,-0.2));
-    std::map<std::string, double> mymap = {{"one", 1.0}, {"two", 2.0}, {"three", 3.0}};
-    m_id = s.add_mesh(Shape::sphere, color, mymap);
-    s.translate(m_id, glm::vec3(-0.6,-0.6,-0.6));
+    s.scale(m_id, 0.5);
+    m_id = s.add_mesh(Shape::sphere, color);
+    s.translate(m_id, glm::vec3(-0.6,-0.6,0.6));
+    s.scale(m_id, 0.3);
+    
+    
+    // add pyramid
+    mymap = {{"sides",7}};
+    m_id = s.add_mesh(Shape::pyramid, color, mymap );
+    s.translate(m_id, glm::vec3(4.2,1.2,-0.2));
+    s.scale(m_id, 0.5);
 
     // add one obj
     if (argc > 1) {
         mesh_id obj_m_id = s.add_mesh(Shape::obj, color, *(argv+1));
         s.scale(obj_m_id, 0.08);
+        s.translate(obj_m_id, glm::vec3(-0.6,-70.2,-0.6));
     }
     
     // render the scene.
