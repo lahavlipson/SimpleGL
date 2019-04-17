@@ -93,7 +93,7 @@ Scene::~Scene() {
     glfwTerminate();
 }
 
-mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, std::variant<std::map<std::string, double>, std::string> p, bool isDefault) {
+mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, std::variant<std::map<std::string, double>, std::string> p) {
     int id = 0;
     glm::mat4 model = glm::mat4(1.0f);
     if (meshMap.find(s) != meshMap.end()) { // contains(s) is c++20
@@ -102,7 +102,7 @@ mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, std::variant<std::map<st
         id = mesh_ptr->add_instance(color, model);
     } else { 
         // first time adding this shape to the scene
-        std::vector<double> vertices = createGLPObj(s, p, isDefault);
+        std::vector<double> vertices = createGLPObj(s, p);
         meshMap.insert(std::make_pair(s, new Mesh(vertices, color, model)));
     }
     return std::make_pair(s, id);
