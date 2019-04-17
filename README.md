@@ -50,4 +50,3 @@ This README heavily referenced from https://github.com/wodeni/Animate-plus-plus/
 - add composite objects
 - add error checking
 - create physics demo of bunny bouncing on springs along with a comparison (no SimpleGL) executable
-- put shader.hpp in 3rd party libs. We didn't create it ourselves, and we don't wanna confuse the TAs
