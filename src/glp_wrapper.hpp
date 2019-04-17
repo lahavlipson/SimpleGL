@@ -5,69 +5,73 @@
 #include <obj_loader/obj_loader.h>
 
 #include <variant>
+#include <map>
 
-enum Shape { custom, sphere, truncatedCone, cylinder, cone, pyramid, torus, box, obj };
+enum Shape { sphere, truncatedCone, cylinder, cone, pyramid, torus, box, obj };
 
 inline std::vector<double> createGLPObj(
-    const Shape s, const std::variant<std::vector<double>, std::string> varP, 
+    const Shape s, const std::variant<std::map<std::string, double>, std::string> varP, 
     const bool isDefault = true) {
     
-	std::vector<double> p;
+	std::map<std::string, double> params;
 	std::string filepath;
-	if (std::holds_alternative<std::vector<double>>(varP)) {
-		p = std::get<std::vector<double>>(varP);
+    int accuracy = 6;
+    int sides = 3;
+	if (std::holds_alternative<std::map<std::string, double>>(varP)) {
+		params = std::get<std::map<std::string, double>>(varP);
+        if ( params.find("accuracy") != params.end() )
+            accuracy = params["accuracy"];
+        if ( params.find("sides") != params.end() )
+            sides = params["sides"];
 	} else {
 		filepath = std::get<std::string>(varP);
 	}
 
 	switch (s) {
-	case custom:
-		// p is the vertices for Shape::custom, directly return
-		return p;
 		
 	case sphere:
 		if (isDefault) {
-			return glp::sphere((int) p[0], p[1]);
+			return glp::sphere(accuracy, 1);
 		}
-		return glp::sphere((int) p[0], p[1], glm::dvec3(p[2],p[3],p[4]));
+		return glp::sphere(accuracy, 1, glm::dvec3(1,1,1));
 
 	case truncatedCone:
 		if (isDefault) {
-			return glp::truncatedCone((int) p[0], p[1], p[2], p[3]);
+			return glp::truncatedCone(accuracy, 1, 1, 1);
 		}
-		return glp::truncatedCone((int) p[0], p[1], p[2], p[3], glm::dvec3(p[4],p[5],p[6]));
+		return glp::truncatedCone(accuracy, 1, 1, 1, glm::dvec3(1,1,1));
 
 	case cylinder:
 		if (isDefault) {
-			return glp::cylinder((int) p[0], p[1], p[2]);
+			return glp::cylinder(accuracy, 1, 1);
 		}
-		return glp::cylinder((int) p[0], p[1], p[2], glm::dvec3(p[3],p[4],p[5]));
+		return glp::cylinder(accuracy, 1, 1, glm::dvec3(1,1,1));
 
 	case cone:
 		if (isDefault) {
-			return glp::cone((int) p[0], p[1], p[2]);
+			return glp::cone(accuracy, 1, 1);
 		}
-		return glp::cone((int) p[0], p[1], p[2], glm::dvec3(p[3],p[4],p[5]));
+		return glp::cone(accuracy, 1, 1, glm::dvec3(1,1,1));
 	
 	case pyramid:
 		if (isDefault) {
-			return glp::pyramid((int) p[0], p[1], p[2]);
+			return glp::pyramid(sides, 1, 1);
 		}
-		return glp::pyramid((int) p[0], p[1], p[2], glm::dvec3(p[3],p[4],p[5]));
+		return glp::pyramid(sides, 1, 1, glm::dvec3(1,1,1));
 
 	case torus:
 		if (isDefault) {
-			return glp::torus((int) p[0], (int) p[1], p[2], p[3]);
+			return glp::torus((int) 1, (int) 1, 1, 1);
 		}
-		return glp::torus((int) p[0], (int) p[1], p[2], p[3], glm::dvec3(p[4],p[5],p[6]));
+		return glp::torus((int) 1, (int) 1, 1, 1, glm::dvec3(1,1,1));
 
 	case box:
 		if (isDefault) {
-			return glp::box(glm::dvec3(p[0],p[1],p[2]));
+			return glp::box(glm::dvec3(1,1,1));
 		}
-		return glp::box(glm::dvec3(p[0],p[1],p[2]), glm::dvec3(p[3],p[4],p[5]));
+		return glp::box(glm::dvec3(1,1,1), glm::dvec3(1,1,1));
 
-	case obj: 
+	case obj:
 		objl::Loader loader;
 		loader.LoadFile(filepath);
 		std::vector<double> output;
