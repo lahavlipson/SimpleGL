@@ -6,61 +6,85 @@
 
 #include "glp_wrapper.hpp"
 #include "scene.hpp"
+#include <thread>
+#include <unistd.h>
+
+class Simulation {
+    
+public:
+    
+    bool stopSim = false;
+    
+    Scene *s = nullptr;
+    
+    inline void cancel(){
+        stopSim = true;
+        std::cout << "canceled\n";
+    }
+    
+    Simulation(Scene *scn):s(scn){}
+    
+    inline void physics(std::vector<mesh_id> ids)
+    {
+        const double t = 0.1;
+        double v1 = 0;
+        while (!stopSim){
+            
+            double ball1Height = s->get_loc(ids[1])[1];
+            double F1 = (4.0 - ball1Height);
+            //std::cout << ball1Height << " " << F1 << " " << v1 << " " << t*v1 << " " << float(t*v1) << "\n";
+
+            v1 += t*F1;
+
+//            std::cout << F1 << "\n";
+
+            s->translate(ids[1], {0.0, v1*t, 0.0});
+            
+            double newBall1Height = s->get_loc(ids[1])[1];
+            s->scale(ids[2], glm::vec3(1, newBall1Height/ball1Height, 1));
+            
+            usleep(10000);
+            
+//            s->translate(ids[1], glm::vec3(0.0,0.000001,0.0));
+        }
+    }
+        
+    
+};
+
+
+    
+
 
 // takes one command line argument to a filepath to a .obj file to be rendered
 int main(int argc, char *argv[]){
     // initialize the scene.
     Scene s;
 
-    // world space positions for the ten boxes
-    glm::vec3 box_positions[] = {
-        glm::vec3( 0.0f,  0.0f,  0.0f),
-        glm::vec3( 2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f,  2.0f, -2.5f),
-        glm::vec3( 1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
-    // add the ten boxes
-    std::vector<double> box_params = {1,1,1};
-    glm::mat4 model = glm::mat4(1.0f);
-    glm::vec3 color = glm::vec3(1.0,0.5,0.71);
-    for (unsigned int i = 0; i < 10; i++) {
-        mesh_id m_id = s.add_mesh(Shape::box, color);
-        s.translate(m_id, box_positions[i]);
-        float angle = 20.0f * i;
-        s.rotate(m_id, angle, glm::vec3(1.0f, 0.3f, 0.5f));
-    }
     
     // add two spheres
-    color = glm::vec3(0.7, 0.5, 0.5);
-    std::vector<double> sphere_params = {3, 0.1};
-    std::map<std::string, double> mymap = {{"accuracy",7}};
-    mesh_id m_id = s.add_mesh(Shape::sphere, color, mymap );
-    s.translate(m_id, glm::vec3(-0.2,-0.2,-0.2));
-    s.scale(m_id, 0.5);
-    m_id = s.add_mesh(Shape::sphere, color);
-    s.translate(m_id, glm::vec3(-0.6,-0.6,0.6));
-    s.scale(m_id, 0.3);
+    color col = glm::vec3(0.7, 0.5, 0.5);
+    mesh_id id_1 = s.add_mesh(Shape::sphere, col );
+    s.translate(id_1, glm::vec3(0, 0, -3));
+    s.scale(id_1, 0.5);
+    mesh_id id_2 = s.add_mesh(Shape::sphere, col);
+    s.translate(id_2, glm::vec3(0,3.5,-3));
+    s.scale(id_2, 0.5);
+    
+    mesh_id spring_id = s.add_mesh(Shape::obj, {0.4, 0.4, 0.4}, argv[1]);
+    s.translate(spring_id, glm::vec3(0, 0.45, -3));
+    s.scale(spring_id, {0.4, 0.6, 0.4});
     
     
-    // add pyramid
-    mymap = {{"sides",7}};
-    m_id = s.add_mesh(Shape::pyramid, color, mymap );
-    s.translate(m_id, glm::vec3(4.2,1.2,-0.2));
-    s.scale(m_id, 0.5);
-
-    // add one obj
-    if (argc > 1) {
-        mesh_id obj_m_id = s.add_mesh(Shape::obj, color, *(argv+1));
-        s.scale(obj_m_id, 0.08);
-        s.translate(obj_m_id, glm::vec3(-0.6,-70.2,-0.6));
-    }
+    Simulation sim(&s);
+    
+    std::vector<mesh_id> ids = {id_1, id_2, spring_id};
+    std::thread t1(&Simulation::physics, &sim, ids);
     
     // render the scene.
     s.render();
+    
+    sim.cancel();
+    
+    t1.join();
 }
