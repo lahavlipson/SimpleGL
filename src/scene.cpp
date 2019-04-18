@@ -93,7 +93,7 @@ Scene::~Scene() {
     glfwTerminate();
 }
 
-mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, std::variant<std::map<std::string, double>, std::string> p, bool isDefault) {
+mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, std::variant<std::map<std::string, double>, std::string> p) {
     int id = 0;
     glm::mat4 model = glm::mat4(1.0f);
     if (meshMap.find(s) != meshMap.end()) { // contains(s) is c++20
@@ -102,7 +102,7 @@ mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, std::variant<std::map<st
         id = mesh_ptr->add_instance(color, model);
     } else { 
         // first time adding this shape to the scene
-        auto vertices = createGLPObj(s, p, isDefault);
+        auto vertices = createGLPObj(s, p);
         if (std::holds_alternative<std::vector<double>>(vertices)) {
             meshMap.insert(std::make_pair(s, new Mesh(std::get<std::vector<double>>(vertices), color, model)));
         } else {
@@ -140,6 +140,14 @@ void Scene::rotate(mesh_id m_id, float angle, glm::vec3 axis) {
     meshMap[m_id.first]->rotate(m_id.second, angle, axis);
 }
 
+glm::vec3 Scene::get_loc(mesh_id m_id) {
+    return meshMap[m_id.first]->get_loc(m_id.second);
+}
+
+void Scene::translate_to(mesh_id m_id, glm::vec3 destination) {
+    translate(m_id, destination - get_loc(m_id));
+}
+
 void Scene::render() {    
     // render loop
     // -----------
@@ -156,7 +164,7 @@ void Scene::render() {
         
         // render
         // ------
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // (note that in this case matrices below could change every frame)
         // pass projection matrix to shader

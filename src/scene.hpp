@@ -24,16 +24,18 @@ public:
     Scene(char *vs= nullptr, char *fs= nullptr, const int width = 800, const int height = 600);
     ~Scene();
 
-    mesh_id add_mesh(const Shape s, const glm::vec3 color = {0.4, 0.4, 0.4}, const std::variant<std::map<std::string, double>, std::string> p = {}, const bool isDefault = true);
+    mesh_id add_mesh(const Shape s, const glm::vec3 color = {0.4, 0.4, 0.4}, const std::variant<std::map<std::string, double>, std::string> p = {});
 
     // Methods for manipulating mesh instances.
     void set_color(const mesh_id m_id, const glm::vec3 c);
     void set_model(const mesh_id m_id, const glm::mat4 model);
     void reset_model(const mesh_id m_id);
     void translate(const mesh_id m_id, const glm::vec3 translation);
+    void translate_to(const mesh_id m_id, const glm::vec3 destination);
     void rotate(const mesh_id m_id, const float angle, glm::vec3 axis);
     void scale(const mesh_id m_id, const glm::vec3 factor);
     void scale(const mesh_id m_id, const double factor);
+    glm::vec3 get_loc(mesh_id m_id);
 
     void render();
 

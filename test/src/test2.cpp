@@ -4,7 +4,6 @@
 
 #include <iostream>
 
-#include "glp_wrapper.hpp"
 #include "scene.hpp"
 
 // takes one command line argument to a filepath to a .obj file to be rendered
