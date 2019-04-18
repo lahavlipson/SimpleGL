@@ -9,6 +9,42 @@
 #include <thread>
 #include <unistd.h>
 
+class Spring {
+
+public:
+
+    Spring(mesh_id a, mesh_id b, mesh_id s, double restL, double constant):id1(a),id2(b),k(constant), rest(restL), obj_id(s) {}
+
+    mesh_id id1;
+    mesh_id id2;
+    mesh_id obj_id;
+    const float k;
+    const float rest;
+
+    inline glm::vec3 getP1(Scene *s){
+        return s->get_loc(id1);
+    }
+    
+    inline glm::vec3 getP2(Scene *s){
+        return s->get_loc(id2);
+    }
+    
+    inline float length(Scene *s){
+        const glm::vec3 p1 = getP1(s);
+        const glm::vec3 p2 = getP2(s);
+        return glm::distance(p1, p2);
+    }
+    
+    inline glm::vec3 dir(Scene *s){
+        return glm::normalize(getP2(s) - getP1(s));
+    }
+
+    inline glm::vec3 force(Scene *s){
+        return k*(rest - length(s))*dir(s);
+    }
+
+};
+
 class Simulation {
     
 public:
@@ -19,41 +55,45 @@ public:
     
     inline void cancel(){
         stopSim = true;
-        std::cout << "canceled\n";
     }
     
     Simulation(Scene *scn):s(scn){}
     
-    inline void physics(std::vector<mesh_id> ids)
+    
+    inline void physics(Spring spr)
     {
-        const double t = 0.1;
-        double v1 = 0;
+        
+        s->reset_model(spr.obj_id);
+        s->translate(spr.obj_id, glm::vec3(0, 0, -3));
+        s->scale(spr.obj_id, {0.4, 0.6, 0.4});
+        
+        s->rotate(spr.obj_id, 0, glm::vec3(-1,0,0));
+        const float t = 0.1f;
+        glm::vec3 v1 = {0, 0, -0.3};
         while (!stopSim){
             
-            double ball1Height = s->get_loc(ids[1])[1];
-            double F1 = (4.0 - ball1Height);
-            //std::cout << ball1Height << " " << F1 << " " << v1 << " " << t*v1 << " " << float(t*v1) << "\n";
+            double ball1Height = spr.getP2(s) [1];
+            const glm::vec3 oldDir = spr.dir(s);
+            glm::vec3 F1 = spr.force(s);
 
-            v1 += t*F1;
+            v1 += F1*t;
 
-//            std::cout << F1 << "\n";
-
-            s->translate(ids[1], {0.0, v1*t, 0.0});
+            s->translate(spr.id2, v1*t);
             
-            double newBall1Height = s->get_loc(ids[1])[1];
-            s->scale(ids[2], glm::vec3(1, newBall1Height/ball1Height, 1));
+            double newBall1Height = spr.getP2(s)[1];
+            glm::vec3 crossProd = glm::cross(glm::vec3(0,1,0.000001), spr.dir(s));
             
+            float angleDiff = glm::degrees(float(acos(glm::dot(spr.dir(s), oldDir))));
+            s->rotate(spr.obj_id, angleDiff, glm::vec3(-1,0,0));
+            
+            //s->scale(spr.obj_id, {1,ball1Height/newBall1Height,1});
             usleep(10000);
             
-//            s->translate(ids[1], glm::vec3(0.0,0.000001,0.0));
         }
     }
-        
     
 };
 
-
-    
 
 
 // takes one command line argument to a filepath to a .obj file to be rendered
@@ -72,14 +112,15 @@ int main(int argc, char *argv[]){
     s.scale(id_2, 0.5);
     
     mesh_id spring_id = s.add_mesh(Shape::obj, {0.4, 0.4, 0.4}, argv[1]);
-    s.translate(spring_id, glm::vec3(0, 0.45, -3));
-    s.scale(spring_id, {0.4, 0.6, 0.4});
+    
     
     
     Simulation sim(&s);
     
     std::vector<mesh_id> ids = {id_1, id_2, spring_id};
-    std::thread t1(&Simulation::physics, &sim, ids);
+    Spring spring(id_1, id_2, spring_id, 4.0, 2.0);
+    
+    std::thread t1(&Simulation::physics, &sim, spring);
     
     // render the scene.
     s.render();
