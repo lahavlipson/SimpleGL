@@ -9,11 +9,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// render_info: contains color and model matrix for each instance
-// and is used in the render loop in Scene class.
-typedef std::pair<glm::vec3, glm::mat4> render_info;
 // color: use vec3 as rgb color.
 typedef glm::vec3 color;
+// render_info: contains color and model matrix for each instance
+// and is used in the render loop in Scene class.
+typedef std::pair<color, glm::mat4> render_info;
 
 class Mesh {
 public:
@@ -83,6 +83,12 @@ public:
     
     inline void scale(const int i, const glm::vec3 scale) {
         render_infos[i].second = glm::scale(render_infos[i].second, scale);
+    }
+    
+    inline glm::vec3 get_loc(const int i) const {
+        // This gets the location from the model matrix, as explained here:
+        // https://stackoverflow.com/a/19448411
+        return glm::vec3(render_infos[i].second[3]);
     }
     
     // Delete the buffers on destrunction.
