@@ -136,6 +136,14 @@ void Scene::rotate(mesh_id m_id, float angle, glm::vec3 axis) {
     meshMap[m_id.first]->rotate(m_id.second, angle, axis);
 }
 
+glm::vec3 Scene::get_loc(mesh_id m_id) {
+    return meshMap[m_id.first]->get_loc(m_id.second);
+}
+
+void Scene::translate_to(mesh_id m_id, glm::vec3 destination) {
+    translate(m_id, destination - get_loc(m_id));
+}
+
 void Scene::render() {    
     // render loop
     // -----------
@@ -152,7 +160,7 @@ void Scene::render() {
         
         // render
         // ------
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // (note that in this case matrices below could change every frame)
         // pass projection matrix to shader

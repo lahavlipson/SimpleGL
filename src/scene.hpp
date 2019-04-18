@@ -30,9 +30,11 @@ public:
     void set_model(const mesh_id m_id, const glm::mat4 model);
     void reset_model(const mesh_id m_id);
     void translate(const mesh_id m_id, const glm::vec3 translation);
+    void translate_to(const mesh_id m_id, const glm::vec3 destination);
     void rotate(const mesh_id m_id, const float angle, glm::vec3 axis);
     void scale(const mesh_id m_id, const glm::vec3 factor);
     void scale(const mesh_id m_id, const double factor);
+    glm::vec3 get_loc(mesh_id m_id);
 
     void render();
 
