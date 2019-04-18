@@ -25,7 +25,6 @@ int main(int argc, char *argv[]){
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
     // add the ten boxes
-    std::vector<double> box_params = {1,1,1};
     glm::vec3 color = glm::vec3(1.0,0.5,0.71);
     for (unsigned int i = 0; i < 10; i++) {
         mesh_id m_id = s.add_mesh(Shape::box, color);
@@ -36,7 +35,6 @@ int main(int argc, char *argv[]){
     
     // add two spheres
     color = glm::vec3(0.7, 0.5, 0.5);
-    std::vector<double> sphere_params = {3, 0.1};
     std::map<std::string, double> mymap = {{"accuracy",7}};
     mesh_id m_id = s.add_mesh(Shape::sphere, color, mymap );
     s.translate(m_id, glm::vec3(-0.2,-0.2,-0.2));

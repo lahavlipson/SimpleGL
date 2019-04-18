@@ -22,7 +22,7 @@ inline std::variant<std::vector<double>,std::error_condition>  createGLPObj(
 		params = std::get<std::map<std::string, double>>(varP);
         if ( params.find("accuracy") != params.end() ){
             accuracy = params["accuracy"];
-        	if (accuracy <= 0){
+        	if (accuracy <= 1){
         		return make_SimpleGL_error_condition(SIMPLEGL_INVALID_PARAM);
         	}
         }
