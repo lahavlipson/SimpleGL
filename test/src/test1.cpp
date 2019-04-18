@@ -4,7 +4,6 @@
 
 #include <iostream>
 
-#include "glp_wrapper.hpp"
 #include "scene.hpp"
 
 // takes one command line argument to a filepath to a .obj file to be rendered
@@ -27,7 +26,6 @@ int main(int argc, char *argv[]){
     };
     // add the ten boxes
     std::vector<double> box_params = {1,1,1};
-    glm::mat4 model = glm::mat4(1.0f);
     glm::vec3 color = glm::vec3(1.0,0.5,0.71);
     for (unsigned int i = 0; i < 10; i++) {
         mesh_id m_id = s.add_mesh(Shape::box, color);

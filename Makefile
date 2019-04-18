@@ -23,7 +23,7 @@ INC_DIRS  := $(shell find $(SRC_DIRS) -type d) /usr/local/Cellar/glfw/3.2.1
 INC_FLAGS := $(addprefix -I,$(INC_DIRS)) -I/usr/local/Cellar/glfw/3.2.1/include
 
 LDFLAGS   := $(INC_FLAGS) -L/usr/local/Cellar/glfw/3.2.1/lib -lglfw
-CPPFLAGS  ?= $(INC_FLAGS) -MP -MMD -std=c++17 -O2 -Wall -Werror
+CPPFLAGS  ?= $(INC_FLAGS) -MP -MMD -std=c++17 -O2 -Wall -Werror -Wno-deprecated-declarations
 
 TEST_INC_FLAGS  := -I./src -I$(TEST_SRC_DIR)
 TEST_LD_FLAGS   := $(TEST_INC_FLAGS) $(LDFLAGS) -L./build -lSimplegl
