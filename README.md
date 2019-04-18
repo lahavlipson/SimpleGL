@@ -4,8 +4,8 @@ A simpler, beginner-friendly version of OpenGL.
 
 ## Directory Structure
 
-All the library source files are `src/` folder. 
-The `include/` folder contains required 3rd party libraries or code.
+All the library source files are `src/` folder.  
+The `include/` folder contains required 3rd party libraries or code.  
 And the test and demo files are in `test/src/`.
 
 ## Dependencies
@@ -21,9 +21,7 @@ Make sure glfw3 is installed first. Run `brew install glfw3` if using Mac OS.
 
 Run `make`. This will generate a libSimplegl.a file in the generated `build/` directory.
 
-Run `make test` to create the test executables which will be created in the `build/` directory as well. The test executables are named `test1`, `test2`, and so on.
-
-Run `make compare` to create the comparison executables which does not use SimpleGL at all. This  will be created in the `build/` directory. The comparison executables named `compare1`, `compare2`, etc correspond to the test executables with the same number.
+Run `make tests` to create the all test executables which will be created in the `build/` directory as well. The test executables are named `test1`, `test2`, `compare1`, `compare2`, and so on. You can also run `make <test_name>` to create one specific test executable.
 
 Run `make clean` to remove all the created files including the `libSimplegl.a` file and the created
 build directory and everything therein.

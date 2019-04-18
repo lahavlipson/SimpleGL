@@ -22,10 +22,13 @@ typedef std::pair<Shape, int> mesh_id;
 
 class Scene {
 public:
-    Scene(char *vs= nullptr, char *fs= nullptr, const int width = 800, const int height = 600);
+    Scene(char *vs = nullptr, char *fs = nullptr, 
+          const int width = 800, const int height = 600);
     ~Scene();
 
-    mesh_id add_mesh(const Shape s, const glm::vec3 color = {0.4, 0.4, 0.4}, const std::variant<std::map<std::string, double>, std::string> p = {});
+    mesh_id add_mesh(
+        const Shape s, const glm::vec3 color = {0.4, 0.4, 0.4}, 
+        const std::variant<std::map<std::string, double>, std::string> p = {});
 
     // Methods for manipulating mesh instances.
     void set_color(const mesh_id m_id, const glm::vec3 c);

@@ -11,8 +11,10 @@
 
 enum Shape { sphere, truncatedCone, cylinder, cone, pyramid, torus, box, obj };
 
-inline std::variant<std::vector<double>,std::error_condition>  createGLPObj(
-    const Shape s, const std::variant<std::map<std::string, double>, std::string> varP) {
+inline std::variant<std::vector<double>,std::error_condition> createGLPObj(
+    const Shape s, 
+	const std::variant<std::map<std::string, double>, std::string> varP) {
+	
 	std::map<std::string, double> params;
 	std::string filepath;
     int accuracy = 6;
@@ -20,15 +22,15 @@ inline std::variant<std::vector<double>,std::error_condition>  createGLPObj(
 
 	if (std::holds_alternative<std::map<std::string, double>>(varP)) {
 		params = std::get<std::map<std::string, double>>(varP);
-        if ( params.find("accuracy") != params.end() ){
+        if (params.find("accuracy") != params.end()) {
             accuracy = params["accuracy"];
-        	if (accuracy <= 1){
+        	if (accuracy <= 1) {
         		return make_SimpleGL_error_condition(SIMPLEGL_INVALID_PARAM);
         	}
         }
-        if ( params.find("sides") != params.end() ){
+        if (params.find("sides") != params.end()) {
             sides = params["sides"];
-        	if (sides <= 0){
+        	if (sides <= 0) {
         		return make_SimpleGL_error_condition(SIMPLEGL_INVALID_PARAM);
         	}        
         }
@@ -61,11 +63,11 @@ inline std::variant<std::vector<double>,std::error_condition>  createGLPObj(
 
 	case obj:
 		objl::Loader loader;
-		if (!loader.LoadFile(filepath)){
+		if (!loader.LoadFile(filepath)) {
         		return make_SimpleGL_error_condition(SIMPLEGL_INVALID_OBJ_FILE);
 		}
 		std::vector<double> output;
-		for (int i = 0; i < loader.LoadedVertices.size(); i++){
+		for (int i = 0; i < loader.LoadedVertices.size(); i++) {
 			output.push_back(loader.LoadedVertices[i].Position.X);
 			output.push_back(loader.LoadedVertices[i].Position.Y);
 			output.push_back(loader.LoadedVertices[i].Position.Z);
@@ -73,7 +75,7 @@ inline std::variant<std::vector<double>,std::error_condition>  createGLPObj(
 			output.push_back(loader.LoadedVertices[i].Normal.Y);
 			output.push_back(loader.LoadedVertices[i].Normal.Z);
 		}
-		if (output.size() != (6 * loader.LoadedVertices.size())){
+		if (output.size() != (6 * loader.LoadedVertices.size())) {
         		return make_SimpleGL_error_condition(SIMPLEGL_OBJ_LOAD_FAIL);
 		}
 		return output;
