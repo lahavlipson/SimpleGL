@@ -24,7 +24,6 @@ float lastFrame = 0.0f;
 // Note: either both of the shaders are default or neither are default
 Scene::Scene(char *vs, char *fs, int width, int height) {
     // glfw: initialize and configure
-    // ------------------------------
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -36,7 +35,6 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
 #endif
     
     // glfw window creation
-    // --------------------
     scr_width = width;
     scr_height = height;
     window = glfwCreateWindow(scr_width, scr_height, "SimpleGL", nullptr, nullptr);
@@ -56,7 +54,6 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
     // glad: load all OpenGL function pointers
-    // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         glfwTerminate();
@@ -64,18 +61,15 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     }
     
     // configure global opengl state
-    // -----------------------------
     glEnable(GL_DEPTH_TEST);
     
     // build and compile our shader program
-    // ------------------------------------
     if (vs && fs) {
         shader = new Shader(vs, fs);
     } else {
         shader = new Shader();
     }
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    // -------------------------------------------------------------------------------------------
     shader->use();
     shader->setVec3("lightColor", 1.0f, 1.0f, 1.0f);
     shader->setVec3("lightPos", 6.2f, 7.0f, 5.0f);
@@ -89,7 +83,6 @@ Scene::~Scene() {
     // Delete shader.
     delete shader;
     // glfw: terminate, clearing all previously allocated GLFW resources.
-    // ------------------------------------------------------------------
     glfwTerminate();
 }
 
@@ -148,22 +141,18 @@ void Scene::translate_to(mesh_id m_id, glm::vec3 destination) {
     translate(m_id, destination - get_loc(m_id));
 }
 
-void Scene::render() {    
+std::error_condition Scene::render() {    
     // render loop
-    // -----------
     while (!glfwWindowShouldClose(window)) {
         // per-frame time logic
-        // --------------------
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         
         // input
-        // -----
         process_input(window);
         
         // render
-        // ------
         glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // (note that in this case matrices below could change every frame)
@@ -187,31 +176,33 @@ void Scene::render() {
         }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+    return make_SimpleGL_error_condition(0);
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
 void Scene::process_input(GLFWwindow *window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
-    
+    }
     float cameraSpeed = 2.5 * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         cameraPos += cameraSpeed * cameraFront;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
         cameraPos -= cameraSpeed * cameraFront;
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
 void Scene::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
@@ -219,7 +210,6 @@ void Scene::framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 // glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
 void Scene::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     if (firstMouse) {
         lastX = xpos;
@@ -253,7 +243,6 @@ void Scene::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
 void Scene::scroll_callback(
     GLFWwindow* window, double xoffset, double yoffset) {
     if (fov >= 1.0f && fov <= 45.0f)

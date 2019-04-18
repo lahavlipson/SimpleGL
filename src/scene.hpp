@@ -13,6 +13,7 @@
 
 #include "mesh.hpp"
 #include "shader.hpp"
+#include "simplegl_error.hpp"
 #include "glp_wrapper.hpp"
 
 // mesh_id: represents the id to a specific instance of Mesh
@@ -37,7 +38,7 @@ public:
     void scale(const mesh_id m_id, const double factor);
     glm::vec3 get_loc(mesh_id m_id);
 
-    void render();
+    std::error_condition render();
 
     // GLFW callbacks.
     static void framebuffer_size_callback(GLFWwindow *window, const int width, const int height);

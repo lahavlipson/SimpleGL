@@ -1,3 +1,6 @@
+#ifndef SIMPLEGL_ERROR_HPP
+#define SIMPLEGL_ERROR_HPP
+
 #include <system_error>
 #include <string>
 
@@ -45,3 +48,4 @@ inline SimpleGL_error const& SimpleGL_error() {
 inline std::error_condition make_SimpleGL_error_condition( int status ) {
     return std::error_condition( status, SimpleGL_error() );
 }
+#endif
