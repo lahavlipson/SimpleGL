@@ -13,6 +13,7 @@
 
 #include "mesh.hpp"
 #include "shader.hpp"
+#include "glp_wrapper.hpp"
 
 // mesh_id: represents the id to a specific instance of Mesh
 // to modify its model matrix and color.

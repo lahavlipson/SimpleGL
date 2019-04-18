@@ -1,15 +1,17 @@
 #ifndef GLP_WRAPPER_HPP
 #define GLP_WRAPPER_HPP
 
-#include <glp/glp.h>
-#include <obj_loader/obj_loader.h>
-
 #include <variant>
 #include <map>
 
+#include <glp/glp.h>
+#include <obj_loader/obj_loader.h>
+
+#include "simplegl_error.hpp"
+
 enum Shape { sphere, truncatedCone, cylinder, cone, pyramid, torus, box, obj };
 
-inline std::vector<double> createGLPObj(
+inline std::variant<std::vector<double>,std::error_condition>  createGLPObj(
     const Shape s, const std::variant<std::map<std::string, double>, std::string> varP, 
     const bool isDefault = true) {
     
@@ -17,12 +19,21 @@ inline std::vector<double> createGLPObj(
 	std::string filepath;
     int accuracy = 6;
     int sides = 3;
+
 	if (std::holds_alternative<std::map<std::string, double>>(varP)) {
 		params = std::get<std::map<std::string, double>>(varP);
-        if ( params.find("accuracy") != params.end() )
+        if ( params.find("accuracy") != params.end() ){
             accuracy = params["accuracy"];
-        if ( params.find("sides") != params.end() )
+        	if (accuracy <= 0){
+        		return make_SimpleGL_error_condition(SIMPLEGL_INVALID_PARAM);
+        	}
+        }
+        if ( params.find("sides") != params.end() ){
             sides = params["sides"];
+        	if (sides <= 0){
+        		return make_SimpleGL_error_condition(SIMPLEGL_INVALID_PARAM);
+        	}        
+        }
 	} else {
 		filepath = std::get<std::string>(varP);
 	}
@@ -73,7 +84,9 @@ inline std::vector<double> createGLPObj(
 
 	case obj:
 		objl::Loader loader;
-		loader.LoadFile(filepath);
+		if (!loader.LoadFile(filepath)){
+        		return make_SimpleGL_error_condition(SIMPLEGL_INVALID_OBJ_FILE);
+		}
 		std::vector<double> output;
 		for (int i = 0; i < loader.LoadedVertices.size(); i++){
 			output.push_back(loader.LoadedVertices[i].Position.X);
@@ -83,7 +96,9 @@ inline std::vector<double> createGLPObj(
 			output.push_back(loader.LoadedVertices[i].Normal.Y);
 			output.push_back(loader.LoadedVertices[i].Normal.Z);
 		}
-		assert (output.size() == 6 * loader.LoadedVertices.size());
+		if (output.size() != (6 * loader.LoadedVertices.size())){
+        		return make_SimpleGL_error_condition(SIMPLEGL_OBJ_LOAD_FAIL);
+		}
 		return output;
 	}
 }

@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "glp_wrapper.hpp"
 #include "scene.hpp"
+#include "glp_wrapper.hpp"
 
 // camera frame
 glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -102,8 +102,12 @@ mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, std::variant<std::map<st
         id = mesh_ptr->add_instance(color, model);
     } else { 
         // first time adding this shape to the scene
-        std::vector<double> vertices = createGLPObj(s, p, isDefault);
-        meshMap.insert(std::make_pair(s, new Mesh(vertices, color, model)));
+        auto vertices = createGLPObj(s, p, isDefault);
+        if (std::holds_alternative<std::vector<double>>(vertices)) {
+            meshMap.insert(std::make_pair(s, new Mesh(std::get<std::vector<double>>(vertices), color, model)));
+        } else {
+            // TODO: This is the error case
+        }
     }
     return std::make_pair(s, id);
 }
