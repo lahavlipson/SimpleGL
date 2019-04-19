@@ -17,16 +17,6 @@ public:
     std::string message(int errCode) const {
         switch(errCode) {
         // ref for glfw error codes: https://www.glfw.org/docs/latest/group__errors.html
-        case GLFW_NOT_INITIALIZED: return "GLFW error: GLFW has not been initialized";
-        case GLFW_NO_CURRENT_CONTEXT: return "GLFW error: GLFW no current context";
-        case GLFW_INVALID_ENUM: return "GLFW error: GLFW invalid enum";
-        case GLFW_INVALID_VALUE: return "GLFW error: GLFW invalid value";
-        case GLFW_OUT_OF_MEMORY: return "GLFW error: GLFW out of memory";
-        case GLFW_API_UNAVAILABLE: return "GLFW error: GLFW API unavailable";
-        case GLFW_VERSION_UNAVAILABLE: return "GLFW error: GLFW version unavailable";
-        case GLFW_PLATFORM_ERROR: return "GLFW error: GLFW platform error";
-        case GLFW_FORMAT_UNAVAILABLE: return "GLFW error: GLFW format unavailable";
-        case GLFW_NO_WINDOW_CONTEXT: return "GLFW error: GLFW window does not have an OpenGL context";
         case 0: return "Success";
         case SIMPLEGL_INVALID_PARAM: return "SimpleGL status: invalid parameter";
         case SIMPLEGL_INVALID_OBJ_FILE: return "SimpleGL status: invalid file";

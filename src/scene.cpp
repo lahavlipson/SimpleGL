@@ -88,7 +88,7 @@ Scene::~Scene() {
     glfwTerminate();
 }
 
-mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, 
+Mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, 
     std::variant<std::map<std::string, int>, std::string> p) {
     // consideration: instead of make p a variant, make s a variant of Shape
     // and string, and this way we allow multiple custom meshes loaded from obj.
@@ -109,54 +109,56 @@ mesh_id Scene::add_mesh(Shape s, const glm::vec3 color,
             throw std::runtime_error{std::get<std::error_condition>(res).message()};
         }
     }
-    return std::make_pair(s, id);
+    Mesh_id new_mesh = Mesh_id(s, id);
+    new_mesh.set_scene_ptr(this);
+    return new_mesh;
 }
 
-void Scene::set_color(mesh_id m_id, glm::vec3 c) {
-    meshMap[m_id.first]->set_color(m_id.second, c);
+void Scene::set_color(Mesh_id m_id, glm::vec3 c) {
+    meshMap[m_id.Mesh_id::get_shape()]->set_color(m_id.get_mesh_id(), c);
 }
 
-void Scene::set_model(mesh_id m_id, glm::mat4 m) {
-    meshMap[m_id.first]->set_model(m_id.second, m);
+void Scene::set_model(Mesh_id m_id, glm::mat4 m) {
+    meshMap[m_id.Mesh_id::get_shape()]->set_model(m_id.get_mesh_id(), m);
 }
 
-void Scene::reset_model(mesh_id m_id) {
-    meshMap[m_id.first]->reset_model(m_id.second);
+void Scene::reset_model(Mesh_id m_id) {
+    meshMap[m_id.Mesh_id::get_shape()]->reset_model(m_id.get_mesh_id());
 }
 
-void Scene::translate(mesh_id m_id, glm::vec3 translation) {
-    meshMap[m_id.first]->translate(m_id.second, translation);
+void Scene::translate(Mesh_id m_id, glm::vec3 translation) {
+    meshMap[m_id.Mesh_id::get_shape()]->translate(m_id.get_mesh_id(), translation);
 }
 
-void Scene::scale(mesh_id m_id, glm::vec3 factor) {
-    meshMap[m_id.first]->scale(m_id.second, factor);
+void Scene::scale(Mesh_id m_id, glm::vec3 factor) {
+    meshMap[m_id.Mesh_id::get_shape()]->scale(m_id.get_mesh_id(), factor);
 }
 
-void Scene::scale(mesh_id m_id, double factor) {
-    meshMap[m_id.first]->scale(m_id.second, {factor, factor, factor});
+void Scene::scale(Mesh_id m_id, double factor) {
+    meshMap[m_id.Mesh_id::get_shape()]->scale(m_id.get_mesh_id(), {factor, factor, factor});
 }
 
-void Scene::set_scale(const mesh_id m_id, const glm::vec3 factor) {
-    meshMap[m_id.first]->set_scale(m_id.second, factor);
+void Scene::set_scale(Mesh_id m_id, const glm::vec3 factor) {
+    meshMap[m_id.Mesh_id::get_shape()]->set_scale(m_id.get_mesh_id(), factor);
 }
 
-void Scene::set_scale(const mesh_id m_id, const double factor) {
-    meshMap[m_id.first]->set_scale(m_id.second, {factor, factor, factor});
+void Scene::set_scale(Mesh_id m_id, const double factor) {
+    meshMap[m_id.Mesh_id::get_shape()]->set_scale(m_id.get_mesh_id(), {factor, factor, factor});
 }
 
-void Scene::rotate(mesh_id m_id, float angle, glm::vec3 axis) {
-    meshMap[m_id.first]->rotate(m_id.second, angle, axis);
+void Scene::rotate(Mesh_id m_id, float angle, glm::vec3 axis) {
+    meshMap[m_id.Mesh_id::get_shape()]->rotate(m_id.get_mesh_id(), angle, axis);
 }
 
-void Scene::set_rotation(const mesh_id m_id, const float angle, glm::vec3 axis) {
-    meshMap[m_id.first]->set_rotation(m_id.second, angle, axis);
+void Scene::set_rotation(Mesh_id m_id, const float angle, glm::vec3 axis) {
+    meshMap[m_id.Mesh_id::get_shape()]->set_rotation(m_id.get_mesh_id(), angle, axis);
 }
 
-glm::vec3 Scene::get_loc(mesh_id m_id) {
-    return meshMap[m_id.first]->get_loc(m_id.second);
+glm::vec3 Scene::get_loc(Mesh_id m_id) {
+    return meshMap[m_id.Mesh_id::get_shape()]->get_loc(m_id.get_mesh_id());
 }
 
-void Scene::translate_to(mesh_id m_id, glm::vec3 destination) {
+void Scene::translate_to(Mesh_id m_id, glm::vec3 destination) {
     translate(m_id, destination - get_loc(m_id));
 }
 

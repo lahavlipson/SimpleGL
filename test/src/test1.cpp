@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
         // add the ten boxes
         glm::vec3 color = glm::vec3(1.0,0.5,0.71);
         for (unsigned int i = 0; i < 10; i++) {
-            mesh_id m_id = s.add_mesh(Shape::box, color);
+            Mesh_id m_id = s.add_mesh(Shape::box, color);
             s.translate(m_id, box_positions[i]);
             float angle = 20.0f * i;
             s.rotate(m_id, angle, glm::vec3(1.0f, 0.3f, 0.5f));
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
         // add two spheres
         color = glm::vec3(0.7, 0.5, 0.5);
         std::map<std::string, int> mymap = {{"accuracy",7}};
-        mesh_id m_id = s.add_mesh(Shape::sphere, color, mymap );
+        Mesh_id m_id = s.add_mesh(Shape::sphere, color, mymap );
         s.translate(m_id, glm::vec3(-0.2,-0.2,-0.2));
         s.scale(m_id, 0.5);
         m_id = s.add_mesh(Shape::sphere, color);
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 
         // add one obj
         if (argc > 1) {
-            mesh_id obj_m_id = s.add_mesh(Shape::obj, color, *(argv+1));
+            Mesh_id obj_m_id = s.add_mesh(Shape::obj, color, *(argv+1));
             s.scale(obj_m_id, 0.08);
             s.translate(obj_m_id, glm::vec3(-0.6,-70.2,-0.6));
         }
