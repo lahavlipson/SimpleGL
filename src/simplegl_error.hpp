@@ -39,6 +39,7 @@ public:
         return std::error_condition(errCode, *this);
     }
 };
+
 inline SimpleGL_error const& SimpleGL_error_static() {
     static class SimpleGL_error res;
     return res;

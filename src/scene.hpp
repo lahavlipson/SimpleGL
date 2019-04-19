@@ -37,8 +37,11 @@ public:
     void translate(const mesh_id m_id, const glm::vec3 translation);
     void translate_to(const mesh_id m_id, const glm::vec3 destination);
     void rotate(const mesh_id m_id, const float angle, glm::vec3 axis);
+    void set_rotation(const mesh_id m_id, const float angle, glm::vec3 axis);
     void scale(const mesh_id m_id, const glm::vec3 factor);
     void scale(const mesh_id m_id, const double factor);
+    void set_scale(const mesh_id m_id, const glm::vec3 factor);
+    void set_scale(const mesh_id m_id, const double factor);
     glm::vec3 get_loc(mesh_id m_id);
 
     std::error_condition render();

@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <iostream>
 
 #include "scene.hpp"
@@ -86,20 +87,26 @@ Scene::~Scene() {
     glfwTerminate();
 }
 
-mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, std::variant<std::map<std::string, double>, std::string> p) {
+mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, 
+    std::variant<std::map<std::string, double>, std::string> p) {
+    // consideration: instead of make p a variant, make s a variant of Shape
+    // and string, and this way we allow multiple custom meshes loaded from obj.
+    
     int id = 0;
-    glm::mat4 model = glm::mat4(1.0f);
     if (meshMap.find(s) != meshMap.end()) { // contains(s) is c++20
         // adding an instance of this shape to the scene
         Mesh *mesh_ptr = meshMap[s];
-        id = mesh_ptr->add_instance(color, model);
+        id = mesh_ptr->add_instance(color);
     } else { 
         // first time adding this shape to the scene
-        auto vertices = createGLPObj(s, p);
-        if (std::holds_alternative<std::vector<double>>(vertices)) {
-            meshMap.insert(std::make_pair(s, new Mesh(std::get<std::vector<double>>(vertices), color, model)));
+        auto res = createGLPObj(s, p);
+        if (std::holds_alternative<std::vector<double>>(res)) {
+            meshMap.insert(std::make_pair(
+                s, new Mesh(std::get<std::vector<double>>(res), color)));
         } else {
-            // TODO: This is the error case
+            // consideration: the user needs to use throw-try-catch 
+            // to handle the error case themselves
+            throw std::runtime_error{std::get<std::error_condition>(res).message()};
         }
     }
     return std::make_pair(s, id);
@@ -129,8 +136,20 @@ void Scene::scale(mesh_id m_id, double factor) {
     meshMap[m_id.first]->scale(m_id.second, {factor, factor, factor});
 }
 
+void Scene::set_scale(const mesh_id m_id, const glm::vec3 factor) {
+    meshMap[m_id.first]->set_scale(m_id.second, factor);
+}
+
+void Scene::set_scale(const mesh_id m_id, const double factor) {
+    meshMap[m_id.first]->set_scale(m_id.second, {factor, factor, factor});
+}
+
 void Scene::rotate(mesh_id m_id, float angle, glm::vec3 axis) {
     meshMap[m_id.first]->rotate(m_id.second, angle, axis);
+}
+
+void Scene::set_rotation(const mesh_id m_id, const float angle, glm::vec3 axis) {
+    meshMap[m_id.first]->set_rotation(m_id.second, angle, axis);
 }
 
 glm::vec3 Scene::get_loc(mesh_id m_id) {
@@ -170,7 +189,7 @@ std::error_condition Scene::render() {
             int v_size = mesh_ptr->get_v_size();
 	        for (auto& info : mesh_ptr->mesh_infos()) {
                 shader->setVec3("objectColor", info.first);
-	            shader->setMat4("model", info.second);
+	            shader->setMat4("model", info.second.get_model());
 	            glDrawArrays(GL_TRIANGLES, 0, (int) (v_size / 6));
 	        }
         }
