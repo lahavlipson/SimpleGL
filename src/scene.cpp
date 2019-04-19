@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <iostream>
 
 #include "scene.hpp"
@@ -87,59 +88,78 @@ Scene::~Scene() {
     glfwTerminate();
 }
 
-mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, std::variant<std::map<std::string, int>, std::string> p) {
+Mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, 
+    std::variant<std::map<std::string, int>, std::string> p) {
+    // consideration: instead of make p a variant, make s a variant of Shape
+    // and string, and this way we allow multiple custom meshes loaded from obj.
     int id = 0;
-    glm::mat4 model = glm::mat4(1.0f);
+    Mesh *mesh_ptr;
     if (meshMap.find(s) != meshMap.end()) { // contains(s) is c++20
         // adding an instance of this shape to the scene
-        Mesh *mesh_ptr = meshMap[s];
-        id = mesh_ptr->add_instance(color, model);
+        mesh_ptr = meshMap[s];
+        id = mesh_ptr->add_instance(color);
     } else { 
         // first time adding this shape to the scene
-        auto vertices = createGLPObj(s, p);
-        if (std::holds_alternative<std::vector<double>>(vertices)) {
-            meshMap.insert(std::make_pair(s, new Mesh(std::get<std::vector<double>>(vertices), color, model)));
+        auto res = createGLPObj(s, p);
+        if (std::holds_alternative<std::vector<double>>(res)) {
+            mesh_ptr = new Mesh(std::get<std::vector<double>>(res), color);
+            meshMap.insert(std::make_pair(s, mesh_ptr));
         } else {
-            // TODO: This is the error case
+            // consideration: the user needs to use throw-try-catch 
+            // to handle the error case themselves
+            throw std::runtime_error{std::get<std::error_condition>(res).message()};
         }
     }
-    return std::make_pair(s, id);
+    Mesh_id new_mesh = Mesh_id(s, id, mesh_ptr);
+    return new_mesh;
 }
 
-void Scene::set_color(mesh_id m_id, glm::vec3 c) {
-    meshMap[m_id.first]->set_color(m_id.second, c);
+void Mesh_id::set_color(glm::vec3 c) {
+    mesh_ptr->set_color(id, c);
 }
 
-void Scene::set_model(mesh_id m_id, glm::mat4 m) {
-    meshMap[m_id.first]->set_model(m_id.second, m);
+void Mesh_id::set_model(glm::mat4 m) {
+    mesh_ptr->set_model(id, m);
 }
 
-void Scene::reset_model(mesh_id m_id) {
-    meshMap[m_id.first]->reset_model(m_id.second);
+void Mesh_id::reset_model() {
+    mesh_ptr->reset_model(id);
 }
 
-void Scene::translate(mesh_id m_id, glm::vec3 translation) {
-    meshMap[m_id.first]->translate(m_id.second, translation);
+void Mesh_id::translate(glm::vec3 translation) {
+    mesh_ptr->translate(id, translation);
 }
 
-void Scene::scale(mesh_id m_id, glm::vec3 factor) {
-    meshMap[m_id.first]->scale(m_id.second, factor);
+void Mesh_id::scale(glm::vec3 factor) {
+    mesh_ptr->scale(id, factor);
 }
 
-void Scene::scale(mesh_id m_id, double factor) {
-    meshMap[m_id.first]->scale(m_id.second, {factor, factor, factor});
+void Mesh_id::scale(double factor) {
+    mesh_ptr->scale(id, {factor, factor, factor});
 }
 
-void Scene::rotate(mesh_id m_id, float angle, glm::vec3 axis) {
-    meshMap[m_id.first]->rotate(m_id.second, angle, axis);
+void Mesh_id::set_scale(const glm::vec3 factor) {
+    mesh_ptr->set_scale(id, factor);
 }
 
-glm::vec3 Scene::get_loc(mesh_id m_id) {
-    return meshMap[m_id.first]->get_loc(m_id.second);
+void Mesh_id::set_scale(const double factor) {
+    mesh_ptr->set_scale(id, {factor, factor, factor});
 }
 
-void Scene::translate_to(mesh_id m_id, glm::vec3 destination) {
-    translate(m_id, destination - get_loc(m_id));
+void Mesh_id::rotate(float angle, glm::vec3 axis) {
+    mesh_ptr->rotate(id, angle, axis);
+}
+
+void Mesh_id::set_rotation(const float angle, glm::vec3 axis) {
+    mesh_ptr->set_rotation(id, angle, axis);
+}
+
+glm::vec3 Mesh_id::get_loc() {
+    return mesh_ptr->get_loc(this->id);
+}
+
+void Mesh_id::translate_to(glm::vec3 destination) {
+    translate(destination - this->get_loc());
 }
 
 std::error_condition Scene::render() {    
@@ -171,7 +191,7 @@ std::error_condition Scene::render() {
             int v_size = mesh_ptr->get_v_size();
 	        for (auto& info : mesh_ptr->mesh_infos()) {
                 shader->setVec3("objectColor", info.first);
-	            shader->setMat4("model", info.second);
+	            shader->setMat4("model", info.second.get_model());
 	            glDrawArrays(GL_TRIANGLES, 0, (int) (v_size / 6));
 	        }
         }

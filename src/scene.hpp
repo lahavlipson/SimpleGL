@@ -18,7 +18,41 @@
 
 // mesh_id: represents the id to a specific instance of Mesh
 // to modify its model matrix and color.
-typedef std::pair<Shape, int> mesh_id;
+class Mesh_id {
+public:
+    Mesh_id(Shape shape, int mesh_id, Mesh* mesh_p): mesh_shape(shape), id(mesh_id), mesh_ptr(mesh_p){}
+    ~Mesh_id(){}
+    
+    int get_mesh_id(){
+        return id;
+    }
+    Shape get_shape(){
+        return mesh_shape;
+    }
+    Mesh* get_mesh_ptr(){
+        return mesh_ptr;
+    }
+
+    // Methods for manipulating mesh instances.
+    void set_color(const glm::vec3 c);
+    void set_model(const glm::mat4 model);
+    void reset_model();
+    void translate(const glm::vec3 translation);
+    void translate_to(const glm::vec3 destination);
+    void rotate(const float angle, glm::vec3 axis);
+    void set_rotation(const float angle, glm::vec3 axis);
+    void scale(const glm::vec3 factor);
+    void scale(const double factor);
+    void set_scale(const glm::vec3 factor);
+    void set_scale(const double factor);
+    glm::vec3 get_loc();
+
+private:
+    Shape mesh_shape;
+    int id;
+    Mesh* mesh_ptr;
+};
+
 
 class Scene {
 public:
@@ -26,20 +60,9 @@ public:
           const int width = 800, const int height = 600);
     ~Scene();
 
-    mesh_id add_mesh(
+    Mesh_id add_mesh(
         const Shape s, const glm::vec3 color = {0.4, 0.4, 0.4}, 
         const std::variant<std::map<std::string, int>, std::string> p = {});
-
-    // Methods for manipulating mesh instances.
-    void set_color(const mesh_id m_id, const glm::vec3 c);
-    void set_model(const mesh_id m_id, const glm::mat4 model);
-    void reset_model(const mesh_id m_id);
-    void translate(const mesh_id m_id, const glm::vec3 translation);
-    void translate_to(const mesh_id m_id, const glm::vec3 destination);
-    void rotate(const mesh_id m_id, const float angle, glm::vec3 axis);
-    void scale(const mesh_id m_id, const glm::vec3 factor);
-    void scale(const mesh_id m_id, const double factor);
-    glm::vec3 get_loc(mesh_id m_id);
 
     std::error_condition render();
 

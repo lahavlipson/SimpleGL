@@ -11,7 +11,7 @@
 
 enum Shape { sphere, truncatedCone, cylinder, cone, pyramid, torus, box, obj };
 
-inline std::variant<std::vector<double>,std::error_condition> createGLPObj(
+inline std::variant<std::vector<double>, std::error_condition> createGLPObj(
     const Shape s, 
 	const std::variant<std::map<std::string, int>, std::string> varP) {
 	
@@ -24,7 +24,7 @@ inline std::variant<std::vector<double>,std::error_condition> createGLPObj(
 		params = std::get<std::map<std::string, int>>(varP);
         if (params.find("accuracy") != params.end()) {
             accuracy = params["accuracy"];
-        	if (accuracy <= 1) {
+        	if (accuracy <= 0) { // why was it not <= 0?
         		return make_SimpleGL_error_condition(SIMPLEGL_INVALID_PARAM);
         	}
         }
@@ -32,7 +32,7 @@ inline std::variant<std::vector<double>,std::error_condition> createGLPObj(
             sides = params["sides"];
         	if (sides <= 0) {
         		return make_SimpleGL_error_condition(SIMPLEGL_INVALID_PARAM);
-        	}        
+        	}
         }
 	} else {
 		filepath = std::get<std::string>(varP);
@@ -64,7 +64,7 @@ inline std::variant<std::vector<double>,std::error_condition> createGLPObj(
 	case obj:
 		objl::Loader loader;
 		if (!loader.LoadFile(filepath)) {
-        		return make_SimpleGL_error_condition(SIMPLEGL_INVALID_OBJ_FILE);
+        	return make_SimpleGL_error_condition(SIMPLEGL_INVALID_OBJ_FILE);
 		}
 		std::vector<double> output;
 		for (int i = 0; i < loader.LoadedVertices.size(); i++) {
@@ -76,7 +76,7 @@ inline std::variant<std::vector<double>,std::error_condition> createGLPObj(
 			output.push_back(loader.LoadedVertices[i].Normal.Z);
 		}
 		if (output.size() != (6 * loader.LoadedVertices.size())) {
-        		return make_SimpleGL_error_condition(SIMPLEGL_OBJ_LOAD_FAIL);
+        	return make_SimpleGL_error_condition(SIMPLEGL_OBJ_LOAD_FAIL);
 		}
 		return output;
 	}
