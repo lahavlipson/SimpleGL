@@ -21,7 +21,7 @@ DEPS      := $(OBJS:.o=.d)
 INC_DIRS  := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS)) -I/usr/local/Cellar/glfw/3.2.1/include
 
-CMPFLAGS  := -MP -MMD -std=c++17 -O2 -Wall -Werror -Wno-deprecated-declarations
+CMPFLAGS  := -MP -MMD -std=c++17 -O2 -Wall -Werror 
 LDFLAGS   := -L/usr/local/Cellar/glfw/3.2.1/lib -lglfw
 CPPFLAGS  ?= $(INC_FLAGS) $(CMPFLAGS)
 

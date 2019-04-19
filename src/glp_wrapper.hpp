@@ -13,15 +13,15 @@ enum Shape { sphere, truncatedCone, cylinder, cone, pyramid, torus, box, obj };
 
 inline std::variant<std::vector<double>,std::error_condition> createGLPObj(
     const Shape s, 
-	const std::variant<std::map<std::string, double>, std::string> varP) {
+	const std::variant<std::map<std::string, int>, std::string> varP) {
 	
-	std::map<std::string, double> params;
+	std::map<std::string, int> params;
 	std::string filepath;
     int accuracy = 6;
     int sides = 3;
 
-	if (std::holds_alternative<std::map<std::string, double>>(varP)) {
-		params = std::get<std::map<std::string, double>>(varP);
+	if (std::holds_alternative<std::map<std::string, int>>(varP)) {
+		params = std::get<std::map<std::string, int>>(varP);
         if (params.find("accuracy") != params.end()) {
             accuracy = params["accuracy"];
         	if (accuracy <= 1) {
