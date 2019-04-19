@@ -25,6 +25,7 @@ float lastFrame = 0.0f;
 // Note: either both of the shaders are default or neither are default
 Scene::Scene(char *vs, char *fs, int width, int height) {
     // glfw: initialize and configure
+    glfwSetErrorCallback(Scene::error_callback);
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -34,7 +35,7 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     // uncomment this statement to fix compilation on OS X
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); 
 #endif
-    
+
     // glfw window creation
     scr_width = width;
     scr_height = height;
@@ -50,7 +51,7 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     glfwSetFramebufferSizeCallback(window, Scene::framebuffer_size_callback);
     glfwSetCursorPosCallback(window, Scene::mouse_callback);
     glfwSetScrollCallback(window, Scene::scroll_callback);
-    
+
     // tell GLFW to capture our mouse
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
@@ -88,10 +89,9 @@ Scene::~Scene() {
 }
 
 mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, 
-    std::variant<std::map<std::string, double>, std::string> p) {
+    std::variant<std::map<std::string, int>, std::string> p) {
     // consideration: instead of make p a variant, make s a variant of Shape
     // and string, and this way we allow multiple custom meshes loaded from obj.
-    
     int id = 0;
     if (meshMap.find(s) != meshMap.end()) { // contains(s) is c++20
         // adding an instance of this shape to the scene
@@ -270,4 +270,10 @@ void Scene::scroll_callback(
         fov = 1.0f;
     if (fov >= 45.0f)
         fov = 45.0f;
+}
+
+// ref: https://www.glfw.org/docs/latest/quick.html#quick_capture_error
+void Scene::error_callback(int error, const char* description) {
+    std::cerr << "Terminating. GLFW Error:" << description << "\n";
+    std::exit(error);
 }

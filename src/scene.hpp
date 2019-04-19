@@ -28,7 +28,7 @@ public:
 
     mesh_id add_mesh(
         const Shape s, const glm::vec3 color = {0.4, 0.4, 0.4}, 
-        const std::variant<std::map<std::string, double>, std::string> p = {});
+        const std::variant<std::map<std::string, int>, std::string> p = {});
 
     // Methods for manipulating mesh instances.
     void set_color(const mesh_id m_id, const glm::vec3 c);
@@ -51,6 +51,7 @@ public:
     static void mouse_callback(GLFWwindow *window, const double xpos, const double ypos);
     static void scroll_callback(GLFWwindow *window, const double xoffset, const double yoffset);
     static void process_input(GLFWwindow *window);
+    static void error_callback(int error, const char* description);
 
 private:
     unsigned int scr_width, scr_height;
