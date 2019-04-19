@@ -37,6 +37,7 @@ inline std::variant<std::vector<double>, std::error_condition> createGLPObj(
 	        }
 		} else {
 			// provided a filepath when we need a params map 
+			return make_SimpleGL_error_condition(SIMPLEGL_INVALID_PARAM);	
 		}
 
 		switch (std::get<Shape>(s)) {
