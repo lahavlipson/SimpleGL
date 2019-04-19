@@ -88,7 +88,7 @@ Scene::~Scene() {
     glfwTerminate();
 }
 
-Mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, 
+Mesh_id Scene::add_mesh(std::variant<Shape, std::string> s, const glm::vec3 color, 
     std::variant<std::map<std::string, int>, std::string> p) {
     // consideration: instead of make p a variant, make s a variant of Shape
     // and string, and this way we allow multiple custom meshes loaded from obj.
@@ -110,7 +110,7 @@ Mesh_id Scene::add_mesh(Shape s, const glm::vec3 color,
             throw std::runtime_error{std::get<std::error_condition>(res).message()};
         }
     }
-    Mesh_id new_mesh = Mesh_id(s, id, mesh_ptr);
+    Mesh_id new_mesh = Mesh_id(id, mesh_ptr);
     return new_mesh;
 }
 

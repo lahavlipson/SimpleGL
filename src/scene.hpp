@@ -20,14 +20,11 @@
 // to modify its model matrix and color.
 class Mesh_id {
 public:
-    Mesh_id(Shape shape, int mesh_id, Mesh* mesh_p): mesh_shape(shape), id(mesh_id), mesh_ptr(mesh_p){}
+    Mesh_id(int mesh_id, Mesh* mesh_p): id(mesh_id), mesh_ptr(mesh_p){}
     ~Mesh_id(){}
     
     int get_mesh_id(){
         return id;
-    }
-    Shape get_shape(){
-        return mesh_shape;
     }
     Mesh* get_mesh_ptr(){
         return mesh_ptr;
@@ -48,7 +45,6 @@ public:
     glm::vec3 get_loc();
 
 private:
-    Shape mesh_shape;
     int id;
     Mesh* mesh_ptr;
 };
@@ -60,10 +56,9 @@ public:
           const int width = 800, const int height = 600);
     ~Scene();
 
-    Mesh_id add_mesh(
-        const Shape s, const glm::vec3 color = {0.4, 0.4, 0.4}, 
-        const std::variant<std::map<std::string, int>, std::string> p = {});
-
+    Mesh_id add_mesh(std::variant<Shape, std::string> s, const glm::vec3 color = {0.4, 0.4, 0.4}, 
+        std::variant<std::map<std::string, int>, std::string> p={});
+    
     std::error_condition render();
 
     // GLFW callbacks.
@@ -77,7 +72,7 @@ private:
     unsigned int scr_width, scr_height;
     GLFWwindow *window = nullptr;
     Shader *shader;
-    std::unordered_map<Shape, Mesh *> meshMap;
+    std::unordered_map<std::variant<Shape, std::string>, Mesh *> meshMap;
 };
 
 #endif

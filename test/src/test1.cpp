@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 
         // add one obj
         if (argc > 1) {
-            Mesh_id obj_m_id = s.add_mesh(Shape::obj, color, *(argv+1));
+            Mesh_id obj_m_id = s.add_mesh("object1", color, *(argv+1));
             obj_m_id.scale(0.08);
             obj_m_id.translate(glm::vec3(-0.6,-70.2,-0.6));
         }
