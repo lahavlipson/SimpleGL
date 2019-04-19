@@ -93,73 +93,73 @@ Mesh_id Scene::add_mesh(Shape s, const glm::vec3 color,
     // consideration: instead of make p a variant, make s a variant of Shape
     // and string, and this way we allow multiple custom meshes loaded from obj.
     int id = 0;
+    Mesh *mesh_ptr;
     if (meshMap.find(s) != meshMap.end()) { // contains(s) is c++20
         // adding an instance of this shape to the scene
-        Mesh *mesh_ptr = meshMap[s];
+        mesh_ptr = meshMap[s];
         id = mesh_ptr->add_instance(color);
     } else { 
         // first time adding this shape to the scene
         auto res = createGLPObj(s, p);
         if (std::holds_alternative<std::vector<double>>(res)) {
-            meshMap.insert(std::make_pair(
-                s, new Mesh(std::get<std::vector<double>>(res), color)));
+            mesh_ptr = new Mesh(std::get<std::vector<double>>(res), color);
+            meshMap.insert(std::make_pair(s, mesh_ptr));
         } else {
             // consideration: the user needs to use throw-try-catch 
             // to handle the error case themselves
             throw std::runtime_error{std::get<std::error_condition>(res).message()};
         }
     }
-    Mesh_id new_mesh = Mesh_id(s, id);
-    new_mesh.set_scene_ptr(this);
+    Mesh_id new_mesh = Mesh_id(s, id, mesh_ptr);
     return new_mesh;
 }
 
-void Scene::set_color(Mesh_id m_id, glm::vec3 c) {
-    meshMap[m_id.Mesh_id::get_shape()]->set_color(m_id.get_mesh_id(), c);
+void Mesh_id::set_color(glm::vec3 c) {
+    mesh_ptr->set_color(id, c);
 }
 
-void Scene::set_model(Mesh_id m_id, glm::mat4 m) {
-    meshMap[m_id.Mesh_id::get_shape()]->set_model(m_id.get_mesh_id(), m);
+void Mesh_id::set_model(glm::mat4 m) {
+    mesh_ptr->set_model(id, m);
 }
 
-void Scene::reset_model(Mesh_id m_id) {
-    meshMap[m_id.Mesh_id::get_shape()]->reset_model(m_id.get_mesh_id());
+void Mesh_id::reset_model() {
+    mesh_ptr->reset_model(id);
 }
 
-void Scene::translate(Mesh_id m_id, glm::vec3 translation) {
-    meshMap[m_id.Mesh_id::get_shape()]->translate(m_id.get_mesh_id(), translation);
+void Mesh_id::translate(glm::vec3 translation) {
+    mesh_ptr->translate(id, translation);
 }
 
-void Scene::scale(Mesh_id m_id, glm::vec3 factor) {
-    meshMap[m_id.Mesh_id::get_shape()]->scale(m_id.get_mesh_id(), factor);
+void Mesh_id::scale(glm::vec3 factor) {
+    mesh_ptr->scale(id, factor);
 }
 
-void Scene::scale(Mesh_id m_id, double factor) {
-    meshMap[m_id.Mesh_id::get_shape()]->scale(m_id.get_mesh_id(), {factor, factor, factor});
+void Mesh_id::scale(double factor) {
+    mesh_ptr->scale(id, {factor, factor, factor});
 }
 
-void Scene::set_scale(Mesh_id m_id, const glm::vec3 factor) {
-    meshMap[m_id.Mesh_id::get_shape()]->set_scale(m_id.get_mesh_id(), factor);
+void Mesh_id::set_scale(const glm::vec3 factor) {
+    mesh_ptr->set_scale(id, factor);
 }
 
-void Scene::set_scale(Mesh_id m_id, const double factor) {
-    meshMap[m_id.Mesh_id::get_shape()]->set_scale(m_id.get_mesh_id(), {factor, factor, factor});
+void Mesh_id::set_scale(const double factor) {
+    mesh_ptr->set_scale(id, {factor, factor, factor});
 }
 
-void Scene::rotate(Mesh_id m_id, float angle, glm::vec3 axis) {
-    meshMap[m_id.Mesh_id::get_shape()]->rotate(m_id.get_mesh_id(), angle, axis);
+void Mesh_id::rotate(float angle, glm::vec3 axis) {
+    mesh_ptr->rotate(id, angle, axis);
 }
 
-void Scene::set_rotation(Mesh_id m_id, const float angle, glm::vec3 axis) {
-    meshMap[m_id.Mesh_id::get_shape()]->set_rotation(m_id.get_mesh_id(), angle, axis);
+void Mesh_id::set_rotation(const float angle, glm::vec3 axis) {
+    mesh_ptr->set_rotation(id, angle, axis);
 }
 
-glm::vec3 Scene::get_loc(Mesh_id m_id) {
-    return meshMap[m_id.Mesh_id::get_shape()]->get_loc(m_id.get_mesh_id());
+glm::vec3 Mesh_id::get_loc() {
+    return mesh_ptr->get_loc(this->id);
 }
 
-void Scene::translate_to(Mesh_id m_id, glm::vec3 destination) {
-    translate(m_id, destination - get_loc(m_id));
+void Mesh_id::translate_to(glm::vec3 destination) {
+    translate(destination - this->get_loc());
 }
 
 std::error_condition Scene::render() {    
