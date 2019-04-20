@@ -17,7 +17,7 @@ class SimpleGL_error : public std::error_category {
 public:
     const char* name() const noexcept { return "SimpleGL status code"; }
     std::string message(int errCode) const {
-        switch(errCode) {
+        switch (errCode) {
         // ref for glfw error codes: https://www.glfw.org/docs/latest/group__errors.html
         case 0: return "Success";
         case SIMPLEGL_INVALID_PARAM: return "SimpleGL status: invalid parameter";

@@ -88,10 +88,10 @@ Scene::~Scene() {
     glfwTerminate();
 }
 
-Mesh_id Scene::add_mesh(std::variant<Shape, std::string> s, const glm::vec3 color, 
-    std::variant<std::map<std::string, int>, std::string> p) {
-    // consideration: instead of make p a variant, make s a variant of Shape
-    // and string, and this way we allow multiple custom meshes loaded from obj.
+Mesh_id Scene::add_mesh(
+    std::variant<Shape, std::string> s, const glm::vec3 color, 
+    std::variant<std::unordered_map<std::string, int>, std::string> p) {
+
     int id = 0;
     Mesh *mesh_ptr;
     if (meshMap.find(s) != meshMap.end()) { // contains(s) is c++20
@@ -110,8 +110,7 @@ Mesh_id Scene::add_mesh(std::variant<Shape, std::string> s, const glm::vec3 colo
             throw std::runtime_error{std::get<std::error_condition>(res).message()};
         }
     }
-    Mesh_id new_mesh = Mesh_id(id, mesh_ptr);
-    return new_mesh;
+    return Mesh_id(id, mesh_ptr);
 }
 
 void Mesh_id::set_color(glm::vec3 c) {
@@ -128,6 +127,10 @@ void Mesh_id::reset_model() {
 
 void Mesh_id::translate(glm::vec3 translation) {
     mesh_ptr->translate(id, translation);
+}
+
+void Mesh_id::set_translation(const glm::vec3 translation) {
+    mesh_ptr->set_translation(id, translation);
 }
 
 void Mesh_id::scale(glm::vec3 factor) {
@@ -155,11 +158,7 @@ void Mesh_id::set_rotation(const float angle, glm::vec3 axis) {
 }
 
 glm::vec3 Mesh_id::get_loc() {
-    return mesh_ptr->get_loc(this->id);
-}
-
-void Mesh_id::translate_to(glm::vec3 destination) {
-    translate(destination - this->get_loc());
+    return mesh_ptr->get_loc(id);
 }
 
 std::error_condition Scene::render() {    

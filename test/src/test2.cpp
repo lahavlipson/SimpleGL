@@ -35,7 +35,7 @@ int main(int argc, char *argv[]){
     
     // add two spheres
     color = glm::vec3(0.7, 0.5, 0.5);
-    std::map<std::string, int> mymap = {{"accuracy",7}};
+    std::unordered_map<std::string, int> mymap = {{"accuracy",7}};
     Mesh_id m_id = s.add_mesh(Shape::sphere, color, mymap);
     m_id.translate(glm::vec3(-0.2,-0.2,-0.2));
     m_id = s.add_mesh(Shape::sphere, color, mymap);

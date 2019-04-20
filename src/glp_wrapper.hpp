@@ -1,8 +1,8 @@
 #ifndef GLP_WRAPPER_HPP
 #define GLP_WRAPPER_HPP
 
+#include <unordered_map>
 #include <variant>
-#include <map>
 
 #include <glp/glp.h>
 #include <obj_loader/obj_loader.h>
@@ -13,16 +13,16 @@ enum Shape { sphere, truncatedCone, cylinder, cone, pyramid, torus, box };
 
 inline std::variant<std::vector<double>, std::error_condition> createGLPObj(
     const std::variant<Shape, std::string> s, 
-	const std::variant<std::map<std::string, int>, std::string> varP) {
+	const std::variant<std::unordered_map<std::string, int>, std::string> varP) {
 
     if (std::holds_alternative<Shape>(s)) { 
     	// --- GLP Primitive ---
     	int accuracy = 6;
     	int sides = 3;
 
-		if (std::holds_alternative<std::map<std::string, int>>(varP)) {
+		if (std::holds_alternative<std::unordered_map<std::string, int>>(varP)) {
 			// Get GLP parameters from the input params map.
-			std::map<std::string, int> params = std::get<std::map<std::string, int>>(varP);
+			auto params = std::get<std::unordered_map<std::string, int>>(varP);
 	        if (params.find("accuracy") != params.end()) {
 	            accuracy = params["accuracy"];
 	        	if (accuracy <= 1) {

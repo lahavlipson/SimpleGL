@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
             glm::vec3( 1.5f,  0.2f, -1.5f),
             glm::vec3(-1.3f,  1.0f, -1.5f)
         };
-        // add the ten boxes
+        // add ten boxes
         glm::vec3 color = glm::vec3(1.0,0.5,0.71);
         for (unsigned int i = 0; i < 10; i++) {
             Mesh_id m_id = s.add_mesh(Shape::box, color);
@@ -36,14 +36,13 @@ int main(int argc, char *argv[]) {
         
         // add two spheres
         color = glm::vec3(0.7, 0.5, 0.5);
-        std::map<std::string, int> mymap = {{"accuracy",7}};
+        std::unordered_map<std::string, int> mymap = {{"accuracy",7}};
         Mesh_id m_id = s.add_mesh(Shape::sphere, color, mymap );
         m_id.translate(glm::vec3(-0.2,-0.2,-0.2));
         m_id.scale(0.5);
         m_id = s.add_mesh(Shape::sphere, color);
         m_id.translate(glm::vec3(-0.6,-0.6,0.6));
         m_id.scale(0.3);
-        
         
         // add pyramid
         mymap = {{"sides",7}};
@@ -61,6 +60,6 @@ int main(int argc, char *argv[]) {
         // render the scene.
         s.render();
     } catch (std::runtime_error& err) {
-        std::cout << *err.what() << "\n";
+        std::cout << err.what() << "\n";
     }
 }

@@ -99,6 +99,10 @@ public:
         render_infos[i].second.translation = glm::translate(
             render_infos[i].second.translation, translation);
     }
+
+    inline void set_translation(const int i, const glm::vec3 translation) {
+        render_infos[i].second.translation = glm::translate(translation);
+    }
     
     inline void scale(const int i, const glm::vec3 scale) {
         render_infos[i].second.scaling = glm::scale(
