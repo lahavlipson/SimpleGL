@@ -161,7 +161,10 @@ glm::vec3 Mesh_id::get_loc() {
     return mesh_ptr->get_loc(id);
 }
 
-std::error_condition Scene::render() {    
+std::error_condition Scene::render() {
+    if (meshMap.empty()) {
+        std::cout << "Current scene has nothing to render.\n";
+    }
     // render loop
     while (!glfwWindowShouldClose(window)) {
         // per-frame time logic
