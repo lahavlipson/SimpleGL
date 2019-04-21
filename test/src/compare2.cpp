@@ -47,7 +47,6 @@ int main(int argc, char *argv[]) {
         return 0;
     }
     // glfw: initialize and configure
-    // ------------------------------
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -58,7 +57,6 @@ int main(int argc, char *argv[]) {
 #endif
     
     // glfw window creation
-    // --------------------
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
@@ -75,7 +73,6 @@ int main(int argc, char *argv[]) {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
     // glad: load all OpenGL function pointers
-    // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
@@ -83,11 +80,9 @@ int main(int argc, char *argv[]) {
     }
     
     // configure global opengl state
-    // -----------------------------
     glEnable(GL_DEPTH_TEST);
     
     // build and compile our shader program
-    // ------------------------------------
      // 1. retrieve the vertex/fragment source code from filePath
     unsigned int ID;
     std::string vertexCode;
@@ -142,7 +137,6 @@ int main(int argc, char *argv[]) {
     glDeleteShader(fragment);
     
     // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
     auto vertices = glp::box(glm::dvec3(1,1,1));
     // world space positions of our cubes
     glm::vec3 cubePositions[] = {
@@ -159,7 +153,6 @@ int main(int argc, char *argv[]) {
     };
 
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    // -------------------------------------------------------------------------------------------
     glUseProgram(ID);
     glUniform3f(glGetUniformLocation(ID, "lightColor"),  1.0f, 1.0f, 1.0f);
     glUniform3f(glGetUniformLocation(ID, "lightPos"),  6.2f, 7.0f, 5.0f);
@@ -177,7 +170,7 @@ int main(int argc, char *argv[]) {
         processInput(window);
         
         // render
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         // activate shader
@@ -221,7 +214,7 @@ int main(int argc, char *argv[]) {
 
         // render spheres
         auto color = glm::vec3(0.7, 0.5, 0.5);
-        auto verticesSphere = glp::sphere(3, .1);
+        auto verticesSphere = glp::sphere(7, 1);
         glGenVertexArrays(1, &vao_sphere);
         glBindVertexArray(vao_sphere);  
         glGenBuffers(1, &vbo_sphere);
@@ -280,13 +273,11 @@ int main(int argc, char *argv[]) {
         }
         
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
     
     // optional: de-allocate all resources once they've outlived their purpose:
-    // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteVertexArrays(1, &vao_obj);
@@ -294,13 +285,11 @@ int main(int argc, char *argv[]) {
     glDeleteVertexArrays(1, &vao_sphere);
     glDeleteBuffers(1, &vbo_sphere);   
     // glfw: terminate, clearing all previously allocated GLFW resources.
-    // ------------------------------------------------------------------
     glfwTerminate();
     return 0;
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -318,7 +307,6 @@ void processInput(GLFWwindow *window)
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     // make sure the viewport matches the new window dimensions; note that width and
@@ -327,7 +315,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 // glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     if (firstMouse)
@@ -363,7 +350,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     if (fov >= 1.0f && fov <= 45.0f)
