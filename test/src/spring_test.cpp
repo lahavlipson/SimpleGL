@@ -60,23 +60,25 @@ public:
     Simulation(){}
     
     
-    inline void physics(Spring spr)
+    inline void physics(std::vector<Spring> springs)
     {
         
-        glm::vec3 v1 = {0.3, 0, -0.3};
+        glm::vec3 vel = {0.3, 0, -0.3};
         while (!stopSim){
             
-            glm::vec3 F1 = spr.force() + gravity;
+            glm::vec3 force = gravity;
+            for (Spring &spr : springs)
+                force += spr.force();
 
-            v1 += F1*t;
-
-            spr.id2.translate(v1*t);
+            vel += force*t;
+            springs[0].id2.translate(vel*t);
             
-            glm::vec3 crossProd = glm::cross(glm::vec3(0,1,0.000001), spr.dir());
-            float angleDiff = glm::degrees(float(acos(glm::dot(spr.dir(), {0,1,0}))));
-            spr.obj_id.set_rotation(angleDiff, crossProd);
-            spr.obj_id.set_scale({0.4,spr.length()*0.17,0.4});
-            
+            for (Spring &spr : springs){
+                glm::vec3 crossProd = glm::cross(glm::vec3(0,1,0.000001), spr.dir());
+                float angleDiff = glm::degrees(float(acos(glm::dot(spr.dir(), {0,1,0}))));
+                spr.obj_id.set_rotation(angleDiff, crossProd);
+                spr.obj_id.set_scale({0.4,spr.length()*0.17,0.4});
+            }
             
             usleep(12000);
         }
@@ -90,36 +92,40 @@ public:
 int main(int argc, char *argv[]){
     // initialize the scene.
     Scene s;
-
     
     color col = glm::vec3(0.7, 0.5, 0.5);
+    Mesh_id center_ball = s.add_mesh(Shape::sphere, col);
+    center_ball.translate(glm::vec3(0,3.5,-3));
+    center_ball.scale(0.5);
+
+    
+    
+    std::vector<Spring> springs;
+    
     Mesh_id ball_1 = s.add_mesh(Shape::sphere, col );
     ball_1.translate(glm::vec3(0, 0, -3));
     ball_1.scale(0.5);
     Mesh_id spring_1 = s.add_mesh("spring_1", {0.4, 0.4, 0.4}, argv[1]);
     spring_1.translate(glm::vec3(0, 0, -3));
+    springs.push_back(Spring(ball_1, center_ball, spring_1, 4.0, 2.0));
     
-    Mesh_id center_ball = s.add_mesh(Shape::sphere, col);
-    center_ball.translate(glm::vec3(0,3.5,-3));
-    center_ball.scale(0.5);
-    
-    
-    
-    
-    
-    
+    Mesh_id ball_2 = s.add_mesh(Shape::sphere, col );
+    ball_2.translate(glm::vec3(-3, 0, -3));
+    ball_2.scale(0.5);
+    Mesh_id spring_2 = s.add_mesh("spring_2", {0.4, 0.4, 0.4}, argv[1]);
+    spring_2.translate(glm::vec3(-3, 0, -3));
+    springs.push_back(Spring(ball_2, center_ball, spring_2, 4.0, 2.0));
     
     
     
     
+    
+
     
     
     Simulation sim;
     
-    std::vector<Mesh_id> ids = {ball_1, center_ball, spring_1};
-    Spring spring(ball_1, center_ball, spring_1, 4.0, 2.0);
-    
-    std::thread t1(&Simulation::physics, &sim, spring);
+    std::thread t1(&Simulation::physics, &sim, springs);
     
     // render the scene.
     s.render();
