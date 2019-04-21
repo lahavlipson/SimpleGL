@@ -1,7 +1,8 @@
+#include <stdexcept>
 #include <iostream>
 
-#include "glp_wrapper.hpp"
 #include "scene.hpp"
+#include "glp_wrapper.hpp"
 
 // camera frame
 glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -24,7 +25,7 @@ float lastFrame = 0.0f;
 // Note: either both of the shaders are default or neither are default
 Scene::Scene(char *vs, char *fs, int width, int height) {
     // glfw: initialize and configure
-    // ------------------------------
+    glfwSetErrorCallback(Scene::error_callback);
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -34,9 +35,8 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     // uncomment this statement to fix compilation on OS X
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); 
 #endif
-    
+
     // glfw window creation
-    // --------------------
     scr_width = width;
     scr_height = height;
     window = glfwCreateWindow(scr_width, scr_height, "SimpleGL", nullptr, nullptr);
@@ -51,12 +51,11 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     glfwSetFramebufferSizeCallback(window, Scene::framebuffer_size_callback);
     glfwSetCursorPosCallback(window, Scene::mouse_callback);
     glfwSetScrollCallback(window, Scene::scroll_callback);
-    
+
     // tell GLFW to capture our mouse
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
     // glad: load all OpenGL function pointers
-    // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         glfwTerminate();
@@ -64,18 +63,15 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     }
     
     // configure global opengl state
-    // -----------------------------
     glEnable(GL_DEPTH_TEST);
     
     // build and compile our shader program
-    // ------------------------------------
     if (vs && fs) {
         shader = new Shader(vs, fs);
     } else {
         shader = new Shader();
     }
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    // -------------------------------------------------------------------------------------------
     shader->use();
     shader->setVec3("lightColor", 1.0f, 1.0f, 1.0f);
     shader->setVec3("lightPos", 6.2f, 7.0f, 5.0f);
@@ -89,77 +85,97 @@ Scene::~Scene() {
     // Delete shader.
     delete shader;
     // glfw: terminate, clearing all previously allocated GLFW resources.
-    // ------------------------------------------------------------------
     glfwTerminate();
 }
 
-mesh_id Scene::add_mesh(Shape s, const glm::vec3 color, std::variant<std::map<std::string, double>, std::string> p) {
+Mesh_id Scene::add_mesh(
+    std::variant<Shape, std::string> s, const glm::vec3 color, 
+    std::variant<std::unordered_map<std::string, int>, std::string> p) {
+
     int id = 0;
-    glm::mat4 model = glm::mat4(1.0f);
+    Mesh *mesh_ptr;
     if (meshMap.find(s) != meshMap.end()) { // contains(s) is c++20
         // adding an instance of this shape to the scene
-        Mesh *mesh_ptr = meshMap[s];
-        id = mesh_ptr->add_instance(color, model);
+        mesh_ptr = meshMap[s];
+        id = mesh_ptr->add_instance(color);
     } else { 
         // first time adding this shape to the scene
-        std::vector<double> vertices = createGLPObj(s, p);
-        meshMap.insert(std::make_pair(s, new Mesh(vertices, color, model)));
+        auto res = createGLPObj(s, p);
+        if (std::holds_alternative<std::vector<double>>(res)) {
+            mesh_ptr = new Mesh(std::get<std::vector<double>>(res), color);
+            meshMap.insert(std::make_pair(s, mesh_ptr));
+        } else {
+            // consideration: the user needs to use throw-try-catch 
+            // to handle the error case themselves
+            throw std::runtime_error{std::get<std::error_condition>(res).message()};
+        }
     }
-    return std::make_pair(s, id);
+    return Mesh_id(id, mesh_ptr);
 }
 
-void Scene::set_color(mesh_id m_id, glm::vec3 c) {
-    meshMap[m_id.first]->set_color(m_id.second, c);
+void Mesh_id::set_color(glm::vec3 c) {
+    mesh_ptr->set_color(id, c);
 }
 
-void Scene::set_model(mesh_id m_id, glm::mat4 m) {
-    meshMap[m_id.first]->set_model(m_id.second, m);
+void Mesh_id::set_model(glm::mat4 m) {
+    mesh_ptr->set_model(id, m);
 }
 
-void Scene::reset_model(mesh_id m_id) {
-    meshMap[m_id.first]->reset_model(m_id.second);
+void Mesh_id::reset_model() {
+    mesh_ptr->reset_model(id);
 }
 
-void Scene::translate(mesh_id m_id, glm::vec3 translation) {
-    meshMap[m_id.first]->translate(m_id.second, translation);
+void Mesh_id::translate(glm::vec3 translation) {
+    mesh_ptr->translate(id, translation);
 }
 
-void Scene::scale(mesh_id m_id, glm::vec3 factor) {
-    meshMap[m_id.first]->scale(m_id.second, factor);
+void Mesh_id::set_translation(const glm::vec3 translation) {
+    mesh_ptr->set_translation(id, translation);
 }
 
-void Scene::scale(mesh_id m_id, double factor) {
-    meshMap[m_id.first]->scale(m_id.second, {factor, factor, factor});
+void Mesh_id::scale(glm::vec3 factor) {
+    mesh_ptr->scale(id, factor);
 }
 
-void Scene::rotate(mesh_id m_id, float angle, glm::vec3 axis) {
-    meshMap[m_id.first]->rotate(m_id.second, angle, axis);
+void Mesh_id::scale(double factor) {
+    mesh_ptr->scale(id, {factor, factor, factor});
 }
 
-glm::vec3 Scene::get_loc(mesh_id m_id) {
-    return meshMap[m_id.first]->get_loc(m_id.second);
+void Mesh_id::set_scale(const glm::vec3 factor) {
+    mesh_ptr->set_scale(id, factor);
 }
 
-void Scene::translate_to(mesh_id m_id, glm::vec3 destination) {
-    translate(m_id, destination - get_loc(m_id));
+void Mesh_id::set_scale(const double factor) {
+    mesh_ptr->set_scale(id, {factor, factor, factor});
 }
 
-void Scene::render() {    
+void Mesh_id::rotate(float angle, glm::vec3 axis) {
+    mesh_ptr->rotate(id, angle, axis);
+}
+
+void Mesh_id::set_rotation(const float angle, glm::vec3 axis) {
+    mesh_ptr->set_rotation(id, angle, axis);
+}
+
+glm::vec3 Mesh_id::get_loc() {
+    return mesh_ptr->get_loc(id);
+}
+
+std::error_condition Scene::render() {
+    if (meshMap.empty()) {
+        std::cout << "Current scene has nothing to render.\n";
+    }
     // render loop
-    // -----------
     while (!glfwWindowShouldClose(window)) {
         // per-frame time logic
-        // --------------------
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         
         // input
-        // -----
         process_input(window);
         
         // render
-        // ------
         glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // (note that in this case matrices below could change every frame)
@@ -177,37 +193,39 @@ void Scene::render() {
             int v_size = mesh_ptr->get_v_size();
 	        for (auto& info : mesh_ptr->mesh_infos()) {
                 shader->setVec3("objectColor", info.first);
-	            shader->setMat4("model", info.second);
+	            shader->setMat4("model", info.second.get_model());
 	            glDrawArrays(GL_TRIANGLES, 0, (int) (v_size / 6));
 	        }
         }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+    return make_SimpleGL_error_condition(0);
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
 void Scene::process_input(GLFWwindow *window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
-    
+    }
     float cameraSpeed = 2.5 * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         cameraPos += cameraSpeed * cameraFront;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
         cameraPos -= cameraSpeed * cameraFront;
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
 void Scene::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
@@ -215,7 +233,6 @@ void Scene::framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 // glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
 void Scene::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     if (firstMouse) {
         lastX = xpos;
@@ -249,7 +266,6 @@ void Scene::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
 void Scene::scroll_callback(
     GLFWwindow* window, double xoffset, double yoffset) {
     if (fov >= 1.0f && fov <= 45.0f)
@@ -258,4 +274,10 @@ void Scene::scroll_callback(
         fov = 1.0f;
     if (fov >= 45.0f)
         fov = 45.0f;
+}
+
+// ref: https://www.glfw.org/docs/latest/quick.html#quick_capture_error
+void Scene::error_callback(int error, const char* description) {
+    std::cerr << "Terminating. GLFW Error:" << description << "\n";
+    std::exit(error);
 }

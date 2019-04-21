@@ -9,46 +9,71 @@
 
 #include <unordered_map>
 #include <variant>
-#include <map>
 
+#include "glp_wrapper.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
+#include "simplegl_error.hpp"
 
 // mesh_id: represents the id to a specific instance of Mesh
-// to modify its model matrix and color.
-typedef std::pair<Shape, int> mesh_id;
+// to modify its model matrices and color.
+class Mesh_id {
+public:
+    Mesh_id(int mesh_id, Mesh* mesh_p): id(mesh_id), mesh_ptr(mesh_p) {}
+    ~Mesh_id() {}
+    
+    int get_mesh_id() {
+        return id;
+    }
+    
+    Mesh* get_mesh_ptr() {
+        return mesh_ptr;
+    }
+
+    // Methods for manipulating mesh instances.
+    void set_color(const glm::vec3 c);
+    void set_model(const glm::mat4 model);
+    void reset_model();
+    void translate(const glm::vec3 translation);
+    void set_translation(const glm::vec3 translation);
+    void rotate(const float angle, glm::vec3 axis);
+    void set_rotation(const float angle, glm::vec3 axis);
+    void scale(const glm::vec3 factor);
+    void set_scale(const glm::vec3 factor);
+    void scale(const double factor);
+    void set_scale(const double factor);
+    glm::vec3 get_loc();
+
+private:
+    int id;
+    Mesh* mesh_ptr;
+};
 
 class Scene {
 public:
-    Scene(char *vs= nullptr, char *fs= nullptr, const int width = 800, const int height = 600);
+    Scene(char *vs = nullptr, char *fs = nullptr, 
+          const int width = 800, const int height = 600);
     ~Scene();
 
-    mesh_id add_mesh(const Shape s, const glm::vec3 color = {0.4, 0.4, 0.4}, const std::variant<std::map<std::string, double>, std::string> p = {});
-
-    // Methods for manipulating mesh instances.
-    void set_color(const mesh_id m_id, const glm::vec3 c);
-    void set_model(const mesh_id m_id, const glm::mat4 model);
-    void reset_model(const mesh_id m_id);
-    void translate(const mesh_id m_id, const glm::vec3 translation);
-    void translate_to(const mesh_id m_id, const glm::vec3 destination);
-    void rotate(const mesh_id m_id, const float angle, glm::vec3 axis);
-    void scale(const mesh_id m_id, const glm::vec3 factor);
-    void scale(const mesh_id m_id, const double factor);
-    glm::vec3 get_loc(mesh_id m_id);
-
-    void render();
+    Mesh_id add_mesh(
+        std::variant<Shape, std::string> s, 
+        const glm::vec3 color = {0.4, 0.4, 0.4}, 
+        std::variant<std::unordered_map<std::string, int>, std::string> p = {});
+    
+    std::error_condition render();
 
     // GLFW callbacks.
     static void framebuffer_size_callback(GLFWwindow *window, const int width, const int height);
     static void mouse_callback(GLFWwindow *window, const double xpos, const double ypos);
     static void scroll_callback(GLFWwindow *window, const double xoffset, const double yoffset);
     static void process_input(GLFWwindow *window);
+    static void error_callback(int error, const char* description);
 
 private:
     unsigned int scr_width, scr_height;
     GLFWwindow *window = nullptr;
     Shader *shader;
-    std::unordered_map<Shape, Mesh *> meshMap;
+    std::unordered_map<std::variant<Shape, std::string>, Mesh *> meshMap;
 };
 
 #endif
