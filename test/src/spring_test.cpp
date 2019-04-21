@@ -92,29 +92,38 @@ public:
 int main(int argc, char *argv[]){
     // initialize the scene.
     Scene s;
+    const double height = -2.5;
     
     color col = glm::vec3(0.7, 0.5, 0.5);
-    Mesh_id center_ball = s.add_mesh(Shape::sphere, col);
-    center_ball.translate(glm::vec3(0,3.5,-3));
-    center_ball.scale(0.5);
+    Mesh_id center_obj = s.add_mesh("kitten", col, argv[2]);
+    center_obj.translate(glm::vec3(0,height + 3.5,-3));
+    center_obj.scale(3.0);
 
     
-    
     std::vector<Spring> springs;
+    const double spring_constant = 1.0;
     
     Mesh_id ball_1 = s.add_mesh(Shape::sphere, col );
-    ball_1.translate(glm::vec3(0, 0, -3));
+    ball_1.translate(glm::vec3(0, height, -3));
     ball_1.scale(0.5);
     Mesh_id spring_1 = s.add_mesh("spring_1", {0.4, 0.4, 0.4}, argv[1]);
-    spring_1.translate(glm::vec3(0, 0, -3));
-    springs.push_back(Spring(ball_1, center_ball, spring_1, 4.0, 2.0));
+    spring_1.translate(glm::vec3(0, height, -3));
+    springs.push_back(Spring(ball_1, center_obj, spring_1, 4.0, spring_constant));
     
     Mesh_id ball_2 = s.add_mesh(Shape::sphere, col );
-    ball_2.translate(glm::vec3(-3, 0, -3));
+    ball_2.translate(glm::vec3(-3, height, -3));
     ball_2.scale(0.5);
     Mesh_id spring_2 = s.add_mesh("spring_2", {0.4, 0.4, 0.4}, argv[1]);
-    spring_2.translate(glm::vec3(-3, 0, -3));
-    springs.push_back(Spring(ball_2, center_ball, spring_2, 4.0, 2.0));
+    spring_2.translate(glm::vec3(-3, height, -3));
+    springs.push_back(Spring(ball_2, center_obj, spring_2, 4.0, spring_constant));
+    
+    
+    Mesh_id ball_3 = s.add_mesh(Shape::sphere, col );
+    ball_3.translate(glm::vec3(-1.5, height, -6));
+    ball_3.scale(0.5);
+    Mesh_id spring_3 = s.add_mesh("spring_3", {0.4, 0.4, 0.4}, argv[1]);
+    spring_3.translate(glm::vec3(-1.5, height, -6));
+    springs.push_back(Spring(ball_3, center_obj, spring_3, 4.0, spring_constant));
     
     
     
