@@ -11,6 +11,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <obj_loader/obj_loader.h>
 
+// a lot of this file is referenced from the learnopengl.com tutorial
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -27,11 +28,11 @@ glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 
 bool firstMouse = true;
-float yaw   = -90.0f;    // yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
+float yaw   = -90.0f;
 float pitch =  0.0f;
-float lastX =  800.0f / 2.0;
-float lastY =  600.0 / 2.0;
 float fov   =  45.0f;
+float lastX =  0.0f;
+float lastY =  0.0f;
 
 // timing
 float deltaTime = 0.0f;    // time between current frame and last frame
@@ -47,7 +48,6 @@ int main(int argc, char *argv[]) {
         return 0;
     }
     // glfw: initialize and configure
-    // ------------------------------
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -56,10 +56,11 @@ int main(int argc, char *argv[]) {
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
 #endif
-    
+
+    lastX = (float) SCR_WIDTH / 2.0;
+    lastY = (float) SCR_HEIGHT / 2.0;
     // glfw window creation
-    // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "SimpleGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -75,7 +76,6 @@ int main(int argc, char *argv[]) {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
     // glad: load all OpenGL function pointers
-    // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
@@ -83,11 +83,9 @@ int main(int argc, char *argv[]) {
     }
     
     // configure global opengl state
-    // -----------------------------
     glEnable(GL_DEPTH_TEST);
     
     // build and compile our shader program
-    // ------------------------------------
      // 1. retrieve the vertex/fragment source code from filePath
     unsigned int ID;
     std::string vertexCode;
@@ -142,7 +140,6 @@ int main(int argc, char *argv[]) {
     glDeleteShader(fragment);
     
     // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
     auto vertices = glp::box(glm::dvec3(1,1,1));
     // world space positions of our cubes
     glm::vec3 cubePositions[] = {
@@ -159,11 +156,10 @@ int main(int argc, char *argv[]) {
     };
 
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    // -------------------------------------------------------------------------------------------
     glUseProgram(ID);
     glUniform3f(glGetUniformLocation(ID, "lightColor"),  1.0f, 1.0f, 1.0f);
     glUniform3f(glGetUniformLocation(ID, "lightPos"),  6.2f, 7.0f, 5.0f);
-    unsigned int VBO, VAO, vao_sphere, vbo_sphere, vao_obj, vbo_obj;
+    unsigned int VBO, VAO, vao_sphere, vbo_sphere, vao_p, vbo_p, vao_obj, vbo_obj;
 
     // render loop
     while (!glfwWindowShouldClose(window))
@@ -177,7 +173,7 @@ int main(int argc, char *argv[]) {
         processInput(window);
         
         // render
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         // activate shader
@@ -221,7 +217,7 @@ int main(int argc, char *argv[]) {
 
         // render spheres
         auto color = glm::vec3(0.7, 0.5, 0.5);
-        auto verticesSphere = glp::sphere(3, .1);
+        auto verticesSphere = glp::sphere(7, 1);
         glGenVertexArrays(1, &vao_sphere);
         glBindVertexArray(vao_sphere);  
         glGenBuffers(1, &vbo_sphere);
@@ -237,15 +233,39 @@ int main(int argc, char *argv[]) {
         glBindVertexArray(vao_sphere);
         glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
         model = glm::translate(model, glm::vec3(-0.2,-0.2,-0.2));
+        model = glm::scale(model, glm::vec3(.5,.5,.5));
         glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model[0][0]);            
         glUniform3fv(glGetUniformLocation(ID, "objectColor"), 1, &color[0]);
         glDrawArrays(GL_TRIANGLES, 0, (int) (verticesSphere.size() / 6));
 
         glm::mat4 model2 = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
         model2 = glm::translate(model2, glm::vec3(-0.6,-0.6,-0.6));
+        model2 = glm::scale(model2, glm::vec3(.3,.3,.3));
         glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model2[0][0]);            
         glUniform3fv(glGetUniformLocation(ID, "objectColor"), 1, &color[0]);
         glDrawArrays(GL_TRIANGLES, 0, (int) (verticesSphere.size() / 6));
+
+        // render pyramid
+        auto verticesPyramid = glp::pyramid(7, 1, 1);
+        glGenVertexArrays(1, &vao_p);
+        glBindVertexArray(vao_p);  
+        glGenBuffers(1, &vbo_p);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_p);
+        glBufferData(GL_ARRAY_BUFFER, verticesPyramid.size()*sizeof(double), verticesPyramid.data(), GL_STATIC_DRAW);
+        // position attribute
+        glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
+        glEnableVertexAttribArray(0);
+        // normal attribute
+        glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE,6*sizeof(double), (void*)(3*sizeof(double)));
+        glEnableVertexAttribArray(1);  
+
+        glBindVertexArray(vao_p);
+        glm::mat4 modelp = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+        modelp = glm::translate(modelp, glm::vec3(4.2,1.2,-0.2));
+        modelp = glm::scale(modelp, glm::vec3(.5,.5,.5));
+        glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &modelp[0][0]);            
+        glUniform3fv(glGetUniformLocation(ID, "objectColor"), 1, &color[0]);
+        glDrawArrays(GL_TRIANGLES, 0, (int) (verticesPyramid.size() / 6));
 
         // render .obj files
         if (argc > 3) {
@@ -275,32 +295,31 @@ int main(int argc, char *argv[]) {
             glBindVertexArray(vao_obj);
             glm::mat4 model3 = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
             glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model3[0][0]);  
-            model3 = glm::scale(model3, glm::vec3(.08,.08,.08));          
+            model3 = glm::scale(model3, glm::vec3(.08,.08,.08));  
+            model3 = glm::translate(model3, glm::vec3(-0.6,-70.2,-0.6));        
             glDrawArrays(GL_TRIANGLES, 0, (int) (verticesObj.size() / 6));
         }
         
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
     
     // optional: de-allocate all resources once they've outlived their purpose:
-    // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteVertexArrays(1, &vao_obj);
     glDeleteBuffers(1, &vbo_obj);
     glDeleteVertexArrays(1, &vao_sphere);
-    glDeleteBuffers(1, &vbo_sphere);   
+    glDeleteBuffers(1, &vbo_sphere);
+    glDeleteVertexArrays(1, &vao_p);
+    glDeleteBuffers(1, &vbo_p);   
     // glfw: terminate, clearing all previously allocated GLFW resources.
-    // ------------------------------------------------------------------
     glfwTerminate();
     return 0;
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -318,7 +337,6 @@ void processInput(GLFWwindow *window)
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     // make sure the viewport matches the new window dimensions; note that width and
@@ -327,7 +345,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 // glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     if (firstMouse)
@@ -363,7 +380,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     if (fov >= 1.0f && fov <= 45.0f)

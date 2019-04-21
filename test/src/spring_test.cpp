@@ -129,13 +129,6 @@ int main(int argc, char *argv[]){
     spring_3.translate(glm::vec3(-1.5, height, -6));
     springs.push_back(Spring(ball_3, center_obj, spring_3, 4.0, spring_constant));
     
-    
-    
-    
-    
-
-    
-    
     Simulation sim;
     
     std::thread t1(&Simulation::physics, &sim, springs);
