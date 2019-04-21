@@ -15,6 +15,7 @@ struct transformation {
     glm::mat4 rotation;     // rotation matrix
     glm::mat4 translation;  // translation matrix
     glm::mat4 scaling;      // scaling matrix
+    bool hidden = false;    // default to show
 
     glm::mat4 get_model() const {
         return model * translation * rotation * scaling;
@@ -56,9 +57,16 @@ public:
     }
     
     inline int add_instance(const color col) {
-        // what if user adds a bunch of instances but doesn't transform them?
         render_infos.push_back(render_info(col, transformation()));
         return render_infos.size() - 1;
+    }
+
+    inline void hide_instance(const int i) {
+        render_infos[i].second.hidden = true;
+    }
+
+    inline void show_instance(const int i) {
+        render_infos[i].second.hidden = false;
     }
 
     inline void bindVAO() const {

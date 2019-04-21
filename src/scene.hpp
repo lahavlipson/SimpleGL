@@ -31,18 +31,65 @@ public:
     }
 
     // Methods for manipulating mesh instances.
-    void set_color(const glm::vec3 c);
-    void set_model(const glm::mat4 model);
-    void reset_model();
-    void translate(const glm::vec3 translation);
-    void set_translation(const glm::vec3 translation);
-    void rotate(const float angle, glm::vec3 axis);
-    void set_rotation(const float angle, glm::vec3 axis);
-    void scale(const glm::vec3 factor);
-    void set_scale(const glm::vec3 factor);
-    void scale(const double factor);
-    void set_scale(const double factor);
-    glm::vec3 get_loc();
+    void remove() {
+        hide();
+    }
+
+    void hide() {
+        mesh_ptr->hide_instance(id);
+    }
+
+    void show() {
+        mesh_ptr->show_instance(id);
+    }
+
+    void set_color(glm::vec3 c) {
+        mesh_ptr->set_color(id, c);
+    }
+
+    void set_model(glm::mat4 m) {
+        mesh_ptr->set_model(id, m);
+    }
+
+    void reset_model() {
+        mesh_ptr->reset_model(id);
+    }
+
+    void translate(glm::vec3 translation) {
+        mesh_ptr->translate(id, translation);
+    }
+
+    void set_translation(const glm::vec3 translation) {
+        mesh_ptr->set_translation(id, translation);
+    }
+
+    void scale(glm::vec3 factor) {
+        mesh_ptr->scale(id, factor);
+    }
+
+    void scale(double factor) {
+        mesh_ptr->scale(id, {factor, factor, factor});
+    }
+
+    void set_scale(const glm::vec3 factor) {
+        mesh_ptr->set_scale(id, factor);
+    }
+
+    void set_scale(const double factor) {
+        mesh_ptr->set_scale(id, {factor, factor, factor});
+    }
+
+    void rotate(float angle, glm::vec3 axis) {
+        mesh_ptr->rotate(id, angle, axis);
+    }
+
+    void set_rotation(const float angle, glm::vec3 axis) {
+        mesh_ptr->set_rotation(id, angle, axis);
+    }
+
+    glm::vec3 get_loc() {
+        return mesh_ptr->get_loc(id);
+    }
 
 private:
     int id;
@@ -59,6 +106,8 @@ public:
         std::variant<Shape, std::string> s, 
         const glm::vec3 color = {0.4, 0.4, 0.4}, 
         std::variant<std::unordered_map<std::string, int>, std::string> p = {});
+    
+    void remove_mesh_all(std::variant<Shape, std::string> s);
     
     std::error_condition render();
 

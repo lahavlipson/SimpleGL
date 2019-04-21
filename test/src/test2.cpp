@@ -1,5 +1,5 @@
 /*
- * A hello-world test for the SimpleGL library.
+ * A test for the SimpleGL library, specifically manipulating meshes.
  */
 
 #include <iostream>
@@ -24,7 +24,7 @@ int main(int argc, char *argv[]){
         glm::vec3( 1.5f,  0.2f, -1.5f),
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
-    // add the ten boxes
+    // add ten boxes and remove all instances of box
     glm::vec3 color = glm::vec3(1.0,0.5,0.71);
     for (unsigned int i = 0; i < 10; i++) {
         Mesh_id m_id = s.add_mesh(Shape::box, color);
@@ -32,21 +32,26 @@ int main(int argc, char *argv[]){
         float angle = 20.0f * i;
         m_id.rotate(angle, glm::vec3(1.0f, 0.3f, 0.5f));
     }
-    
-    // add two spheres
+    s.remove_mesh_all(Shape::box);
+
+    // add two spheres and hide the first one
     color = glm::vec3(0.7, 0.5, 0.5);
     std::unordered_map<std::string, int> mymap = {{"accuracy",7}};
     Mesh_id m_id = s.add_mesh(Shape::sphere, color, mymap);
     m_id.translate(glm::vec3(-0.2,-0.2,-0.2));
+    m_id.hide();
     m_id = s.add_mesh(Shape::sphere, color, mymap);
     m_id.translate(glm::vec3(-0.6,-0.6,-0.6));
+    m_id.show();
+    // s.remove_mesh_all(Shape::sphere);
 
     // add one obj
     if (argc > 1) {
         Mesh_id obj_m_id = s.add_mesh("object1", color, *(argv+1));
         obj_m_id.scale(0.08);
     }
-    
+    // s.remove_mesh_all("object1");
+
     // render the scene.
     s.render();
 }

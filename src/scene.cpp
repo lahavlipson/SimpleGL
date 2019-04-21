@@ -113,52 +113,11 @@ Mesh_id Scene::add_mesh(
     return Mesh_id(id, mesh_ptr);
 }
 
-void Mesh_id::set_color(glm::vec3 c) {
-    mesh_ptr->set_color(id, c);
-}
-
-void Mesh_id::set_model(glm::mat4 m) {
-    mesh_ptr->set_model(id, m);
-}
-
-void Mesh_id::reset_model() {
-    mesh_ptr->reset_model(id);
-}
-
-void Mesh_id::translate(glm::vec3 translation) {
-    mesh_ptr->translate(id, translation);
-}
-
-void Mesh_id::set_translation(const glm::vec3 translation) {
-    mesh_ptr->set_translation(id, translation);
-}
-
-void Mesh_id::scale(glm::vec3 factor) {
-    mesh_ptr->scale(id, factor);
-}
-
-void Mesh_id::scale(double factor) {
-    mesh_ptr->scale(id, {factor, factor, factor});
-}
-
-void Mesh_id::set_scale(const glm::vec3 factor) {
-    mesh_ptr->set_scale(id, factor);
-}
-
-void Mesh_id::set_scale(const double factor) {
-    mesh_ptr->set_scale(id, {factor, factor, factor});
-}
-
-void Mesh_id::rotate(float angle, glm::vec3 axis) {
-    mesh_ptr->rotate(id, angle, axis);
-}
-
-void Mesh_id::set_rotation(const float angle, glm::vec3 axis) {
-    mesh_ptr->set_rotation(id, angle, axis);
-}
-
-glm::vec3 Mesh_id::get_loc() {
-    return mesh_ptr->get_loc(id);
+void Scene::remove_mesh_all(std::variant<Shape, std::string> s) {
+    if (meshMap.find(s) != meshMap.end()) { // contains(s) is c++20
+        delete meshMap[s];
+        meshMap.erase(s);
+    }
 }
 
 std::error_condition Scene::render() {
@@ -192,6 +151,7 @@ std::error_condition Scene::render() {
         	mesh_ptr->bindVAO();
             int v_size = mesh_ptr->get_v_size();
 	        for (auto& info : mesh_ptr->mesh_infos()) {
+                if (info.second.hidden) { continue; }
                 shader->setVec3("objectColor", info.first);
 	            shader->setMat4("model", info.second.get_model());
 	            glDrawArrays(GL_TRIANGLES, 0, (int) (v_size / 6));
