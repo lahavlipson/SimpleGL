@@ -47,4 +47,4 @@ This README heavily referenced from https://github.com/wodeni/Animate-plus-plus/
 
 - add composite objects
 - add error checking
-- create physics demo of bunny bouncing on springs along with a comparison (no SimpleGL) executable
+- create version of kitten bouncing on springs without using SimpleGL
