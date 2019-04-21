@@ -12,7 +12,7 @@ class Spring {
 
 public:
 
-    Spring(Mesh_id a, Mesh_id b, Mesh_id s, double restL, double constant):id1(a),id2(b),k(constant), rest(restL), obj_id(s) {}
+    Spring(Mesh_id a, Mesh_id b, Mesh_id s, double restL, double constant):id1(a),id2(b), obj_id(s),k(constant), rest(restL) {}
 
     Mesh_id id1;
     Mesh_id id2;
@@ -90,6 +90,10 @@ public:
 
 // takes one command line argument to a filepath to a .obj file to be rendered
 int main(int argc, char *argv[]){
+    if (argc < 3) {
+        std::cout << "Usage: " << *argv << " <coil_obj_filepath> <other_obj_filepath> \n";
+        return 0;
+    }
     // initialize the scene.
     Scene s;
     const double height = -2.5;
