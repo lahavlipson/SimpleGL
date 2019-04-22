@@ -91,10 +91,30 @@ public:
         return mesh_ptr->get_loc(id);
     }
 
-private:
+    bool operator ==(const Mesh_id &b) const{
+        return id == b.id && mesh_ptr == b.mesh_ptr;
+    }
+
     int id;
     Mesh* mesh_ptr;
 };
+
+namespace std {
+
+    template <>
+    struct hash<Mesh_id>
+    {
+        std::size_t operator()(const Mesh_id& k) const
+        {
+            using std::size_t;
+            using std::hash;
+            using std::string;
+
+            return ((hash<int>()(k.id)
+                     ^ (hash<Mesh *>()(k.mesh_ptr) << 1)) >> 1);
+        }
+    };
+}
 
 class Scene {
 public:
