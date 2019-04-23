@@ -41,7 +41,7 @@ class Spring {
 
 public:
 
-    Spring(Mass &a, Mass &b, Mesh_id s, double restL, double constant):id1(a),id2(b),k(constant), obj_id(s) {
+    Spring(Mass &a, Mass &b, Mesh_id s, double restL, double constant):id1(a),id2(b), obj_id(s),k(constant) {
         rest = length();
     }
 
@@ -149,6 +149,10 @@ public:
 
 // takes one command line argument to a filepath to a .obj file to be rendered
 int main(int argc, char *argv[]){
+    if (argc < 2) {
+        std::cout << "Usage: " << *argv << " <coil_obj_filepath>\n";
+        return 0;
+    }
     // initialize the scene.
     Scene s;
     const double height = 2.5;
@@ -183,9 +187,6 @@ int main(int argc, char *argv[]){
     std::vector<Spring> springs;
     const double spring_constant = 32.5;
     
-    
-    
-    
     Mesh_id spring_1 = s.add_mesh("spring_1", {0.4, 0.4, 0.4}, argv[1]);
     spring_1.translate(glm::vec3(0, height, -3));
     springs.push_back(Spring(m1, m0, spring_1, 4.0, spring_constant));
@@ -210,14 +211,10 @@ int main(int argc, char *argv[]){
     spring_6.translate(glm::vec3(0, height, -3));
     springs.push_back(Spring(m2, m3, spring_6, 4.0, spring_constant));
     
-    
-    
     Mesh_id floor = s.add_mesh(Shape::box, {0.6, 0.6, 0.6} );
     floor.translate(glm::vec3( -35, -7.5, -35));
     floor.scale({70, 0.01, 70});
 
-    
-    
     Simulation sim;
     
     std::thread t1(&Simulation::physics, &sim, springs, masses);
