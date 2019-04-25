@@ -139,7 +139,7 @@ public:
     static void error_callback(int error, const char* description);
 
 private:
-    unsigned int scr_width, scr_height;
+    int scr_width, scr_height;
     GLFWwindow *window = nullptr;
     Shader *shader;
     Shader *simpleDepthShader;

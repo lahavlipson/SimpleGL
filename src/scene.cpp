@@ -41,9 +41,12 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
 #endif
 
     // glfw window creation
+    
     scr_width = width;
     scr_height = height;
+    
     window = glfwCreateWindow(scr_width, scr_height, "SimpleGL", nullptr, nullptr);
+    glfwGetFramebufferSize(window, &scr_width, &scr_height);
     lastX = (float) scr_width / 2.0;
     lastY = (float) scr_height / 2.0;
     if (window == nullptr) {
