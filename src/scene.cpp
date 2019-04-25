@@ -229,6 +229,7 @@ std::error_condition Scene::render() {
         shader->setVec3("viewPos", cameraPos);
         shader->setVec3("lightPos", lightPos);
         shader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+        shader->setBool("shadowEnabled", shadowsEnabled);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, depthMap);
         

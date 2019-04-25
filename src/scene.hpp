@@ -129,6 +129,8 @@ public:
     
     void remove_mesh_all(std::variant<Shape, std::string> s);
     
+    inline void toggleShadows() { shadowsEnabled = !shadowsEnabled; }
+    
     std::error_condition render();
 
     // GLFW callbacks.
@@ -139,6 +141,7 @@ public:
     static void error_callback(int error, const char* description);
 
 private:
+    bool shadowsEnabled = true;
     int scr_width, scr_height;
     GLFWwindow *window = nullptr;
     Shader *shader;
