@@ -76,12 +76,10 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     if (vs && fs) {
         shader = new Shader(vs, fs);
     } else {
-        shader = new Shader();
+        shader = new Shader(ShaderType::light);
     }
     
-    simpleDepthShader = new Shader(
-                                   "/Users/lahavlipson/Coursework/Spring_2019/C++/SimpleOpenGL/src/3.1.2.shadow_mapping_depth.vs",
-                                   "/Users/lahavlipson/Coursework/Spring_2019/C++/SimpleOpenGL/src/3.1.2.shadow_mapping_depth.fs");
+    simpleDepthShader = new Shader(ShaderType::depth);
     
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     shader->use();
@@ -97,8 +95,9 @@ Scene::~Scene() {
     for (auto& p : meshMap) {
         delete p.second;
     }
-    // Delete shader.
+    // Delete shaders.
     delete shader;
+    delete simpleDepthShader;
     // glfw: terminate, clearing all previously allocated GLFW resources.
     glfwTerminate();
 }
