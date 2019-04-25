@@ -9,6 +9,10 @@ glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 
+// lighting info
+// -------------
+glm::vec3 lightPos(6.2f, 7.0f, 5.0f);
+
 bool firstMouse = true;
 // yaw is initialized to -90 degrees since a yaw of 0 results in a direction
 // vector pointing to the right, so we initially rotate a bit to the left.
@@ -71,10 +75,18 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     } else {
         shader = new Shader();
     }
+    
+    simpleDepthShader = new Shader(
+                                   "/Users/lahavlipson/Coursework/Spring_2019/C++/SimpleOpenGL/src/3.1.2.shadow_mapping_depth.vs",
+                                   "/Users/lahavlipson/Coursework/Spring_2019/C++/SimpleOpenGL/src/3.1.2.shadow_mapping_depth.fs");
+    
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     shader->use();
     shader->setVec3("lightColor", 1.0f, 1.0f, 1.0f);
     shader->setVec3("lightPos", 6.2f, 7.0f, 5.0f);
+    
+    
+    
 }
 
 Scene::~Scene() {
@@ -124,6 +136,34 @@ std::error_condition Scene::render() {
     if (meshMap.empty()) {
         std::cout << "Current scene has nothing to render.\n";
     }
+    
+    // configure depth map FBO
+    // -----------------------
+    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+    unsigned int depthMapFBO;
+    glGenFramebuffers(1, &depthMapFBO);
+    // create depth texture
+    unsigned int depthMap;
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // attach depth texture as FBO's depth buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
+    // shader configuration
+    // --------------------
+//    shader->setInt("diffuseTexture", 0);
+    shader->setInt("shadowMap", 0);
+    glm::vec3 lightPos(-2.0f, 4.0f, -1.0f);
+    
     // render loop
     while (!glfwWindowShouldClose(window)) {
         // per-frame time logic
@@ -137,6 +177,42 @@ std::error_condition Scene::render() {
         // render
         glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        float near_plane = 1.0f, far_plane = 7.5f;
+        glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+        glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f),
+                                          glm::vec3( 0.0f, 0.0f,  0.0f),
+                                          glm::vec3( 0.0f, 1.0f,  0.0f));
+        glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+        simpleDepthShader->use();
+        simpleDepthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+        
+        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        for (auto& entry : meshMap) {
+            Mesh *mesh_ptr = entry.second;
+            mesh_ptr->bindVAO();
+            int v_size = mesh_ptr->get_v_size();
+            for (auto& info : mesh_ptr->mesh_infos()) {
+                if (info.second.hidden) { continue; }
+                simpleDepthShader->setVec3("objectColor", info.first);
+                simpleDepthShader->setMat4("model", info.second.get_model());
+                glDrawArrays(GL_TRIANGLES, 0, (int) (v_size / 6));
+            }
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        
+        
+        
+        
+        // 2. render scene as normal using the generated depth/shadow map
+        // --------------------------------------------------------------
+        glViewport(0, 0, scr_width, scr_height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        shader->use();
+        
         // (note that in this case matrices below could change every frame)
         // pass projection matrix to shader
         glm::mat4 projection = glm::perspective(
@@ -145,6 +221,12 @@ std::error_condition Scene::render() {
         // pass camera/view transformation to shade
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos+cameraFront, cameraUp);
         shader->setMat4("view", view);
+        // set light uniforms
+        shader->setVec3("viewPos", cameraPos);
+        shader->setVec3("lightPos", lightPos);
+        shader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, depthMap);
         
         for (auto& entry : meshMap) {
             Mesh *mesh_ptr = entry.second;

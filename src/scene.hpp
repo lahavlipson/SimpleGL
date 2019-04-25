@@ -142,6 +142,7 @@ private:
     unsigned int scr_width, scr_height;
     GLFWwindow *window = nullptr;
     Shader *shader;
+    Shader *simpleDepthShader;
     std::unordered_map<std::variant<Shape, std::string>, Mesh *> meshMap;
 };
 
