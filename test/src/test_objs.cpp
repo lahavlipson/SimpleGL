@@ -16,11 +16,10 @@ std::string get_obj_name(std::string obj_arg) {
 
 int main(int argc, char *argv[]) {
     try {
-        // initialize the scene.
-        Scene s;
-        
         // add multiple objs to the scene.
         if (argc > 1) {
+            // initialize the scene.
+            Scene s;
             int i = 1;
             while (i < argc) {
                 std::string fpath(*(argv+i));
@@ -40,10 +39,12 @@ int main(int argc, char *argv[]) {
                 obj_m_id.scale(glm::vec3(0.1*i, 0.15*i, 0.2*i));
                 i++;
             }
+            // render the scene.
+            s.render();
+        } else {
+            std::cout << "Usage: " << *argv << " <obj1_filepath> [optional_obj2_path] [optional_obj3_path] ...\n";
+            return 0;
         }
-    
-        // render the scene.
-        s.render();
     } catch (std::runtime_error& err) {
         std::cout << err.what() << "\n";
     }
