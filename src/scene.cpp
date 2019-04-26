@@ -1,8 +1,7 @@
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
 
 #include "scene.hpp"
-#include "glp_wrapper.hpp"
 
 // camera frame
 glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -41,10 +40,8 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
 #endif
 
     // glfw window creation
-    
     scr_width = width;
     scr_height = height;
-    
     window = glfwCreateWindow(scr_width, scr_height, "SimpleGL", nullptr, nullptr);
     glfwGetFramebufferSize(window, &scr_width, &scr_height);
     lastX = (float) scr_width / 2.0;
@@ -78,7 +75,6 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     } else {
         lightShader = new Shader(ShaderType::light);
     }
-    
     depthShader = new Shader(ShaderType::depth);
     
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
@@ -86,12 +82,10 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     lightShader->setVec3("lightColor", 1.0f, 1.0f, 1.0f);
     lightShader->setVec3("lightPos", 6.2f, 7.0f, 5.0f);
     
-    
     // configure depth map FBO
     // -----------------------
     glGenFramebuffers(1, &depthMapFBO);
     // create depth texture
-    
     glGenTextures(1, &depthMap);
     glBindTexture(GL_TEXTURE_2D, depthMap);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -99,7 +93,6 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
     // attach depth texture as FBO's depth buffer
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -110,8 +103,12 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
 }
 
 Scene::~Scene() {
+    // Clean up composite pointers; must be before cleaning up Mesh*.
+    for (auto& p : composite_list) {
+        delete p;
+    }
     // Clean up mesh pointers.
-    for (auto& p : meshMap) {
+    for (auto& p : mesh_map) {
         delete p.second;
     }
     // Delete shaders.
@@ -127,16 +124,16 @@ Mesh_id Scene::add_mesh(
 
     int id = 0;
     Mesh *mesh_ptr;
-    if (meshMap.find(s) != meshMap.end()) { // contains(s) is c++20
+    if (mesh_map.find(s) != mesh_map.end()) { // contains(s) is c++20
         // adding an instance of this shape to the scene
-        mesh_ptr = meshMap[s];
+        mesh_ptr = mesh_map[s];
         id = mesh_ptr->add_instance(color);
     } else { 
         // first time adding this shape to the scene
         auto res = createGLPObj(s, p);
         if (std::holds_alternative<std::vector<double>>(res)) {
             mesh_ptr = new Mesh(std::get<std::vector<double>>(res), color);
-            meshMap.insert(std::make_pair(s, mesh_ptr));
+            mesh_map.insert(std::make_pair(s, mesh_ptr));
         } else {
             // consideration: the user needs to use throw-try-catch 
             // to handle the error case themselves
@@ -146,15 +143,21 @@ Mesh_id Scene::add_mesh(
     return Mesh_id(id, mesh_ptr);
 }
 
+Comp_id Scene::add_composite(std::initializer_list<Mesh_id> l) {
+    Composite *comp_ptr = new Composite(l);
+    composite_list.push_back(comp_ptr);
+    return Comp_id(comp_ptr);
+}
+
 void Scene::remove_mesh_all(std::variant<Shape, std::string> s) {
-    if (meshMap.find(s) != meshMap.end()) { // contains(s) is c++20
-        delete meshMap[s];
-        meshMap.erase(s);
+    if (mesh_map.find(s) != mesh_map.end()) { // contains(s) is c++20
+        delete mesh_map[s];
+        mesh_map.erase(s);
     }
 }
 
 std::error_condition Scene::render() {
-    if (meshMap.empty()) {
+    if (mesh_map.empty()) {
         std::cout << "Current scene has nothing to render.\n";
     }
     
@@ -189,9 +192,8 @@ std::error_condition Scene::render() {
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
         glClear(GL_DEPTH_BUFFER_BIT);
-        renderMeshes(depthShader);
+        render_meshes(depthShader);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        
         
         // 2. render scene as normal using the generated depth/shadow map
         // --------------------------------------------------------------
@@ -215,7 +217,7 @@ std::error_condition Scene::render() {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, depthMap);
         
-        renderMeshes(lightShader);
+        render_meshes(lightShader);
         glCullFace(GL_BACK);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -225,8 +227,8 @@ std::error_condition Scene::render() {
     return make_SimpleGL_error_condition(0);
 }
 
-void Scene::renderMeshes(Shader *sh) {
-    for (auto& entry : meshMap) {
+void Scene::render_meshes(Shader *sh) {
+    for (auto& entry : mesh_map) {
         Mesh *mesh_ptr = entry.second;
         mesh_ptr->bindVAO();
         int v_size = mesh_ptr->get_v_size();

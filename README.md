@@ -33,6 +33,40 @@ After running `make`, run `./build/test1 <obj_file_path>` to render the default 
 ### Scene Class API
 TODO: More on how to use the API of Scene class.
 
+### Interactive Key Controls
+
+Space bar: default to cycle through different shape categories, e.g. box, pyramid, obj1, obj2, composite
+
+Down arrow key: move to specific instances of the current shape category
+
+Left arrow key: previous instance in the current shape category
+
+Right arrow key: next instance in the current shape category
+
+Up arrow key: move to top level, cycling through shape categories again
+
+WASD: move the camera up, left, down, right
+
+Cursor: change the viewing direction of the camera
+
+1: decrease the current instance's X position
+
+2: increase the current instance's X position
+
+3: decrease the current instance's Y position
+
+4: increase the current instance's Y position
+
+5: decrease the current instance's Z position
+
+6: increase the current instance's Z position
+
+7: rotate the current instance around X axis
+
+8: rotate the current instance around Y axis
+
+9: rotate the current instance around Z axis
+
 ## Troubleshooting
 
 If you get this error when running `make`: `xcrun: error: invalid active developer path (/Library/Developer/CommandLineTools), missing xcrun at: /Library/Developer/CommandLineTools/usr/bin/xcrun`
@@ -45,6 +79,5 @@ This README heavily referenced from https://github.com/wodeni/Animate-plus-plus/
 
 ## TODO
 
-- add composite objects
-- add error checking
 - create version of kitten bouncing on springs without using SimpleGL
+- add configuration and key controls callback

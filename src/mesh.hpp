@@ -61,6 +61,11 @@ public:
         return render_infos.size() - 1;
     }
 
+    inline int duplicate_instance(const int i) {
+        render_infos.push_back(render_infos[i]);
+        return render_infos.size() - 1;
+    }
+
     inline void hide_instance(const int i) {
         render_infos[i].second.hidden = true;
     }
@@ -139,5 +144,100 @@ private:
     int v_size;
     std::vector<render_info> render_infos;
 };
+
+// Mesh_id: represents the id to a specific instance of Mesh
+// to modify its model matrices and color.
+class Mesh_id {
+public:
+    Mesh_id(int mesh_id, Mesh* mesh_p): id(mesh_id), mesh_ptr(mesh_p) {}
+    ~Mesh_id() {}
+
+    // Duplicates the current instance and returns the id to the copy.
+    Mesh_id duplicate() {
+        return Mesh_id(mesh_ptr->duplicate_instance(id), mesh_ptr);
+    }
+
+    // Methods for manipulating mesh instances.
+    void remove() {
+        hide();
+    }
+
+    void hide() {
+        mesh_ptr->hide_instance(id);
+    }
+
+    void show() {
+        mesh_ptr->show_instance(id);
+    }
+
+    void set_color(glm::vec3 c) {
+        mesh_ptr->set_color(id, c);
+    }
+
+    void set_model(glm::mat4 m) {
+        mesh_ptr->set_model(id, m);
+    }
+
+    void reset_model() {
+        mesh_ptr->reset_model(id);
+    }
+
+    void translate(glm::vec3 translation) {
+        mesh_ptr->translate(id, translation);
+    }
+
+    void set_translation(const glm::vec3 translation) {
+        mesh_ptr->set_translation(id, translation);
+    }
+
+    void scale(glm::vec3 factor) {
+        mesh_ptr->scale(id, factor);
+    }
+
+    void scale(double factor) {
+        mesh_ptr->scale(id, {factor, factor, factor});
+    }
+
+    void set_scale(const glm::vec3 factor) {
+        mesh_ptr->set_scale(id, factor);
+    }
+
+    void set_scale(const double factor) {
+        mesh_ptr->set_scale(id, {factor, factor, factor});
+    }
+
+    void rotate(float angle, glm::vec3 axis) {
+        mesh_ptr->rotate(id, angle, axis);
+    }
+
+    void set_rotation(const float angle, glm::vec3 axis) {
+        mesh_ptr->set_rotation(id, angle, axis);
+    }
+
+    glm::vec3 get_loc() {
+        return mesh_ptr->get_loc(id);
+    }
+
+    bool operator ==(const Mesh_id& b) const {
+        return id == b.id && mesh_ptr == b.mesh_ptr;
+    }
+
+    int id;
+    Mesh *mesh_ptr;
+};
+
+namespace std {
+    template <>
+    struct hash<Mesh_id> {
+        std::size_t operator()(const Mesh_id& k) const {
+            using std::size_t;
+            using std::hash;
+            using std::string;
+
+            return ((hash<int>()(k.id)
+                     ^ (hash<Mesh *>()(k.mesh_ptr) << 1)) >> 1);
+        }
+    };
+}
 
 #endif
