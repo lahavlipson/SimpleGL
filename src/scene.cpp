@@ -74,17 +74,17 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
     
     // build and compile our shader program
     if (vs && fs) {
-        shader = new Shader(vs, fs);
+        lightShader = new Shader(vs, fs);
     } else {
-        shader = new Shader(ShaderType::light);
+        lightShader = new Shader(ShaderType::light);
     }
     
-    simpleDepthShader = new Shader(ShaderType::depth);
+    depthShader = new Shader(ShaderType::depth);
     
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    shader->use();
-    shader->setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-    shader->setVec3("lightPos", 6.2f, 7.0f, 5.0f);
+    lightShader->use();
+    lightShader->setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+    lightShader->setVec3("lightPos", 6.2f, 7.0f, 5.0f);
     
     
     // configure depth map FBO
@@ -115,8 +115,8 @@ Scene::~Scene() {
         delete p.second;
     }
     // Delete shaders.
-    delete shader;
-    delete simpleDepthShader;
+    delete lightShader;
+    delete depthShader;
     // glfw: terminate, clearing all previously allocated GLFW resources.
     glfwTerminate();
 }
@@ -160,7 +160,7 @@ std::error_condition Scene::render() {
     
     // shader configuration
     // --------------------
-    shader->setInt("shadowMap", 0);
+    lightShader->setInt("shadowMap", 0);
     glm::vec3 lightPos(-2.0f, 4.0f, -1.0f);
     
     // render loop
@@ -183,23 +183,13 @@ std::error_condition Scene::render() {
                                           glm::vec3( 0.0f, 0.0f,  0.0f),
                                           glm::vec3( 0.0f, 1.0f,  0.0f));
         glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-        simpleDepthShader->use();
-        simpleDepthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+        depthShader->use();
+        depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
         
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
         glClear(GL_DEPTH_BUFFER_BIT);
-        for (auto& entry : meshMap) {
-            Mesh *mesh_ptr = entry.second;
-            mesh_ptr->bindVAO();
-            int v_size = mesh_ptr->get_v_size();
-            for (auto& info : mesh_ptr->mesh_infos()) {
-                if (info.second.hidden) { continue; }
-                simpleDepthShader->setVec3("objectColor", info.first);
-                simpleDepthShader->setMat4("model", info.second.get_model());
-                glDrawArrays(GL_TRIANGLES, 0, (int) (v_size / 6));
-            }
-        }
+        renderMeshes(depthShader);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         
         
@@ -207,35 +197,25 @@ std::error_condition Scene::render() {
         // --------------------------------------------------------------
         glViewport(0, 0, scr_width, scr_height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        shader->use();
+        lightShader->use();
         glCullFace(GL_FRONT);
         // (note that in this case matrices below could change every frame)
         // pass projection matrix to shader
         glm::mat4 projection = glm::perspective(
             glm::radians(fov), (float)scr_width/(float)scr_height, 0.1f, 100.0f);
-        shader->setMat4("projection", projection);
+        lightShader->setMat4("projection", projection);
         // pass camera/view transformation to shade
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos+cameraFront, cameraUp);
-        shader->setMat4("view", view);
+        lightShader->setMat4("view", view);
         // set light uniforms
-        shader->setVec3("viewPos", cameraPos);
-        shader->setVec3("lightPos", lightPos);
-        shader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
-        shader->setBool("shadowEnabled", shadowsEnabled);
+        lightShader->setVec3("viewPos", cameraPos);
+        lightShader->setVec3("lightPos", lightPos);
+        lightShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+        lightShader->setBool("shadowEnabled", shadowsEnabled);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, depthMap);
         
-        for (auto& entry : meshMap) {
-            Mesh *mesh_ptr = entry.second;
-        	mesh_ptr->bindVAO();
-            int v_size = mesh_ptr->get_v_size();
-	        for (auto& info : mesh_ptr->mesh_infos()) {
-                if (info.second.hidden) { continue; }
-                shader->setVec3("objectColor", info.first);
-	            shader->setMat4("model", info.second.get_model());
-	            glDrawArrays(GL_TRIANGLES, 0, (int) (v_size / 6));
-	        }
-        }
+        renderMeshes(lightShader);
         glCullFace(GL_BACK);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -243,6 +223,20 @@ std::error_condition Scene::render() {
         glfwPollEvents();
     }
     return make_SimpleGL_error_condition(0);
+}
+
+void Scene::renderMeshes(Shader *sh) {
+    for (auto& entry : meshMap) {
+        Mesh *mesh_ptr = entry.second;
+        mesh_ptr->bindVAO();
+        int v_size = mesh_ptr->get_v_size();
+        for (auto& info : mesh_ptr->mesh_infos()) {
+            if (info.second.hidden) { continue; }
+            sh->setVec3("objectColor", info.first);
+            sh->setMat4("model", info.second.get_model());
+            glDrawArrays(GL_TRIANGLES, 0, (int) (v_size / 6));
+        }
+    }
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
