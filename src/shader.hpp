@@ -12,51 +12,136 @@
 #include <sstream>
 #include <iostream>
 
+enum ShaderType { light, depth };
+
 static const std::string FRAG_SHADER = "#version 330 core\n"
 "out vec4 FragColor;\n"
-"in vec3 Normal;\n"
-"in vec3 FragPos;\n"
-"uniform vec3 viewPos;\n"
+"\n"
+"in VS_OUT {\n"
+"    vec3 FragPos;\n"
+"    vec3 Normal;\n"
+"    vec2 TexCoords;\n"
+"    vec4 FragPosLightSpace;\n"
+"} fs_in;\n"
+"\n"
+"uniform sampler2D shadowMap;\n"
+"\n"
 "uniform vec3 lightPos;\n"
+"uniform vec3 viewPos;\n"
 "uniform vec3 objectColor;\n"
-"uniform vec3 lightColor;\n"
-"float specularStrength = 0.5;\n"
-"void main(){\n"
-"    float ambientStrength = 0.5;\n"
-"    vec3 ambient = ambientStrength * lightColor;\n"
-"    vec3 norm = normalize(Normal);\n"
-"    vec3 lightDir = normalize(lightPos - FragPos);\n"
-"    float diff = max(dot(norm, lightDir), 0.0);\n"
+"uniform bool shadowEnabled;\n"
+"\n"
+"float ShadowCalculation(vec4 fragPosLightSpace)\n"
+"{\n"
+"    // perform perspective divide\n"
+"    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;\n"
+"    // transform to [0,1] range\n"
+"    projCoords = projCoords * 0.5 + 0.5;\n"
+"    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)\n"
+"    float closestDepth = texture(shadowMap, projCoords.xy).r;\n"
+"    // get depth of current fragment from light's perspective\n"
+"    float currentDepth = projCoords.z;\n"
+"    // calculate bias (based on depth map resolution and slope)\n"
+"    vec3 normal = normalize(fs_in.Normal);\n"
+"    vec3 lightDir = normalize(lightPos - fs_in.FragPos);\n"
+"    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);\n"
+"    // check whether current frag pos is in shadow\n"
+"    // float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;\n"
+"    // PCF\n"
+"    float shadow = 0.0;\n"
+"    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);\n"
+"    for(int x = -1; x <= 1; ++x)\n"
+"    {\n"
+"        for(int y = -1; y <= 1; ++y)\n"
+"        {\n"
+"            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;\n"
+"            shadow += (currentDepth - bias > pcfDepth) && shadowEnabled ? 1.0 : 0.0;\n"
+"        }\n"
+"    }\n"
+"    shadow /= 9.0;\n"
+"\n"
+"    // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.\n"
+"    if(projCoords.z > 1.0)\n"
+"        shadow = 0.0;\n"
+"\n"
+"    return shadow;\n"
+"}\n"
+"\n"
+"void main()\n"
+"{\n"
+"    vec3 color = objectColor;\n"
+"    vec3 normal = normalize(fs_in.Normal);\n"
+"    vec3 lightColor = vec3(0.3);\n"
+"    // ambient\n"
+"    vec3 ambient = 0.8 * color;\n"
+"    // diffuse\n"
+"    vec3 lightDir = normalize(lightPos - fs_in.FragPos);\n"
+"    float diff = max(dot(lightDir, normal), 0.0);\n"
 "    vec3 diffuse = diff * lightColor;\n"
-"    vec3 viewDir = normalize(viewPos - FragPos);\n"
-"    vec3 reflectDir = reflect(-lightDir, norm);\n"
-"    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 20);\n"
-"    vec3 specular = specularStrength * spec * lightColor;\n"
-"    vec3 result = (ambient + diffuse + specular) * objectColor;\n"
-"    FragColor = vec4(result, 1.0);\n"
+"    // specular\n"
+"    vec3 viewDir = normalize(viewPos - fs_in.FragPos);\n"
+"    vec3 reflectDir = reflect(-lightDir, normal);\n"
+"    float spec = 0.0;\n"
+"    vec3 halfwayDir = normalize(lightDir + viewDir);\n"
+"    spec = pow(max(dot(normal, halfwayDir), 0.0), 64.0);\n"
+"    vec3 specular = spec * lightColor;\n"
+"    // calculate shadow\n"
+"    float shadow = ShadowCalculation(fs_in.FragPosLightSpace);\n"
+"    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;\n"
+"\n"
+"    FragColor = vec4(lighting, 1.0);\n"
 "}\n";
 
 static const std::string VERTEX_SHADER = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
 "layout (location = 1) in vec3 aNormal;\n"
-"out vec3 FragPos;\n"
-"out vec3 Normal;\n"
-"uniform mat4 model;\n"
-"uniform mat4 view;\n"
+"layout (location = 2) in vec2 aTexCoords;\n"
+"\n"
+"out vec2 TexCoords;\n"
+"\n"
+"out VS_OUT {\n"
+"    vec3 FragPos;\n"
+"    vec3 Normal;\n"
+"    vec2 TexCoords;\n"
+"    vec4 FragPosLightSpace;\n"
+"} vs_out;\n"
+"\n"
 "uniform mat4 projection;\n"
-"void main(){\n"
+"uniform mat4 view;\n"
+"uniform mat4 model;\n"
+"uniform mat4 lightSpaceMatrix;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    vs_out.FragPos = vec3(model * vec4(aPos, 1.0));\n"
+"    vs_out.Normal = transpose(inverse(mat3(model))) * aNormal;\n"
+"    vs_out.TexCoords = aTexCoords;\n"
+"    vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(vs_out.FragPos, 1.0);\n"
 "    gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
-"    FragPos = vec3(model * vec4(aPos, 1.0));\n"
-"    Normal = aNormal;\n"
+"}\n";
+
+static const std::string DEPTH_VERTEX_SHADER = "#version 330 core\n"
+"layout (location = 0) in vec3 aPos;\n"
+"\n"
+"uniform mat4 lightSpaceMatrix;\n"
+"uniform mat4 model;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    gl_Position = lightSpaceMatrix * model * vec4(aPos, 1.0);\n"
+"}\n";
+
+static const std::string DEPTH_FRAG_SHADER = "#version 330 core\n"
+"\n"
+"void main()\n"
+"{\n"
+"    // gl_FragDepth = gl_FragCoord.z;\n"
 "}\n";
 
 class Shader {
 public:
-    // ------------------------------------------------------------------------
-    // constructor for shaders using the default shader code we provide
-    Shader() {
-        const char *vShaderCode = VERTEX_SHADER.c_str();
-        const char *fShaderCode = FRAG_SHADER.c_str();
+    
+    inline void setup(const char *vShaderCode, const char *fShaderCode) {
         // compile shaders
         unsigned int vertex, fragment;
         // vertex shader
@@ -78,6 +163,20 @@ public:
         // delete the shaders as they're already linked and no longer necessery
         glDeleteShader(vertex);
         glDeleteShader(fragment);
+    }
+    
+    // ------------------------------------------------------------------------
+    // constructor for shaders using the default shader code we provide
+    Shader(ShaderType type) {
+        if (type == light){
+            const char *vShaderCode = VERTEX_SHADER.c_str();
+            const char *fShaderCode = FRAG_SHADER.c_str();
+            setup(vShaderCode, fShaderCode);
+        } else {
+            const char *vShaderCode = DEPTH_VERTEX_SHADER.c_str();
+            const char *fShaderCode = DEPTH_FRAG_SHADER.c_str();
+            setup(vShaderCode, fShaderCode);
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -111,26 +210,7 @@ public:
         const char *vShaderCode = vertexCode.c_str();
         const char *fShaderCode = fragmentCode.c_str();
         // 2. compile shaders
-        unsigned int vertex, fragment;
-        // vertex shader
-        vertex = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertex, 1, &vShaderCode, NULL);
-        glCompileShader(vertex);
-        checkCompileErrors(vertex, "VERTEX");
-        // fragment shader
-        fragment = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragment, 1, &fShaderCode, NULL);
-        glCompileShader(fragment);
-        checkCompileErrors(fragment, "FRAGMENT");
-        // shader program
-        ID = glCreateProgram();
-        glAttachShader(ID, vertex);
-        glAttachShader(ID, fragment);
-        glLinkProgram(ID);
-        checkCompileErrors(ID, "PROGRAM");
-        // delete the shaders as they're already linked and no longer necessery
-        glDeleteShader(vertex);
-        glDeleteShader(fragment);
+        setup(vShaderCode, fShaderCode);
     }
 
     // activate the shader

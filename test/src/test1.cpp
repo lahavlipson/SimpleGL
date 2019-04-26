@@ -10,7 +10,7 @@
 int main(int argc, char *argv[]) {
     try {
         // initialize the scene.
-        Scene s;
+        Scene s(argv[1],argv[2]);
 
         // world space positions for the ten boxes
         glm::vec3 box_positions[] = {
@@ -49,13 +49,10 @@ int main(int argc, char *argv[]) {
         m_id = s.add_mesh(Shape::pyramid, color, mymap );
         m_id.translate(glm::vec3(4.2,1.2,-0.2));
         m_id.scale(0.5);
-
-        // add one obj
-        if (argc > 1) {
-            Mesh_id obj_m_id = s.add_mesh("object1", color, *(argv+1));
-            obj_m_id.scale(0.08);
-            obj_m_id.translate(glm::vec3(-0.6,-70.2,-0.6));
-        }
+        
+        Mesh_id floor = s.add_mesh(Shape::box, {0.6, 0.6, 0.6} );
+        floor.translate(glm::vec3( -35, -4, -35));
+        floor.scale({70, 0.01, 70});
     
         // render the scene.
         s.render();

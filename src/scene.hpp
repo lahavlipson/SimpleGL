@@ -129,6 +129,8 @@ public:
     
     void remove_mesh_all(std::variant<Shape, std::string> s);
     
+    inline void toggleShadows() { shadowsEnabled = !shadowsEnabled; }
+    
     std::error_condition render();
 
     // GLFW callbacks.
@@ -139,10 +141,20 @@ public:
     static void error_callback(int error, const char* description);
 
 private:
-    unsigned int scr_width, scr_height;
+    bool shadowsEnabled = true;
+    int scr_width, scr_height;
     GLFWwindow *window = nullptr;
-    Shader *shader;
+    Shader *lightShader;
+    Shader *depthShader;
     std::unordered_map<std::variant<Shape, std::string>, Mesh *> meshMap;
+    
+    // for shadow depth map
+    unsigned int depthMapFBO;
+    unsigned int depthMap;
+    float borderColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+    
+    void renderMeshes(Shader *sh);
 };
 
 #endif
