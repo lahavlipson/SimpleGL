@@ -147,6 +147,12 @@ private:
     Shader *shader;
     Shader *simpleDepthShader;
     std::unordered_map<std::variant<Shape, std::string>, Mesh *> meshMap;
+    
+    // for shadow depth map
+    unsigned int depthMapFBO;
+    unsigned int depthMap;
+    float borderColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 };
 
 #endif
