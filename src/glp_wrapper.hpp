@@ -1,6 +1,7 @@
 #ifndef GLP_WRAPPER_HPP
 #define GLP_WRAPPER_HPP
 
+#include <iostream>
 #include <unordered_map>
 #include <variant>
 
@@ -9,13 +10,40 @@
 
 #include "simplegl_error.hpp"
 
-enum Shape { sphere, truncatedCone, cylinder, cone, pyramid, torus, box };
+enum Shape { sphere, truncatedCone, cylinder, cone, pyramid, torus, box, composite };
+
+struct obj_params {
+    std::variant<std::unordered_map<std::string, int>, std::string> glp_params;
+    components comp;
+};
+
+typedef std::variant<Shape, std::string> obj_type;
+
+std::ostream& operator<<(std::ostream& os, obj_type t) {
+	if (std::holds_alternative<Shape>(t)) {
+		Shape s = std::get<Shape>(t);
+		switch (s) {
+			case box: os << "box"; break;
+			case composite: os << "composite"; break;
+			case cone: os << "cone"; break;
+			case cylinder: os << "cylinder"; break;
+			case pyramid: os << "pyramid"; break;
+			case sphere: os << "sphere"; break;
+			case torus: os << "torus"; break;
+			case truncatedCone: os << "truncatedCone"; break;
+			default: os << int(s); break;
+		}
+	} else {
+		os << std::get<std::string>(t);
+	}
+    return os;
+}
 
 inline std::variant<std::vector<double>, std::error_condition> createGLPObj(
-    const std::variant<Shape, std::string> s, 
+    const obj_type t, 
 	const std::variant<std::unordered_map<std::string, int>, std::string> varP) {
 
-    if (std::holds_alternative<Shape>(s)) { 
+    if (std::holds_alternative<Shape>(t)) { 
     	// --- GLP Primitive ---
     	int accuracy = 6;
     	int sides = 3;
@@ -40,7 +68,7 @@ inline std::variant<std::vector<double>, std::error_condition> createGLPObj(
 			return make_SimpleGL_error_condition(SIMPLEGL_INVALID_PARAM);	
 		}
 
-		switch (std::get<Shape>(s)) {
+		switch (std::get<Shape>(t)) {
 		case sphere:
 			return glp::sphere(accuracy, 1);
 		case truncatedCone:

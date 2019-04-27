@@ -1,6 +1,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "composite.hpp"
+#include "mesh.hpp"
 #include "scene.hpp"
 
 // camera frame
@@ -25,10 +27,13 @@ float lastY =  0.0f;
 float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
 
+// key control
+bool atShapeLevel = true;
+
 // Note: either both of the shaders are default or neither are default
-Scene::Scene(char *vs, char *fs, int width, int height) {
+Scene::Scene(char *vs, char *fs, int width, int height, bool use_full_ctrl) {
     // glfw: initialize and configure
-    glfwSetErrorCallback(Scene::error_callback);
+    glfwSetErrorCallback(error_callback);
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -52,9 +57,12 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
         abort();
     }
     glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, Scene::framebuffer_size_callback);
-    glfwSetCursorPosCallback(window, Scene::mouse_callback);
-    glfwSetScrollCallback(window, Scene::scroll_callback);
+    if (use_full_ctrl) {
+        glfwSetKeyCallback(window, key_callback);
+    }
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     // tell GLFW to capture our mouse
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -103,13 +111,9 @@ Scene::Scene(char *vs, char *fs, int width, int height) {
 }
 
 Scene::~Scene() {
-    // Clean up composite pointers; must be before cleaning up Mesh*.
-    for (auto& p : composite_list) {
-        delete p;
-    }
-    // Clean up mesh pointers.
-    for (auto& p : mesh_map) {
-        delete p.second;
+    // Clean up obj pointers.
+    for (auto& entry : obj_map) {
+        delete entry.second;
     }
     // Delete shaders.
     delete lightShader;
@@ -118,47 +122,53 @@ Scene::~Scene() {
     glfwTerminate();
 }
 
-Mesh_id Scene::add_mesh(
-    std::variant<Shape, std::string> s, const glm::vec3 color, 
-    std::variant<std::unordered_map<std::string, int>, std::string> p) {
-
+ObjId Scene::add_obj(obj_type t, obj_params params, const color c) {
     int id = 0;
-    Mesh *mesh_ptr;
-    if (mesh_map.find(s) != mesh_map.end()) { // contains(s) is c++20
+    BaseObj *obj_ptr;
+    if (obj_map.find(t) != obj_map.end()) { // contains(s) is c++20
         // adding an instance of this shape to the scene
-        mesh_ptr = mesh_map[s];
-        id = mesh_ptr->add_instance(color);
-    } else { 
-        // first time adding this shape to the scene
-        auto res = createGLPObj(s, p);
-        if (std::holds_alternative<std::vector<double>>(res)) {
-            mesh_ptr = new Mesh(std::get<std::vector<double>>(res), color);
-            mesh_map.insert(std::make_pair(s, mesh_ptr));
+        obj_ptr = obj_map[t];
+        if (std::holds_alternative<Shape>(t)
+            && std::get<Shape>(t) == Shape::composite) {
+            id = obj_ptr->add_instance(c, params.comp);
         } else {
-            // consideration: the user needs to use throw-try-catch 
-            // to handle the error case themselves
-            throw std::runtime_error{std::get<std::error_condition>(res).message()};
+            id = obj_ptr->add_instance(c);
+        }
+    } else {
+        // first time adding this shape to the scene
+        if (std::holds_alternative<Shape>(t)
+            && std::get<Shape>(t) == Shape::composite) {
+            obj_ptr = new Composite();
+            id = obj_ptr->add_instance(c, params.comp);
+        } else {
+            auto res = createGLPObj(t, params.glp_params);
+            if (std::holds_alternative<std::vector<double>>(res)) {
+                obj_ptr = new Mesh(std::get<std::vector<double>>(res), c);
+                obj_map.insert(std::make_pair(t, obj_ptr));
+            } else {
+                // consideration: the user needs to use throw-try-catch 
+                // to handle the error case themselves
+                throw std::runtime_error{std::get<std::error_condition>(res).message()};
+            }
         }
     }
-    return Mesh_id(id, mesh_ptr);
+    return ObjId(id, obj_ptr);
 }
 
-Comp_id Scene::add_composite(std::initializer_list<Mesh_id> l) {
-    Composite *comp_ptr = new Composite(l);
-    composite_list.push_back(comp_ptr);
-    return Comp_id(comp_ptr);
-}
-
-void Scene::remove_mesh_all(std::variant<Shape, std::string> s) {
-    if (mesh_map.find(s) != mesh_map.end()) { // contains(s) is c++20
-        delete mesh_map[s];
-        mesh_map.erase(s);
+void Scene::remove_obj_all(obj_type t) {
+    if (obj_map.find(t) != obj_map.end()) { // contains(s) is c++20
+        delete obj_map[t];
+        obj_map.erase(t);
     }
 }
 
 std::error_condition Scene::render() {
-    if (mesh_map.empty()) {
+    if (obj_map.empty()) {
         std::cout << "Current scene has nothing to render.\n";
+    } else {
+        for (auto& entry : obj_map) {
+            obj_types.push_back(entry.first);
+        }
     }
     
     // shader configuration
@@ -168,6 +178,7 @@ std::error_condition Scene::render() {
     
     // render loop
     while (!glfwWindowShouldClose(window)) {
+        // TODO: drop measurement code
         // per-frame time logic
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -181,7 +192,8 @@ std::error_condition Scene::render() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         float near_plane = 1.0f, far_plane = 17.5f;
-        glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+        glm::mat4 lightProjection = glm::ortho(
+            -10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
         glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f),
                                           glm::vec3( 0.0f, 0.0f,  0.0f),
                                           glm::vec3( 0.0f, 1.0f,  0.0f));
@@ -228,11 +240,13 @@ std::error_condition Scene::render() {
 }
 
 void Scene::render_meshes(Shader *sh) {
-    for (auto& entry : mesh_map) {
-        Mesh *mesh_ptr = entry.second;
-        mesh_ptr->bindVAO();
-        int v_size = mesh_ptr->get_v_size();
-        for (auto& info : mesh_ptr->mesh_infos()) {
+    for (auto& [t, obj_ptr] : obj_map) {
+        // never draw composite because it is made up of mesh instances.
+        if (obj_ptr->is_composite()) { continue; }
+        // draw all visible instances of the current mesh.
+        obj_ptr->bindVAO();
+        int v_size = obj_ptr->get_v_size();
+        for (auto& info : obj_ptr->obj_infos()) {
             if (info.second.hidden) { continue; }
             sh->setVec3("objectColor", info.first);
             sh->setMat4("model", info.second.get_model());
@@ -245,25 +259,80 @@ void Scene::render_meshes(Shader *sh) {
 void Scene::process_input(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
+    } else {
+        float cameraSpeed = 2.5 * deltaTime;
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+            cameraPos += cameraSpeed * cameraFront;
+        } else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+            cameraPos -= cameraSpeed * cameraFront;
+        } else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+            cameraPos -= 
+                glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        } else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+            cameraPos += 
+                glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        } else if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+            cameraPos += cameraUp * cameraSpeed;
+        } else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+            cameraPos += -cameraUp * cameraSpeed;
+        }
     }
-    float cameraSpeed = 2.5 * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        cameraPos += cameraSpeed * cameraFront;
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        cameraPos -= cameraSpeed * cameraFront;
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    }
-    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
-        cameraPos += cameraUp * cameraSpeed;
-    }
-    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
-        cameraPos += -cameraUp * cameraSpeed;
+}
+
+void Scene::key_callback(
+    GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (atShapeLevel) {
+        if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+            type_idx = (type_idx + 1) % obj_types.size();
+            instance_idx = 0;
+            if (obj_map.find(obj_types[type_idx]) != obj_map.end()) {
+                curr_obj = obj_map[obj_types[type_idx]];
+                obj_count = curr_obj->count();
+            }
+            std::cout << "switched to shape category " << obj_types[type_idx] << "\n";
+        } else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
+            atShapeLevel = false;
+            std::cout << "at instance level\n";
+        } else if (key == GLFW_KEY_H && action == GLFW_PRESS) {
+            curr_obj->hide_all();
+        } else if (key == GLFW_KEY_U && action == GLFW_PRESS) {
+            curr_obj->show_all();
+        }
+    } else {
+        float speed = 5.0 * deltaTime;
+        float rot_angle = 10.0 * deltaTime;
+        if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
+            instance_idx = (instance_idx + 1) % obj_count;
+            std::cout << "switched to instance at idx " << instance_idx << "\n";
+        } else if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
+            instance_idx = (instance_idx - 1) % obj_count;
+            std::cout << "switched to instance at idx " << instance_idx << "\n";
+        } else if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+            atShapeLevel = true;
+            std::cout << "at shape level\n";
+        } else if (key == GLFW_KEY_H && action == GLFW_PRESS) {
+            curr_obj->hide_instance(instance_idx);
+        } else if (key == GLFW_KEY_U && action == GLFW_PRESS) {
+            curr_obj->show_instance(instance_idx);
+        } else if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+            curr_obj->translate(instance_idx, {speed, 0, 0});
+        } else if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
+            curr_obj->translate(instance_idx, {speed, 0, 0});
+        } else if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
+            curr_obj->translate(instance_idx, {0, -speed, 0});
+        } else if (key == GLFW_KEY_4 && action == GLFW_PRESS) {
+            curr_obj->translate(instance_idx, {0, speed, 0});
+        } else if (key == GLFW_KEY_5 && action == GLFW_PRESS) {
+            curr_obj->translate(instance_idx, {0, 0, -speed});
+        } else if (key == GLFW_KEY_6 && action == GLFW_PRESS) {
+            curr_obj->translate(instance_idx, {0, 0, speed});
+        } else if (key == GLFW_KEY_7 && action == GLFW_PRESS) {
+            curr_obj->rotate(instance_idx, rot_angle, {1, 0, 0});
+        } else if (key == GLFW_KEY_8 && action == GLFW_PRESS) {
+            curr_obj->rotate(instance_idx, rot_angle, {0, 1, 0});
+        } else if (key == GLFW_KEY_9 && action == GLFW_PRESS) {
+            curr_obj->rotate(instance_idx, rot_angle, {0, 0, 1});
+        }
     }
 }
 

@@ -49,6 +49,12 @@ WASD: move the camera up, left, down, right
 
 Cursor: change the viewing direction of the camera
 
+(TODO) P: print the current configuration. 
+
+H: hide/remove the current instance or all instances in this category.
+
+U: unhide the current instance or all instances in this category.
+
 1: decrease the current instance's X position
 
 2: increase the current instance's X position
@@ -80,4 +86,4 @@ This README heavily referenced from https://github.com/wodeni/Animate-plus-plus/
 ## TODO
 
 - create version of kitten bouncing on springs without using SimpleGL
-- add configuration and key controls callback
+- add configuration parsing and storing

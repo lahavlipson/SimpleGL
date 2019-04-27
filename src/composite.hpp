@@ -1,167 +1,130 @@
 #ifndef COMPOSITE_HPP
 #define COMPOSITE_HPP
 
-#include "mesh.hpp"
+#include "base_obj.hpp"
 
-class Composite {
+class Composite : public BaseObj {
 public:
-    Composite(std::initializer_list<Mesh_id> l) : ids(l) {}
+    Composite() {}
     ~Composite() {
-        hide();
+        hide_all();
     }
 
-    void hide() {
-        for (auto& x : ids) {
-            x.mesh_ptr->hide_instance(x.id);
+    //=================Overriding Base class methods======================//
+    bool is_composite() override { return true; }
+
+    int add_instance(const color col, const components comp = {}) override {
+        comp_infos.push_back(components(comp));
+        return BaseObj::add_instance(col);
+    }
+
+    int duplicate_instance(const int i) override {
+        components ith_comp;
+        for (auto& id : comp_infos[i]) {
+            ith_comp.push_back(id.duplicate());
+        }
+        comp_infos.push_back(ith_comp);
+        return BaseObj::duplicate_instance(i);
+    }
+
+    void hide_all() override {
+        BaseObj::hide_all();
+        for (auto& info : comp_infos) {
+            for (auto& id : info) {
+                id.hide();
+            }
         }
     }
 
-    void show() {
-        for (auto& x : ids) {
-            x.mesh_ptr->show_instance(x.id);
+    void hide_instance(const int i) override {
+        BaseObj::hide_instance(i);
+        for (auto& id : comp_infos[i]) {
+            id.hide();
         }
     }
 
-    void set_color(glm::vec3 c) {
-        for (auto& x : ids) {
-            x.mesh_ptr->set_color(x.id, c);
+    void show_all() override {
+        BaseObj::show_all();
+        for (auto& info : comp_infos) {
+            for (auto& id : info) {
+                id.show();
+            }
         }
     }
 
-    void set_model(glm::mat4 m) {
-        T.model = m;
-        for (auto& x : ids) {
-            x.mesh_ptr->set_model(x.id, m);
+    void show_instance(const int i) override {
+        BaseObj::show_instance(i);
+        for (auto& id : comp_infos[i]) {
+            id.show();
         }
     }
 
-    void reset_model() {
-        T = transformation();
-        for (auto& x : ids) {
-            x.mesh_ptr->reset_model(x.id);
+    void set_color(const int i, const color c) override {
+        BaseObj::set_color(i, c);
+        for (auto& id : comp_infos[i]) {
+            id.set_color(c);
         }
     }
 
-    void translate(glm::vec3 translation) {
-        T.translation = glm::translate(T.translation, translation);
-        for (auto& x : ids) {
-            x.mesh_ptr->translate(x.id, translation);
+    void set_model(const int i, const glm::mat4 m) override {
+        BaseObj::set_model(i, m);
+        for (auto& id : comp_infos[i]) {
+            id.set_model(m);
         }
     }
 
-    void set_translation(const glm::vec3 translation) {
-        T.translation = glm::translate(translation);
-        for (auto& x : ids) {
-            x.mesh_ptr->set_translation(x.id, translation);
+    void reset_model(const int i) override {
+        BaseObj::reset_model(i);
+        for (auto& id : comp_infos[i]) {
+            id.reset_model();
         }
     }
 
-    void scale(glm::vec3 factor) {
-        T.scaling = glm::scale(T.scaling, factor);
-        for (auto& x : ids) {
-            x.mesh_ptr->scale(x.id, factor);
+    void rotate(const int i, const float angle, const glm::vec3 axis) override {
+        BaseObj::rotate(i, angle, axis);
+        for (auto& id : comp_infos[i]) {
+            id.rotate(angle, axis);
         }
     }
 
-    void set_scale(const glm::vec3 factor) {
-        T.scaling = glm::scale(factor);
-        for (auto& x : ids) {
-            x.mesh_ptr->set_scale(x.id, factor);
+    void set_rotation(
+        const int i, const float angle, const glm::vec3 axis) override {
+        BaseObj::set_rotation(i, angle, axis);
+        for (auto& id : comp_infos[i]) {
+            id.set_rotation(angle, axis);
         }
     }
 
-    void rotate(float angle, glm::vec3 axis) {
-        T.rotation = glm::rotate(T.rotation, angle, axis);
-        for (auto& x : ids) {
-            x.mesh_ptr->rotate(x.id, angle, axis);
+    void translate(const int i, const glm::vec3 translation) override {
+        BaseObj::translate(i, translation);
+        for (auto& id : comp_infos[i]) {
+            id.translate(translation);
         }
     }
 
-    void set_rotation(const float angle, glm::vec3 axis) {
-        T.rotation = glm::rotate(angle, axis);
-        for (auto& x : ids) {
-            x.mesh_ptr->set_rotation(x.id, angle, axis);
+    void set_translation(const int i, const glm::vec3 translation) override {
+        BaseObj::set_translation(i, translation);
+        for (auto& id : comp_infos[i]) {
+            id.set_translation(translation);
         }
     }
 
-    glm::vec3 get_loc() {
-        glm::mat4 model = T.get_model();
-        return glm::vec3(model[3]);
+    void scale(const int i, const glm::vec3 scale) override {
+        BaseObj::scale(i, scale);
+        for (auto& id : comp_infos[i]) {
+            id.scale(scale);
+        }
+    }
+
+    void set_scale(const int i, const glm::vec3 scale) override {
+        BaseObj::scale(i, scale);
+        for (auto& id : comp_infos[i]) {
+            id.set_scale(scale);
+        }
     }
 
 private:
-    transformation T;
-    std::vector<Mesh_id> ids;
-};
-
-// comp_id: represents the id to a Composite object for future manipulation.
-class Comp_id {
-public:
-    Comp_id(Composite *comp_p): comp_ptr(comp_p) {}
-    ~Comp_id() {}
-
-    // Methods for manipulating the Composite object.
-    void remove() {
-        hide();
-    }
-
-    void hide() {
-        comp_ptr->hide();
-    }
-
-    void show() {
-        comp_ptr->show();
-    }
-
-    void set_color(glm::vec3 c) {
-        comp_ptr->set_color(c);
-    }
-
-    void set_model(glm::mat4 m) {
-        comp_ptr->set_model(m);
-    }
-
-    void reset_model() {
-        comp_ptr->reset_model();
-    }
-
-    void translate(glm::vec3 translation) {
-        comp_ptr->translate(translation);
-    }
-
-    void set_translation(const glm::vec3 translation) {
-        comp_ptr->set_translation(translation);
-    }
-
-    void scale(glm::vec3 factor) {
-        comp_ptr->scale(factor);
-    }
-
-    void scale(double factor) {
-        comp_ptr->scale({factor, factor, factor});
-    }
-
-    void set_scale(const glm::vec3 factor) {
-        comp_ptr->set_scale(factor);
-    }
-
-    void set_scale(const double factor) {
-        comp_ptr->set_scale({factor, factor, factor});
-    }
-
-    void rotate(float angle, glm::vec3 axis) {
-        comp_ptr->rotate(angle, axis);
-    }
-
-    void set_rotation(const float angle, glm::vec3 axis) {
-        comp_ptr->set_rotation(angle, axis);
-    }
-
-    glm::vec3 get_loc() {
-        return comp_ptr->get_loc();
-    }
-
-    Composite *comp_ptr;
+    std::vector<components> comp_infos;
 };
 
 #endif

@@ -10,29 +10,10 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
 
-struct transformation {
-    glm::mat4 model;        // the overall model matrix
-    glm::mat4 rotation;     // rotation matrix
-    glm::mat4 translation;  // translation matrix
-    glm::mat4 scaling;      // scaling matrix
-    bool hidden = false;    // default to show
+#include "base_obj.hpp"
 
-    glm::mat4 get_model() const {
-        return model * translation * rotation * scaling;
-    }
-    // assumption here is that the user will not use other helper methods
-    // if they are setting the model matrix themselves. 
-};
-
-// color: use vec3 as rgb color.
-typedef glm::vec3 color;
-// render_info: contains color and transformation for each instance
-// and is used in the render loop in Scene class.
-typedef std::pair<color, transformation> render_info;
-
-class Mesh {
+class Mesh : public BaseObj {
 public:
-
     // When first initializing, generate buffers and store the vertices data.
     Mesh(std::vector<double>& vertices, const color col)
         : v_size(vertices.size()) {
@@ -55,189 +36,24 @@ public:
                               6*sizeof(double), (void*)(3*sizeof(double)));
         glEnableVertexAttribArray(1);  
     }
-    
-    inline int add_instance(const color col) {
-        render_infos.push_back(render_info(col, transformation()));
-        return render_infos.size() - 1;
+
+    // Delete the buffers on destrunction.
+    ~Mesh() {
+        glDeleteVertexArrays(1, &vao_id);
+        glDeleteBuffers(1, &vbo_id);
     }
 
-    inline int duplicate_instance(const int i) {
-        render_infos.push_back(render_infos[i]);
-        return render_infos.size() - 1;
-    }
-
-    inline void hide_instance(const int i) {
-        render_infos[i].second.hidden = true;
-    }
-
-    inline void show_instance(const int i) {
-        render_infos[i].second.hidden = false;
-    }
-
-    inline void bindVAO() const {
+    inline void bindVAO() const override {
         glBindVertexArray(vao_id);
     }
 
-    inline std::vector<render_info>& mesh_infos() {
-        return render_infos;
-    }
-
-    inline int get_v_size() const {
+    inline int get_v_size() const override {
         return v_size;
-    }
-
-    // Methods for manipulating a specific instance of this Mesh.
-    inline void set_color(const int i, const color c) {
-        render_infos[i].first = c;
-    }
-
-    inline void set_model(const int i, const glm::mat4 m) {
-        render_infos[i].second.model = m;
-    }
-    
-    inline void reset_model(const int i) {
-        render_infos[i].second = transformation();
-    }
-    
-    inline void rotate(const int i, const float angle, const glm::vec3 axis) {
-        render_infos[i].second.rotation = glm::rotate(
-            render_infos[i].second.rotation, glm::radians(angle), axis);
-    }
-
-    inline void set_rotation(const int i, const float angle, const glm::vec3 axis) {
-        render_infos[i].second.rotation = glm::rotate(glm::radians(angle), axis);
-    }
-
-    inline void translate(const int i, const glm::vec3 translation) {
-        render_infos[i].second.translation = glm::translate(
-            render_infos[i].second.translation, translation);
-    }
-
-    inline void set_translation(const int i, const glm::vec3 translation) {
-        render_infos[i].second.translation = glm::translate(translation);
-    }
-    
-    inline void scale(const int i, const glm::vec3 scale) {
-        render_infos[i].second.scaling = glm::scale(
-            render_infos[i].second.scaling, scale);
-    }
-
-    inline void set_scale(const int i, const glm::vec3 scale) {
-        render_infos[i].second.scaling = glm::scale(scale);
-    }
-    
-    inline glm::vec3 get_loc(const int i) const {
-        // This gets the location from the model matrix, as explained here:
-        // https://stackoverflow.com/a/19448411
-        glm::mat4 model = render_infos[i].second.get_model();
-        return glm::vec3(model[3]);
-    }
-    
-    // Delete the buffers on destrunction.
-    ~Mesh(){
-        glDeleteVertexArrays(1, &vao_id);
-        glDeleteBuffers(1, &vbo_id);
     }
 
 private:
     unsigned int vao_id, vbo_id;
     int v_size;
-    std::vector<render_info> render_infos;
 };
-
-// Mesh_id: represents the id to a specific instance of Mesh
-// to modify its model matrices and color.
-class Mesh_id {
-public:
-    Mesh_id(int mesh_id, Mesh* mesh_p): id(mesh_id), mesh_ptr(mesh_p) {}
-    ~Mesh_id() {}
-
-    // Duplicates the current instance and returns the id to the copy.
-    Mesh_id duplicate() {
-        return Mesh_id(mesh_ptr->duplicate_instance(id), mesh_ptr);
-    }
-
-    // Methods for manipulating mesh instances.
-    void remove() {
-        hide();
-    }
-
-    void hide() {
-        mesh_ptr->hide_instance(id);
-    }
-
-    void show() {
-        mesh_ptr->show_instance(id);
-    }
-
-    void set_color(glm::vec3 c) {
-        mesh_ptr->set_color(id, c);
-    }
-
-    void set_model(glm::mat4 m) {
-        mesh_ptr->set_model(id, m);
-    }
-
-    void reset_model() {
-        mesh_ptr->reset_model(id);
-    }
-
-    void translate(glm::vec3 translation) {
-        mesh_ptr->translate(id, translation);
-    }
-
-    void set_translation(const glm::vec3 translation) {
-        mesh_ptr->set_translation(id, translation);
-    }
-
-    void scale(glm::vec3 factor) {
-        mesh_ptr->scale(id, factor);
-    }
-
-    void scale(double factor) {
-        mesh_ptr->scale(id, {factor, factor, factor});
-    }
-
-    void set_scale(const glm::vec3 factor) {
-        mesh_ptr->set_scale(id, factor);
-    }
-
-    void set_scale(const double factor) {
-        mesh_ptr->set_scale(id, {factor, factor, factor});
-    }
-
-    void rotate(float angle, glm::vec3 axis) {
-        mesh_ptr->rotate(id, angle, axis);
-    }
-
-    void set_rotation(const float angle, glm::vec3 axis) {
-        mesh_ptr->set_rotation(id, angle, axis);
-    }
-
-    glm::vec3 get_loc() {
-        return mesh_ptr->get_loc(id);
-    }
-
-    bool operator ==(const Mesh_id& b) const {
-        return id == b.id && mesh_ptr == b.mesh_ptr;
-    }
-
-    int id;
-    Mesh *mesh_ptr;
-};
-
-namespace std {
-    template <>
-    struct hash<Mesh_id> {
-        std::size_t operator()(const Mesh_id& k) const {
-            using std::size_t;
-            using std::hash;
-            using std::string;
-
-            return ((hash<int>()(k.id)
-                     ^ (hash<Mesh *>()(k.mesh_ptr) << 1)) >> 1);
-        }
-    };
-}
 
 #endif
