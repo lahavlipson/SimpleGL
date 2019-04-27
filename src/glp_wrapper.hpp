@@ -8,6 +8,7 @@
 #include <glp/glp.h>
 #include <obj_loader/obj_loader.h>
 
+#include "base_obj.hpp"
 #include "simplegl_error.hpp"
 
 enum Shape { sphere, truncatedCone, cylinder, cone, pyramid, torus, box, composite };
@@ -19,24 +20,23 @@ struct obj_params {
 
 typedef std::variant<Shape, std::string> obj_type;
 
-std::ostream& operator<<(std::ostream& os, obj_type t) {
+inline std::string obj_type_to_str(obj_type t) {
 	if (std::holds_alternative<Shape>(t)) {
 		Shape s = std::get<Shape>(t);
 		switch (s) {
-			case box: os << "box"; break;
-			case composite: os << "composite"; break;
-			case cone: os << "cone"; break;
-			case cylinder: os << "cylinder"; break;
-			case pyramid: os << "pyramid"; break;
-			case sphere: os << "sphere"; break;
-			case torus: os << "torus"; break;
-			case truncatedCone: os << "truncatedCone"; break;
-			default: os << int(s); break;
+			case box: return "box"; 
+			case composite: return "composite"; 
+			case cone: return "cone"; 
+			case cylinder: return "cylinder"; 
+			case pyramid: return "pyramid"; 
+			case sphere: return "sphere"; 
+			case torus: return "torus"; 
+			case truncatedCone: return "truncatedCone"; 
 		}
 	} else {
-		os << std::get<std::string>(t);
+		return std::get<std::string>(t);
 	}
-    return os;
+	return "unknown type";
 }
 
 inline std::variant<std::vector<double>, std::error_condition> createGLPObj(

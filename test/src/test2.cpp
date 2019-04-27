@@ -27,30 +27,34 @@ int main(int argc, char *argv[]){
     // add ten boxes and remove all instances of box
     glm::vec3 color = glm::vec3(1.0,0.5,0.71);
     for (unsigned int i = 0; i < 10; i++) {
-        Mesh_id m_id = s.add_mesh(Shape::box, color);
+        ObjId m_id = s.add_obj(Shape::box, color);
         m_id.translate(box_positions[i]);
         float angle = 20.0f * i;
         m_id.rotate(angle, glm::vec3(1.0f, 0.3f, 0.5f));
     }
-    s.remove_mesh_all(Shape::box);
+    s.remove_obj_all(Shape::box);
+
+    color = glm::vec3(0.7, 0.5, 0.5);
+    obj_params params;
+    std::unordered_map<std::string, int> mymap = {{"accuracy",7}};
+    params.glp_params = mymap;
 
     // add two spheres and hide the first one
-    color = glm::vec3(0.7, 0.5, 0.5);
-    std::unordered_map<std::string, int> mymap = {{"accuracy",7}};
-    Mesh_id m_id = s.add_mesh(Shape::sphere, color, mymap);
+    ObjId m_id = s.add_obj(Shape::sphere, color, params);
     m_id.translate(glm::vec3(-0.2,-0.2,-0.2));
     m_id.hide();
-    m_id = s.add_mesh(Shape::sphere, color, mymap);
+    m_id = s.add_obj(Shape::sphere, color, params);
     m_id.translate(glm::vec3(-0.6,-0.6,-0.6));
     m_id.show();
-    // s.remove_mesh_all(Shape::sphere);
+    // s.remove_obj_all(Shape::sphere);
 
     // add one obj
     if (argc > 1) {
-        Mesh_id obj_m_id = s.add_mesh("object1", color, *(argv+1));
+        params.glp_params = argv[1];
+        ObjId obj_m_id = s.add_obj("object1", color, params);
         obj_m_id.scale(0.08);
     }
-    // s.remove_mesh_all("object1");
+    // s.remove_obj_all("object1");
 
     // render the scene.
     s.render();

@@ -5,7 +5,6 @@
 
 class Composite : public BaseObj {
 public:
-    Composite() {}
     ~Composite() {
         hide_all();
     }

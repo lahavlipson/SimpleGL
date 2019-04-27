@@ -29,6 +29,14 @@ float lastFrame = 0.0f;
 
 // key control
 bool atShapeLevel = true;
+std::vector<obj_type> obj_types;
+int type_idx;
+int instance_idx;
+int obj_count;
+BaseObj *curr_obj;
+
+// objects
+std::unordered_map<obj_type, BaseObj *> obj_map;
 
 // Note: either both of the shaders are default or neither are default
 Scene::Scene(char *vs, char *fs, int width, int height, bool use_full_ctrl) {
@@ -122,7 +130,7 @@ Scene::~Scene() {
     glfwTerminate();
 }
 
-ObjId Scene::add_obj(obj_type t, obj_params params, const color c) {
+ObjId Scene::add_obj(obj_type t, const color c, obj_params params) {
     int id = 0;
     BaseObj *obj_ptr;
     if (obj_map.find(t) != obj_map.end()) { // contains(s) is c++20
@@ -289,7 +297,8 @@ void Scene::key_callback(
                 curr_obj = obj_map[obj_types[type_idx]];
                 obj_count = curr_obj->count();
             }
-            std::cout << "switched to shape category " << obj_types[type_idx] << "\n";
+            std::cout << "switched to shape category " 
+                      << obj_type_to_str(obj_types[type_idx]) << "\n";
         } else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
             atShapeLevel = false;
             std::cout << "at instance level\n";

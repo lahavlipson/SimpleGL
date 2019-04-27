@@ -1,15 +1,6 @@
 #ifndef MESH_HPP
 #define MESH_HPP
 
-#include <iostream>
-#include <vector>
-
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/transform.hpp>
-
 #include "base_obj.hpp"
 
 class Mesh : public BaseObj {

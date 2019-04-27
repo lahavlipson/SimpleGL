@@ -1,22 +1,23 @@
 /*
- * A hello-world test for the SimpleGL library.
+ * Test SimpleGL with physics simulation of spring forces.
  */
 
 #include <iostream>
-
-#include "scene.hpp"
 #include <thread>
 #include <unistd.h>
+
+#include "scene.hpp"
 
 class Spring {
 
 public:
 
-    Spring(Mesh_id a, Mesh_id b, Mesh_id s, double restL, double constant):id1(a),id2(b), obj_id(s),k(constant), rest(restL) {}
+    Spring(ObjId a, ObjId b, ObjId s, double restL, double constant)
+        : id1(a),id2(b), obj_id(s),k(constant), rest(restL) {}
 
-    Mesh_id id1;
-    Mesh_id id2;
-    Mesh_id obj_id;
+    ObjId id1;
+    ObjId id2;
+    ObjId obj_id;
     const float k;
     const float rest;
 
@@ -86,8 +87,6 @@ public:
     
 };
 
-
-
 // takes one command line argument to a filepath to a .obj file to be rendered
 int main(int argc, char *argv[]){
     if (argc < 3) {
@@ -98,34 +97,38 @@ int main(int argc, char *argv[]){
     Scene s;
     const double height = -2.5;
     
+    obj_params params;
+    params.glp_params = argv[2];
+
     color col = glm::vec3(0.7, 0.5, 0.5);
-    Mesh_id center_obj = s.add_mesh("kitten", col, argv[2]);
+    ObjId center_obj = s.add_obj("kitten", col, params);
     center_obj.translate(glm::vec3(0,height + 3.5,-3));
     center_obj.scale(3.0);
 
-    
     std::vector<Spring> springs;
     const double spring_constant = 1.0;
     
-    Mesh_id ball_1 = s.add_mesh(Shape::sphere, col );
+    ObjId ball_1 = s.add_obj(Shape::sphere, col);
     ball_1.translate(glm::vec3(0, height, -3));
     ball_1.scale(0.5);
-    Mesh_id spring_1 = s.add_mesh("spring_1", {0.4, 0.4, 0.4}, argv[1]);
+
+    params.glp_params = argv[1];
+    ObjId spring_1 = s.add_obj("spring_1", {0.4, 0.4, 0.4}, params);
     spring_1.translate(glm::vec3(0, height, -3));
     springs.push_back(Spring(ball_1, center_obj, spring_1, 4.0, spring_constant));
     
-    Mesh_id ball_2 = s.add_mesh(Shape::sphere, col );
+    ObjId ball_2 = s.add_obj(Shape::sphere, col );
     ball_2.translate(glm::vec3(-3, height, -3));
     ball_2.scale(0.5);
-    Mesh_id spring_2 = s.add_mesh("spring_2", {0.4, 0.4, 0.4}, argv[1]);
+    ObjId spring_2 = s.add_obj("spring_2", {0.4, 0.4, 0.4}, params);
     spring_2.translate(glm::vec3(-3, height, -3));
     springs.push_back(Spring(ball_2, center_obj, spring_2, 4.0, spring_constant));
     
     
-    Mesh_id ball_3 = s.add_mesh(Shape::sphere, col );
+    ObjId ball_3 = s.add_obj(Shape::sphere, col );
     ball_3.translate(glm::vec3(-1.5, height, -6));
     ball_3.scale(0.5);
-    Mesh_id spring_3 = s.add_mesh("spring_3", {0.4, 0.4, 0.4}, argv[1]);
+    ObjId spring_3 = s.add_obj("spring_3", {0.4, 0.4, 0.4}, params);
     spring_3.translate(glm::vec3(-1.5, height, -6));
     springs.push_back(Spring(ball_3, center_obj, spring_3, 4.0, spring_constant));
     
@@ -135,8 +138,6 @@ int main(int argc, char *argv[]){
     
     // render the scene.
     s.render();
-    
     sim.cancel();
-    
     t1.join();
 }

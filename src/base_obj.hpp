@@ -37,7 +37,7 @@ typedef std::vector<ObjId> components;
 
 class BaseObj {
 public:
-    virtual ~BaseObj() = 0;
+    virtual ~BaseObj() {}
 
     virtual bool is_composite() { return false; }
 

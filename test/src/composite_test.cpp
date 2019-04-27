@@ -15,12 +15,17 @@ int main(int argc, char *argv[]) {
     // initialize the scene.
     Scene s;
 
-    // add a composite object of a kitten mesh and a default cone.
     glm::vec3 color = glm::vec3(0.7, 0.5, 0.5);
-    Mesh_id cone = s.add_mesh(Shape::cone, color);
+    obj_params params;
+    std::unordered_map<std::string, int> mymap = {{"accuracy",7}};
+    params.glp_params = argv[1];
+
+    // add a composite object of a kitten mesh and a default cone.
+    ObjId cone = s.add_obj(Shape::cone, color);
     color = glm::vec3(0.8, 0.6, 0.8);
-    Mesh_id obj = s.add_mesh("kitten", color, *(argv+1));
-    Comp_id c1 = s.add_composite({cone, obj});
+    ObjId obj = s.add_obj("kitten", color, params);
+    params.comp = {cone, obj};
+    ObjId c1 = s.add_obj(Shape::composite, color, params);
 
     // order of transformations doesn't matter
     c1.scale(0.5);
@@ -29,10 +34,16 @@ int main(int argc, char *argv[]) {
     cone.scale({0.1, 0.3, 0.1});
     obj.rotate(20, glm::vec3(0, 1, 0));
 
-    // add another composite of the same components' copies.
-    // duplicate() adds a copy of the instance in the Mesh_id.
-    Comp_id c2 = s.add_composite({cone.duplicate(), obj.duplicate()});
+    // add the second composite of the same components' copies.
+    // duplicate() adds a copy of the instance in the ObjId.
+    params.comp = {cone.duplicate(), obj.duplicate()};
+    ObjId c2 = s.add_obj(Shape::composite, color, params);
     c2.translate(glm::vec3(1, 0, 0));
+
+    // add the third composite of the same components' copies.
+    // by directly duplicating the composite. 
+    ObjId c3 = c2.duplicate();
+    c3.translate(glm::vec3(1, 1, 0));
 
     // render the scene.
     s.render();
