@@ -5,8 +5,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "scene.hpp"
-
+#include "simplegl.hpp"
 std::string get_obj_name(std::string obj_arg) {
     std::stringstream ss(obj_arg);
     std::string item;

@@ -3,12 +3,11 @@
  */
 
 #include <iostream>
-
-#include "scene.hpp"
 #include <thread>
 #include <set>
 #include <unistd.h>
 
+#include "simplegl.hpp"
 class Mass {
     
 public:

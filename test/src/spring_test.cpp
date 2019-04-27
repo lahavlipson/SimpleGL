@@ -4,10 +4,10 @@
 
 #include <iostream>
 
-#include "scene.hpp"
 #include <thread>
 #include <unistd.h>
 
+#include "simplegl.hpp"
 class Spring {
 
 public:

@@ -4,13 +4,13 @@
 
 #include <iostream>
 
-#include "scene.hpp"
+#include "simplegl.hpp"
 
 // takes one command line argument to a filepath to a .obj file to be rendered
 int main(int argc, char *argv[]) {
     try {
         // initialize the scene.
-        Scene s(argv[1],argv[2]);
+        Scene s;
 
         // world space positions for the ten boxes
         glm::vec3 box_positions[] = {

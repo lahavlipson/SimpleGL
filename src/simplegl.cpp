@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "scene.hpp"
+#include "simplegl.hpp"
 
 // camera frame
 glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f, 3.0f);

@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-#include "scene.hpp"
+#include "simplegl.hpp"
 
 int main(int argc, char *argv[]) {
     try {

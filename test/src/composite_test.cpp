@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#include "scene.hpp"
+#include "simplegl.hpp"
 
 // takes one command line argument to a filepath to a .obj file to be rendered
 int main(int argc, char *argv[]) {

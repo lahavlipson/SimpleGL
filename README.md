@@ -21,17 +21,24 @@ Make sure glfw3 is installed first. Run `brew install glfw3` if using Mac OS.
 
 Run `make`. This will generate a libSimplegl.a file in the generated `build/` directory.
 
-Run `make tests` to create the all test executables which will be created in the `build/` directory as well. The test executables are named `test1`, `test2`, `compare1`, `compare2`, and so on. You can also run `make <test_name>` to create one specific test executable.
+Run `make tests` to create the test executables in the `build/` directory. You can also run `make <test_name>` to create one specific test executable.
 
-Run `make clean` to remove all the created files including the `libSimplegl.a` file and the created
-build directory and everything therein.
+Run `make clean` to remove all the created files including the `libSimplegl.a` file and the created build directory and everything therein.
 
 ## Sample Usage
 
-After running `make`, run `./build/test1 <obj_file_path>` to render the default scene with an optional .obj file item.
+To use SimpleGL, include "scene.hpp" and link the lSimplegl when compiling. 
 
-### Scene Class API
-TODO: More on how to use the API of Scene class.
+To start using SimpleGL to create a Scene object.
+
+Objects in SimpleGL are called "meshes". These can be one of the default types provided by SimpleGL (sphere, truncated cone, cylinder, cone, pyramid, torus, box) which are identified in the Shape namespace or a custom object which can be initialized from a .obj file.
+
+To add these meshes to your scene, take the scene object and use the `add_mesh()` function.
+
+These meshes can then be transformed via various methods like translate(), rotate(), and scale(). See documentation.md for a more detailed description of the API.
+
+For a more detailed tutorial see tutorial.md.
+
 
 ### Interactive Key Controls
 
