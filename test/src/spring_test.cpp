@@ -1,17 +1,14 @@
-/*
- * A hello-world test for the SimpleGL library.
- */
-
 #include <iostream>
-
 #include <thread>
 #include <unistd.h>
 
 #include "simplegl.hpp"
+
+using namespace sgl;
+
 class Spring {
 
 public:
-
     Spring(Mesh_id a, Mesh_id b, Mesh_id s, double restL, double constant):id1(a),id2(b), obj_id(s),k(constant), rest(restL) {}
 
     Mesh_id id1;
@@ -47,7 +44,6 @@ public:
 class Simulation {
     
 public:
-    
     const float t = 0.1f;
     const glm::vec3 gravity = {0, -0.3, 0};
     

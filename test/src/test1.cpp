@@ -1,12 +1,12 @@
 /*
  * A hello-world test for the SimpleGL library.
  */
-
 #include <iostream>
 
 #include "simplegl.hpp"
 
-// takes one command line argument to a filepath to a .obj file to be rendered
+using namespace sgl;
+
 int main(int argc, char *argv[]) {
     try {
         // initialize the scene.

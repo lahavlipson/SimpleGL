@@ -8,6 +8,7 @@
 
 #include "simplegl.hpp"
 
+using namespace sgl;
 int main(int argc, char *argv[]) {
     try {
         // initialize the scene.

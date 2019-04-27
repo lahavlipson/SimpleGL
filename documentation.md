@@ -2,14 +2,12 @@
 
 Here all the functions you can use with SimpleGL are documented with a brief description and a sample use case.
 
-## Scene Class
-
-### Constructing a Scene
+## Constructing a Scene
 ```
 Scene(char *vs = nullptr, char *fs = nullptr, const int width = 800, const int height = 600);
 ```
 
-### Adding a mesh
+## Adding a mesh
 ```
 Mesh_id add_mesh(
         std::variant<Shape, std::string> s, 
@@ -17,4 +15,4 @@ Mesh_id add_mesh(
         std::variant<std::unordered_map<std::string, int>, std::string> p = {});
 ```
 
-### Adding a composite object
+## Adding a composite object

@@ -1,12 +1,12 @@
 /*
  * A test for the SimpleGL library, specifically manipulating meshes.
  */
-
 #include <iostream>
 
 #include "simplegl.hpp"
 
-// takes one command line argument to a filepath to a .obj file to be rendered
+using namespace sgl;
+
 int main(int argc, char *argv[]){
     // initialize the scene.
     Scene s;

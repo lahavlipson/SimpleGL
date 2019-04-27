@@ -27,15 +27,17 @@ Run `make clean` to remove all the created files including the `libSimplegl.a` f
 
 ## Sample Usage
 
-To use SimpleGL, include "scene.hpp" and link the lSimplegl when compiling. 
+To use SimpleGL, include "simplegl.hpp" and link the -lSimplegl when compiling. 
 
-To start using SimpleGL to create a Scene object.
+To start using SimpleGL, create a Scene object.
 
 Objects in SimpleGL are called "meshes". These can be one of the default types provided by SimpleGL (sphere, truncated cone, cylinder, cone, pyramid, torus, box) which are identified in the Shape namespace or a custom object which can be initialized from a .obj file.
 
 To add these meshes to your scene, take the scene object and use the `add_mesh()` function.
 
 These meshes can then be transformed via various methods like translate(), rotate(), and scale(). See documentation.md for a more detailed description of the API.
+
+Then, the scene can be rendered via `s.render();`.
 
 For a more detailed tutorial see tutorial.md.
 

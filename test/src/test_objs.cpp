@@ -1,11 +1,13 @@
 /*
  * Test loading multiple .obj files and related errors.
  */
-
 #include <iostream>
 #include <sstream>
 
 #include "simplegl.hpp"
+
+using namespace sgl;
+
 std::string get_obj_name(std::string obj_arg) {
     std::stringstream ss(obj_arg);
     std::string item;

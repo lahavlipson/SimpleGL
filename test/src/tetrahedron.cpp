@@ -1,17 +1,13 @@
-/*
- * A hello-world test for the SimpleGL library.
- */
-
 #include <iostream>
 #include <thread>
 #include <set>
 #include <unistd.h>
 
 #include "simplegl.hpp"
+
+using namespace sgl;
 class Mass {
-    
 public:
-    
     Mesh_id id;
     glm::vec3 vel = {0,0,0};
     glm::vec3 force = {0,0,0};
