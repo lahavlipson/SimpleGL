@@ -6,7 +6,9 @@
 #include <thread>
 #include <unistd.h>
 
-#include "scene.hpp"
+#include "simplegl.hpp"
+
+using namespace sgl;
 
 class Spring {
 
@@ -48,7 +50,6 @@ public:
 class Simulation {
     
 public:
-    
     const float t = 0.1f;
     const glm::vec3 gravity = {0, -0.3, 0};
     

@@ -1,11 +1,12 @@
 /*
  * Test loading multiple .obj files and related errors.
  */
-
 #include <iostream>
 #include <sstream>
 
-#include "scene.hpp"
+#include "simplegl.hpp"
+
+using namespace sgl;
 
 std::string get_obj_name(std::string obj_arg) {
     std::stringstream ss(obj_arg);
@@ -25,16 +26,16 @@ int main(int argc, char *argv[]) {
                 std::cout << i << " " << argv[i] << "\n";
 
                 // Expected error: if fpath doesn't exist, will terminate.
-                obj_params params;
-                params.glp_params = argv[i];
+                obj_params oparams;
+                oparams.glp_params = argv[i];
                 ObjId obj_m_id = s.add_obj(get_obj_name(argv[i]), 
-                    glm::vec3(0.1*i, 0.15*i, 0.2*i), params);
+                    glm::vec3(0.1*i, 0.15*i, 0.2*i), oparams);
                 /* Comment the above and uncommment the following two lines to 
                  * see the expected error when we didn't provide a filepath. */
-                // std::unordered_map<std::string, int> mmap = {{"accuracy", 1}};
-                // params.glp_params = mmap;
+                // params p = {.accuracy = 1};
+                // oparams.glp_params = p;
                 // ObjId obj_m_id = s.add_obj(get_obj_name(argv[i]), 
-                //     glm::vec3(0.5, 0.7, 0.3), params);
+                //     glm::vec3(0.5, 0.7, 0.3), oparams);
                 
                 obj_m_id.rotate(i, glm::vec3(1, 1, 1));
                 obj_m_id.translate(glm::vec3(i, i, i));

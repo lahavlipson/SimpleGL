@@ -1,12 +1,12 @@
 /*
  * A hello-world test for the SimpleGL library.
  */
-
 #include <iostream>
 
-#include "scene.hpp"
+#include "simplegl.hpp"
 
-// takes one command line argument to a filepath to a .obj file to be rendered
+using namespace sgl;
+
 int main(int argc, char *argv[]) {
     try {
         // initialize the scene.
@@ -35,12 +35,12 @@ int main(int argc, char *argv[]) {
         }
         
         color = glm::vec3(0.7, 0.5, 0.5);
-        obj_params params;
-        std::unordered_map<std::string, int> mymap = {{"accuracy",7}};
-        params.glp_params = mymap;
+        obj_params oparams;
+        params p = {.accuracy = 7};
+        oparams.glp_params = p;
         
         // add two spheres
-        ObjId m_id = s.add_obj(Shape::sphere, color, params);
+        ObjId m_id = s.add_obj(Shape::sphere, color, oparams);
         m_id.translate(glm::vec3(-0.2,-0.2,-0.2));
         m_id.scale(0.5);
         m_id = s.add_obj(Shape::sphere, color);
@@ -48,9 +48,9 @@ int main(int argc, char *argv[]) {
         m_id.scale(0.3);
         
         // add pyramid
-        mymap = {{"sides",7}};
-        params.glp_params = mymap;
-        m_id = s.add_obj(Shape::pyramid, color, params);
+        p = {.sides = 7};
+        oparams.glp_params = p;
+        m_id = s.add_obj(Shape::pyramid, color, oparams);
         m_id.translate(glm::vec3(4.2,1.2,-0.2));
         m_id.scale(0.5);
         

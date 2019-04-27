@@ -1,12 +1,12 @@
 /*
  * A test for the SimpleGL library, specifically the composite objects.
  */
-
 #include <iostream>
 
-#include "scene.hpp"
+#include "simplegl.hpp"
 
-// takes one command line argument to a filepath to a .obj file to be rendered
+using namespace sgl;
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         std::cout << "Usage: " << *argv << " <path_to_kitten_obj>\n";
@@ -16,16 +16,16 @@ int main(int argc, char *argv[]) {
     Scene s;
 
     glm::vec3 color = glm::vec3(0.7, 0.5, 0.5);
-    obj_params params;
+    obj_params oparams;
     std::unordered_map<std::string, int> mymap = {{"accuracy",7}};
-    params.glp_params = argv[1];
+    oparams.glp_params = argv[1];
 
     // add a composite object of a kitten mesh and a default cone.
     ObjId cone = s.add_obj(Shape::cone, color);
     color = glm::vec3(0.8, 0.6, 0.8);
-    ObjId obj = s.add_obj("kitten", color, params);
-    params.comp = {cone, obj};
-    ObjId c1 = s.add_obj(Shape::composite, color, params);
+    ObjId obj = s.add_obj("kitten", color, oparams);
+    oparams.comp = {cone, obj};
+    ObjId c1 = s.add_obj(Shape::composite, color, oparams);
 
     // order of transformations doesn't matter
     c1.scale(0.5);
@@ -36,8 +36,8 @@ int main(int argc, char *argv[]) {
 
     // add the second composite of the same components' copies.
     // duplicate() adds a copy of the instance in the ObjId.
-    params.comp = {cone.duplicate(), obj.duplicate()};
-    ObjId c2 = s.add_obj(Shape::composite, color, params);
+    oparams.comp = {cone.duplicate(), obj.duplicate()};
+    ObjId c2 = s.add_obj(Shape::composite, color, oparams);
     c2.translate(glm::vec3(1, 0, 0));
 
     // add the third composite of the same components' copies.

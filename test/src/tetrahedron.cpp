@@ -1,16 +1,13 @@
-/*
- * A hello-world test for the SimpleGL library.
- */
-
 #include <iostream>
 #include <thread>
 #include <set>
 #include <unistd.h>
 
-#include "scene.hpp"
+#include "simplegl.hpp"
+
+using namespace sgl;
 
 class Mass {
-    
 public:
     
     ObjId id;

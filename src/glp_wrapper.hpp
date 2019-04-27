@@ -13,8 +13,13 @@
 
 enum Shape { sphere, truncatedCone, cylinder, cone, pyramid, torus, box, composite };
 
+struct params {
+	int accuracy = 6;
+	int sides = 3;
+};
+
 struct obj_params {
-    std::variant<std::unordered_map<std::string, int>, std::string> glp_params;
+    std::variant<params, std::string> glp_params;
     components comp;
 };
 
@@ -40,52 +45,37 @@ inline std::string obj_type_to_str(obj_type t) {
 }
 
 inline std::variant<std::vector<double>, std::error_condition> createGLPObj(
-    const obj_type t, 
-	const std::variant<std::unordered_map<std::string, int>, std::string> varP) {
-
-    if (std::holds_alternative<Shape>(t)) { 
-    	// --- GLP Primitive ---
-    	int accuracy = 6;
-    	int sides = 3;
-
-		if (std::holds_alternative<std::unordered_map<std::string, int>>(varP)) {
-			// Get GLP parameters from the input params map.
-			auto params = std::get<std::unordered_map<std::string, int>>(varP);
-	        if (params.find("accuracy") != params.end()) {
-	            accuracy = params["accuracy"];
-	        	if (accuracy <= 1) {
-	        		return make_SimpleGL_error_condition(SIMPLEGL_INVALID_PARAM);
-	        	}
-	        }
-	        if (params.find("sides") != params.end()) {
-	            sides = params["sides"];
-	        	if (sides <= 0) {
-	        		return make_SimpleGL_error_condition(SIMPLEGL_INVALID_PARAM);
-	        	}
-	        }
+    const obj_type t, const std::variant<params, std::string> varP) {
+	
+    if (std::holds_alternative<Shape>(t)) {
+		if (std::holds_alternative<params>(varP)) {
+			// Get GLP parameters from the input params.
+			auto paramsP = std::get<params>(varP);
+			if (paramsP.accuracy <= 1 || paramsP.sides <= 0) {
+				return make_SimpleGL_error_condition(SIMPLEGL_INVALID_PARAM);
+			}
+			switch (std::get<Shape>(t)) {
+			case sphere:
+				return glp::sphere(paramsP.accuracy, 1);
+			case truncatedCone:
+				return glp::truncatedCone(paramsP.accuracy, 1, 1, 1);
+			case cylinder:
+				return glp::cylinder(paramsP.accuracy, 1, 1);
+			case cone:
+				return glp::cone(paramsP.accuracy, 1, 1);
+			case pyramid:
+				return glp::pyramid(paramsP.sides, 1, 1);
+			case torus:
+				return glp::torus(1, 1, 1, 1);
+			case box:
+				return glp::box(glm::dvec3(1, 1, 1));
+			default:
+				// no such GLP primitive
+	    		return make_SimpleGL_error_condition(SIMPLEGL_SHAPE_NOT_FOUND);
+			}
 		} else {
-			// provided a filepath when we need a params map 
+			// provided a filepath when we need params 
 			return make_SimpleGL_error_condition(SIMPLEGL_INVALID_PARAM);	
-		}
-
-		switch (std::get<Shape>(t)) {
-		case sphere:
-			return glp::sphere(accuracy, 1);
-		case truncatedCone:
-			return glp::truncatedCone(accuracy, 1, 1, 1);
-		case cylinder:
-			return glp::cylinder(accuracy, 1, 1);
-		case cone:
-			return glp::cone(accuracy, 1, 1);
-		case pyramid:
-			return glp::pyramid(sides, 1, 1);
-		case torus:
-			return glp::torus(1, 1, 1, 1);
-		case box:
-			return glp::box(glm::dvec3(1, 1, 1));
-		default:
-			// no such GLP primitive
-    		return make_SimpleGL_error_condition(SIMPLEGL_SHAPE_NOT_FOUND);
 		}
     } else {
     	// --- Loading from .obj file ---
@@ -110,7 +100,7 @@ inline std::variant<std::vector<double>, std::error_condition> createGLPObj(
 			}
 			return output;
 		} else {
-			// provided a params map when we need a .obj filepath
+			// provided params when we need a .obj filepath
     		return make_SimpleGL_error_condition(SIMPLEGL_OBJ_NO_FILE);	
 		}
     }
