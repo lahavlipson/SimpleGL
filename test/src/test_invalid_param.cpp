@@ -16,8 +16,8 @@ int main(int argc, char *argv[]) {
         
         // add one sphere with too low accuracy
         glm::vec3 color = glm::vec3(0.7, 0.5, 0.5);
-        std::unordered_map<std::string, int> mmap = {{"accuracy", 1}};
-        Mesh_id m_id = s.add_mesh(Shape::sphere, color, mmap);
+        params p = {.accuracy = 1};
+        Mesh_id m_id = s.add_mesh(Shape::sphere, color, p);
         m_id.translate(glm::vec3(-0.2,-0.2,-0.2));
         m_id.scale(0.5);
     

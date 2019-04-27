@@ -22,13 +22,13 @@ To start using SimpleGL create a Scene object (you can use the default construct
 
 Objects in SimpleGL are called "meshes". These meshes can be one of the default types provided by SimpleGL (sphere, truncated cone, cylinder, cone, pyramid, torus, box) which are identified in the Shape namespace or a custom object which can be initialized from a .obj file.
 
-To add these meshes to your scene, take the scene object and use the `add_mesh()` function which returns a `Mesh_id` object that identifies a particular mesh. This method takes a type, an optional glm::vec3 color vector, and an optional std::unordered_map<std::string, int> parameter map with "accuracy" and/or "size" specified as keys. If any optional field is not specified, default values are used. Some sample use cases are shown here:
+To add these meshes to your scene, take the scene object and use the `add_mesh()` function which returns a `Mesh_id` object that identifies a particular mesh. This method takes a type, an optional glm::vec3 color vector, and an optional parameter struct called params with accuracy and sides fields that you can specify. If any optional field is not specified, default values are used. Some sample use cases are shown here:
 ```
 glm::vec3 color = glm::vec3(1.0,0.5,0.71);
 Mesh_id m_id = s.add_mesh(Shape::box, color);
    
-std::unordered_map<std::string, int> mymap = {{"accuracy",7}};
-Mesh_id m_id = s.add_mesh(Shape::sphere, color, mymap );
+params p = {.accuracy = 7};
+Mesh_id m_id = s.add_mesh(Shape::sphere, color, p);
 
 Mesh_id obj_m_id = s.add_mesh("kitten", color, "<filepath_to_kitten_obj>");
 ```
