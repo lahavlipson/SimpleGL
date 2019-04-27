@@ -1,6 +1,6 @@
 /*
  * Test the error of giving invalid parameters to GLP. 
- * Expect add_mesh() to throw an error, and the output would be
+ * Expect add_obj() to throw an error, and the output would be
  * "SimpleGL status: invalid parameter".
  */
 
@@ -16,8 +16,10 @@ int main(int argc, char *argv[]) {
         
         // add one sphere with too low accuracy
         glm::vec3 color = glm::vec3(0.7, 0.5, 0.5);
+        obj_params oparams;
         params p = {.accuracy = 1};
-        Mesh_id m_id = s.add_mesh(Shape::sphere, color, p);
+        oparams.glp_params = p;
+        ObjId m_id = s.add_obj(Shape::sphere, color, oparams);
         m_id.translate(glm::vec3(-0.2,-0.2,-0.2));
         m_id.scale(0.5);
     

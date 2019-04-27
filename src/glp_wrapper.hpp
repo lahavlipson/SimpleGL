@@ -1,32 +1,60 @@
 #ifndef GLP_WRAPPER_HPP
 #define GLP_WRAPPER_HPP
 
+#include <iostream>
+#include <unordered_map>
 #include <variant>
 
 #include <glp/glp.h>
 #include <obj_loader/obj_loader.h>
 
+#include "base_obj.hpp"
 #include "simplegl_error.hpp"
 
-enum Shape { sphere, truncatedCone, cylinder, cone, pyramid, torus, box };
+enum Shape { sphere, truncatedCone, cylinder, cone, pyramid, torus, box, composite };
 
 struct params {
 	int accuracy = 6;
 	int sides = 3;
 };
 
-inline std::variant<std::vector<double>, std::error_condition> createGLPObj(
-    const std::variant<Shape, std::string> s, 
-	const std::variant<params, std::string> varP) {
+struct obj_params {
+    std::variant<params, std::string> glp_params;
+    components comp;
+};
 
-    if (std::holds_alternative<Shape>(s)) {
+typedef std::variant<Shape, std::string> obj_type;
+
+inline std::string obj_type_to_str(obj_type t) {
+	if (std::holds_alternative<Shape>(t)) {
+		Shape s = std::get<Shape>(t);
+		switch (s) {
+			case box: return "box"; 
+			case composite: return "composite"; 
+			case cone: return "cone"; 
+			case cylinder: return "cylinder"; 
+			case pyramid: return "pyramid"; 
+			case sphere: return "sphere"; 
+			case torus: return "torus"; 
+			case truncatedCone: return "truncatedCone"; 
+		}
+	} else {
+		return std::get<std::string>(t);
+	}
+	return "unknown type";
+}
+
+inline std::variant<std::vector<double>, std::error_condition> createGLPObj(
+    const obj_type t, const std::variant<params, std::string> varP) {
+	
+    if (std::holds_alternative<Shape>(t)) {
 		if (std::holds_alternative<params>(varP)) {
 			// Get GLP parameters from the input params.
 			auto paramsP = std::get<params>(varP);
 			if (paramsP.accuracy <= 1 || paramsP.sides <= 0) {
 				return make_SimpleGL_error_condition(SIMPLEGL_INVALID_PARAM);
 			}
-			switch (std::get<Shape>(s)) {
+			switch (std::get<Shape>(t)) {
 			case sphere:
 				return glp::sphere(paramsP.accuracy, 1);
 			case truncatedCone:

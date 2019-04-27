@@ -6,13 +6,15 @@
 #include "simplegl.hpp"
 
 using namespace sgl;
+
 class Mass {
 public:
-    Mesh_id id;
+    
+    ObjId id;
     glm::vec3 vel = {0,0,0};
     glm::vec3 force = {0,0,0};
     
-    Mass(Mesh_id mid):id(mid){}
+    Mass(ObjId mid):id(mid){}
     
     inline glm::vec3 get_loc(){
         return id.get_loc();
@@ -36,13 +38,14 @@ class Spring {
 
 public:
 
-    Spring(Mass &a, Mass &b, Mesh_id s, double restL, double constant):id1(a),id2(b), obj_id(s),k(constant) {
+    Spring(Mass &a, Mass &b, ObjId s, double restL, double constant)
+        : id1(a),id2(b), obj_id(s),k(constant) {
         rest = length();
     }
 
     Mass &id1;
     Mass &id2;
-    Mesh_id obj_id;
+    ObjId obj_id;
     const float k;
     float rest;
 
@@ -134,7 +137,7 @@ public:
                 spr.obj_id.set_rotation(angleDiff, crossProd);
                 spr.obj_id.set_scale({0.4,spr.length()*0.17,0.4});
             }
-           // usleep(30);
+            // usleep(30);
         }
     }
     
@@ -155,25 +158,25 @@ int main(int argc, char *argv[]){
     color col = glm::vec3(0.7, 0.5, 0.5);
     std::vector<Mass> masses;
     
-    Mesh_id ball_0 = s.add_mesh(Shape::sphere, col );
+    ObjId ball_0 = s.add_obj(Shape::sphere, col);
     ball_0.translate(glm::vec3(-1.5,height + 3,-3));
     ball_0.scale(0.5);
     Mass m0(ball_0);
     masses.push_back(m0);
 
-    Mesh_id ball_1 = s.add_mesh(Shape::sphere, col );
+    ObjId ball_1 = s.add_obj(Shape::sphere, col);
     ball_1.translate(glm::vec3(0, height, -3));
     ball_1.scale(0.5);
     Mass m1(ball_1);
     masses.push_back(m1);
     
-    Mesh_id ball_2 = s.add_mesh(Shape::sphere, col );
+    ObjId ball_2 = s.add_obj(Shape::sphere, col);
     ball_2.translate(glm::vec3(-3, height, -3));
     ball_2.scale(0.5);
     Mass m2(ball_2);
     masses.push_back(m2);
     
-    Mesh_id ball_3 = s.add_mesh(Shape::sphere, col );
+    ObjId ball_3 = s.add_obj(Shape::sphere, col);
     ball_3.translate(glm::vec3(-1.5, height, -6));
     ball_3.scale(0.5);
     Mass m3(ball_3);
@@ -182,31 +185,33 @@ int main(int argc, char *argv[]){
     std::vector<Spring> springs;
     const double spring_constant = 32.5;
     
-    Mesh_id spring_1 = s.add_mesh("spring_1", {0.4, 0.4, 0.4}, argv[1]);
+    obj_params params;
+    params.glp_params = argv[1];
+    ObjId spring_1 = s.add_obj("spring_1", {0.4, 0.4, 0.4}, params);
     spring_1.translate(glm::vec3(0, height, -3));
     springs.push_back(Spring(m1, m0, spring_1, 4.0, spring_constant));
     
-    Mesh_id spring_2 = s.add_mesh("spring_2", {0.4, 0.4, 0.4}, argv[1]);
+    ObjId spring_2 = s.add_obj("spring_2", {0.4, 0.4, 0.4}, params);
     spring_2.translate(glm::vec3(-3, height, -3));
     springs.push_back(Spring(m2 ,m0, spring_2, 4.0, spring_constant));
     
-    Mesh_id spring_3 = s.add_mesh("spring_3", {0.4, 0.4, 0.4}, argv[1]);
+    ObjId spring_3 = s.add_obj("spring_3", {0.4, 0.4, 0.4}, params);
     spring_3.translate(glm::vec3(-1.5, height, -6));
     springs.push_back(Spring(m3, m0, spring_3, 4.0, spring_constant));
 
-    Mesh_id spring_4 = s.add_mesh("spring_4", {0.4, 0.4, 0.4}, argv[1]);
+    ObjId spring_4 = s.add_obj("spring_4", {0.4, 0.4, 0.4}, params);
     spring_4.translate(glm::vec3(0, height, -3));
     springs.push_back(Spring(m1, m2, spring_4, 4.0, spring_constant));
     
-    Mesh_id spring_5 = s.add_mesh("spring_5", {0.4, 0.4, 0.4}, argv[1]);
+    ObjId spring_5 = s.add_obj("spring_5", {0.4, 0.4, 0.4}, params);
     spring_5.translate(glm::vec3(0, height, -3));
     springs.push_back(Spring(m1, m3, spring_5, 4.0, spring_constant));
     
-    Mesh_id spring_6 = s.add_mesh("spring_6", {0.4, 0.4, 0.4}, argv[1]);
+    ObjId spring_6 = s.add_obj("spring_6", {0.4, 0.4, 0.4}, params);
     spring_6.translate(glm::vec3(0, height, -3));
     springs.push_back(Spring(m2, m3, spring_6, 4.0, spring_constant));
     
-    Mesh_id floor = s.add_mesh(Shape::box, {0.6, 0.6, 0.6} );
+    ObjId floor = s.add_obj(Shape::box, {0.6, 0.6, 0.6});
     floor.translate(glm::vec3( -35, -7.5, -35));
     floor.scale({70, 0.01, 70});
 
@@ -216,8 +221,6 @@ int main(int argc, char *argv[]){
     
     // render the scene.
     s.render();
-    
     sim.cancel();
-    
     t1.join();
 }
