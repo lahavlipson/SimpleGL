@@ -36,11 +36,11 @@ int main(int argc, char *argv[]){
 
     // add two spheres and hide the first one
     color = glm::vec3(0.7, 0.5, 0.5);
-    std::unordered_map<std::string, int> mymap = {{"accuracy",7}};
-    Mesh_id m_id = s.add_mesh(Shape::sphere, color, mymap);
+    params p = {.accuracy = 7};
+    Mesh_id m_id = s.add_mesh(Shape::sphere, color, p);
     m_id.translate(glm::vec3(-0.2,-0.2,-0.2));
     m_id.hide();
-    m_id = s.add_mesh(Shape::sphere, color, mymap);
+    m_id = s.add_mesh(Shape::sphere, color, p);
     m_id.translate(glm::vec3(-0.6,-0.6,-0.6));
     m_id.show();
     // s.remove_mesh_all(Shape::sphere);

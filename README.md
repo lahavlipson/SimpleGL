@@ -29,6 +29,8 @@ Run `make clean` to remove all the created files including the `libSimplegl.a` f
 
 To use SimpleGL, include "simplegl.hpp" and link the -lSimplegl when compiling. 
 
+All of SimpleGL is inside the sgl namespace.
+
 To start using SimpleGL, create a Scene object.
 
 Objects in SimpleGL are called "meshes". These can be one of the default types provided by SimpleGL (sphere, truncated cone, cylinder, cone, pyramid, torus, box) which are identified in the Shape namespace or a custom object which can be initialized from a .obj file.

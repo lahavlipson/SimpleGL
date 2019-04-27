@@ -27,7 +27,7 @@ namespace sgl{
         Mesh_id add_mesh(
             std::variant<Shape, std::string> s, 
             const glm::vec3 color = {0.4, 0.4, 0.4}, 
-            std::variant<std::unordered_map<std::string, int>, std::string> p = {});
+            std::variant<params, std::string> p = {});
         
         Comp_id add_composite(std::initializer_list<Mesh_id> l);
         

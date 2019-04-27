@@ -120,7 +120,7 @@ namespace sgl {
 
     Mesh_id Scene::add_mesh(
         std::variant<Shape, std::string> s, const glm::vec3 color, 
-        std::variant<std::unordered_map<std::string, int>, std::string> p) {
+        std::variant<params, std::string> p) {
 
         int id = 0;
         Mesh *mesh_ptr;

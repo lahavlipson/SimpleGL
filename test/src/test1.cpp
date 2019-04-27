@@ -36,8 +36,8 @@ int main(int argc, char *argv[]) {
         
         // add two spheres
         color = glm::vec3(0.7, 0.5, 0.5);
-        std::unordered_map<std::string, int> mymap = {{"accuracy",7}};
-        Mesh_id m_id = s.add_mesh(Shape::sphere, color, mymap );
+        params p = {.accuracy = 7};
+        Mesh_id m_id = s.add_mesh(Shape::sphere, color, p );
         m_id.translate(glm::vec3(-0.2,-0.2,-0.2));
         m_id.scale(0.5);
         m_id = s.add_mesh(Shape::sphere, color);
@@ -45,8 +45,8 @@ int main(int argc, char *argv[]) {
         m_id.scale(0.3);
         
         // add pyramid
-        mymap = {{"sides",7}};
-        m_id = s.add_mesh(Shape::pyramid, color, mymap );
+        params p2 = {.sides = 7};
+        m_id = s.add_mesh(Shape::pyramid, color, p2);
         m_id.translate(glm::vec3(4.2,1.2,-0.2));
         m_id.scale(0.5);
         

@@ -31,9 +31,9 @@ int main(int argc, char *argv[]) {
                     glm::vec3(0.1*i, 0.15*i, 0.2*i), fpath);
                 /* Comment the above and uncommment the following two lines to 
                  * see the expected error when we didn't provide a filepath. */
-                // std::unordered_map<std::string, int> mmap = {{"accuracy", 1}};
+                // params p = {.accuracy = 1};
                 // Mesh_id obj_m_id = s.add_mesh(get_obj_name(fpath), 
-                //     glm::vec3(0.5, 0.7, 0.3), mmap);
+                //     glm::vec3(0.5, 0.7, 0.3), p);
                 
                 obj_m_id.rotate(i, glm::vec3(1, 1, 1));
                 obj_m_id.translate(glm::vec3(i, i, i));
