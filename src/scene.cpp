@@ -315,6 +315,7 @@ void Scene::key_callback(
             std::cout << "switched to instance at idx " << instance_idx << "\n";
         } else if (key == GLFW_KEY_LEFT && action == GLFW_PRESS) {
             instance_idx = (instance_idx - 1) % obj_count;
+            if (instance_idx < 0) instance_idx += obj_count;
             std::cout << "switched to instance at idx " << instance_idx << "\n";
         } else if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
             atShapeLevel = true;
@@ -324,7 +325,7 @@ void Scene::key_callback(
         } else if (key == GLFW_KEY_U && action == GLFW_PRESS) {
             curr_obj->show_instance(instance_idx);
         } else if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
-            curr_obj->translate(instance_idx, {speed, 0, 0});
+            curr_obj->translate(instance_idx, {-speed, 0, 0});
         } else if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
             curr_obj->translate(instance_idx, {speed, 0, 0});
         } else if (key == GLFW_KEY_3 && action == GLFW_PRESS) {

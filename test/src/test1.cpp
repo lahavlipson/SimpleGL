@@ -10,7 +10,7 @@
 int main(int argc, char *argv[]) {
     try {
         // initialize the scene.
-        Scene s(argv[1],argv[2]);
+        Scene s(argv[1], argv[2], 800, 600, true);
 
         // world space positions for the ten boxes
         glm::vec3 box_positions[] = {
