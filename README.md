@@ -41,8 +41,7 @@ These meshes can then be transformed via various methods like translate(), rotat
 
 Then, the scene can be rendered via `s.render();`.
 
-For a more detailed tutorial see tutorial.md.
-
+For a more detailed tutorial see [tutorial.md](tutorial.md).
 
 ### Interactive Key Controls
 
@@ -59,8 +58,6 @@ Up arrow key: move to top level, cycling through shape categories again
 WASD: move the camera up, left, down, right
 
 Cursor: change the viewing direction of the camera
-
-(TODO) P: print the current configuration. 
 
 H: hide/remove the current instance or all instances in this category.
 
@@ -97,4 +94,3 @@ This README heavily referenced from https://github.com/wodeni/Animate-plus-plus/
 ## TODO
 
 - create version of kitten bouncing on springs without using SimpleGL
-- add configuration parsing and storing
