@@ -21,16 +21,14 @@ namespace sgl {
     class Scene {
     public:
         Scene(char *vs = nullptr, char *fs = nullptr, 
-            const int width = 800, const int height = 600, 
-            bool use_full_ctrl = false);
+              const int width = 800, const int height = 600, 
+              bool use_full_ctrl = false);
         ~Scene();
 
         ObjId add_obj(obj_type t, const color c = {0.4, 0.4, 0.4},
                       obj_params params = obj_params());
             
         void remove_obj_all(obj_type t);
-        
-        inline void toggle_shadows() { shadowsEnabled = !shadowsEnabled; }
         
         std::error_condition render();
 
@@ -48,7 +46,6 @@ namespace sgl {
         GLFWwindow *window;
 
         // for light & shadow shading
-        bool shadowsEnabled = true;
         unsigned int depthMapFBO;
         unsigned int depthMap;
         float borderColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };

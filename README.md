@@ -59,9 +59,13 @@ WASD: move the camera up, left, down, right
 
 Cursor: change the viewing direction of the camera
 
-H: hide/remove the current instance or all instances in this category.
+H: hide/remove the current instance or all instances in this category
 
-U: unhide the current instance or all instances in this category.
+U: unhide the current instance or all instances in this category
+
+P: print the render info associated with the current instance
+
+0: toggles the shadow rendering on/off.
 
 1: decrease the current instance's X position
 

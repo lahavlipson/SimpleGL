@@ -9,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 struct transformation {
     glm::mat4 model;        // the overall model matrix
@@ -17,15 +18,27 @@ struct transformation {
     glm::mat4 scaling;      // scaling matrix
     bool hidden = false;    // default to show
 
+    // assumption here is that the user will not use other helper methods
+    // if they are setting the model matrix themselves. 
     glm::mat4 get_model() const {
         return model * translation * rotation * scaling;
     }
-    // assumption here is that the user will not use other helper methods
-    // if they are setting the model matrix themselves. 
 };
+
+inline std::ostream& operator<<(std::ostream& os, transformation& t) {
+    return os << "\n\tmodel: \n\t" << glm::to_string(t.model) 
+              << "\n\trotation: \n\t" << glm::to_string(t.rotation)
+              << "\n\ttranslation: \n\t" << glm::to_string(t.translation) 
+              << "\n\tscaling: \n\t" << glm::to_string(t.scaling) 
+              << "\n\thidden: " << t.hidden; 
+}
 
 // color: use vec3 as rgb color.
 typedef glm::vec3 color;
+
+inline std::ostream& operator<<(std::ostream& os, color& c) {
+    return os << glm::to_string(glm::vec3(c));
+}
 
 // render_info: contains color and transformation for each instance
 // and is used in the render loop in Scene class.
@@ -119,6 +132,10 @@ public:
         // This gets the location from the model matrix, as explained here:
         // https://stackoverflow.com/a/19448411
         return glm::vec3(render_infos[i].second.get_model()[3]);
+    }
+
+    inline render_info get_instance_info(const int i) const {
+        return render_infos[i];
     }
 
     inline std::vector<render_info> obj_infos() const {
