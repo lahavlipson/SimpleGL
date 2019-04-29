@@ -27,12 +27,13 @@ namespace sgl {
     float lastFrame = 0.0f;
 
     // key control
+    bool shadowsEnabled = true;
     bool atShapeLevel = true;
     std::vector<obj_type> obj_types;
-    int type_idx;
-    int instance_idx;
-    int obj_count;
-    BaseObj *curr_obj;
+    int type_idx = 0;
+    int instance_idx = 0;
+    int obj_count = 0;
+    BaseObj *curr_obj = nullptr;
 
     // objects
     std::unordered_map<obj_type, BaseObj *> obj_map;
@@ -172,10 +173,13 @@ namespace sgl {
     std::error_condition Scene::render() {
         if (obj_map.empty()) {
             std::cout << "Current scene has nothing to render.\n";
+            return make_SimpleGL_error_condition(SIMPLEGL_EMPTY_SCENE);
         } else {
             for (auto& entry : obj_map) {
                 obj_types.push_back(entry.first);
             }
+            curr_obj = obj_map[obj_types[type_idx]];
+            obj_count = curr_obj->count();
         }
         
         // shader configuration
@@ -190,7 +194,7 @@ namespace sgl {
             float currentFrame = glfwGetTime();
             deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
-            
+
             // input
             process_input(window);
             
@@ -282,6 +286,8 @@ namespace sgl {
                 cameraPos += cameraUp * cameraSpeed;
             } else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
                 cameraPos += -cameraUp * cameraSpeed;
+            } else if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS) {
+                shadowsEnabled = !shadowsEnabled;
             }
         }
     }
@@ -291,15 +297,15 @@ namespace sgl {
         if (atShapeLevel) {
             if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
                 type_idx = (type_idx + 1) % obj_types.size();
-                instance_idx = 0;
                 if (obj_map.find(obj_types[type_idx]) != obj_map.end()) {
                     curr_obj = obj_map[obj_types[type_idx]];
                     obj_count = curr_obj->count();
                 }
                 std::cout << "switched to shape category " 
-                        << obj_type_to_str(obj_types[type_idx]) << "\n";
+                          << obj_type_to_str(obj_types[type_idx]) << "\n";
             } else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
                 atShapeLevel = false;
+                instance_idx = 0;
                 std::cout << "at instance level\n";
             } else if (key == GLFW_KEY_H && action == GLFW_PRESS) {
                 curr_obj->hide_all();
@@ -341,6 +347,14 @@ namespace sgl {
                 curr_obj->rotate(instance_idx, rot_angle, {0, 1, 0});
             } else if (key == GLFW_KEY_9 && action == GLFW_PRESS) {
                 curr_obj->rotate(instance_idx, rot_angle, {0, 0, 1});
+            } else if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+                if (curr_obj == nullptr) {
+                    std::cout << "NULLPTR!!!!\n";
+                    return;
+                }
+                render_info info = curr_obj->get_instance_info(instance_idx);
+                std::cout << "\ncolor: " << info.first
+                          << "\ntransformation: " << info.second << "\n";
             }
         }
     }

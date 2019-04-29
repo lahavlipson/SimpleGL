@@ -11,6 +11,7 @@
 #define SIMPLEGL_OBJ_LOAD_FAIL 0x00020003
 #define SIMPLEGL_SHAPE_NOT_FOUND 0x00020004
 #define SIMPLEGL_OBJ_NO_FILE 0x00020005
+#define SIMPLEGL_EMPTY_SCENE 0x00020006
 
 // ref: https://stackoverflow.com/questions/13093576/mapping-external-error-codes-to-stderror-condition
 class SimpleGL_error : public std::error_category {
@@ -25,6 +26,7 @@ public:
         case SIMPLEGL_OBJ_LOAD_FAIL: return "SimpleGL status: obj loader failed";
         case SIMPLEGL_OBJ_NO_FILE: return "SimpleGL status: missing obj filepath";
         case SIMPLEGL_SHAPE_NOT_FOUND: return "SimpleGL status: shape type not found";
+        case SIMPLEGL_EMPTY_SCENE: return "SimpleGL status: nothing to render";
         // a couple of other error codes will be handled here
         default: return "Unknown status code";
         }
