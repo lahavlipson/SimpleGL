@@ -4,39 +4,45 @@
 #include "simplegl.hpp"
 
 namespace sgl {
-    // camera frame
-    glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f, 3.0f);
-    glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 
-    // lighting info
-    // -------------
-    glm::vec3 lightPos(6.2f, 7.0f, 5.0f);
+    namespace { 
+        // anonymous namespace to protect these values while still allowing access
+        // camera frame
+        glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f, 3.0f);
+        glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+        glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 
-    bool firstMouse = true;
-    // yaw is initialized to -90 degrees since a yaw of 0 results in a direction
-    // vector pointing to the right, so we initially rotate a bit to the left.
-    float yaw   = -90.0f;
-    float pitch =  0.0f;
-    float fov   =  45.0f;
-    float lastX =  0.0f;
-    float lastY =  0.0f;
+        // lighting info
+        glm::vec3 lightPos(6.2f, 7.0f, 5.0f);
 
-    // timing
-    float deltaTime = 0.0f; // time between current frame and last frame
-    float lastFrame = 0.0f;
+        bool firstMouse = true;
+        // yaw is initialized to -90 degrees since a yaw of 0 results in a direction
+        // vector pointing to the right, so we initially rotate a bit to the left.
+        float yaw   = -90.0f;
+        float pitch =  0.0f;
+        float fov   =  45.0f;
+        float lastX =  0.0f;
+        float lastY =  0.0f;
 
-    // key control
-    bool shadowsEnabled = true;
-    bool atShapeLevel = true;
-    std::vector<obj_type> obj_types;
-    int type_idx = 0;
-    int instance_idx = 0;
-    int obj_count = 0;
-    BaseObj *curr_obj = nullptr;
+        // timing
+        float deltaTime = 0.0f; // time between current frame and last frame
+        float lastFrame = 0.0f;
+        double framerate = 60; // dummy initial value
+        std::chrono::milliseconds deltaFrame;
+        double smoothing = 0.5;
 
-    // objects
-    std::unordered_map<obj_type, BaseObj *> obj_map;
+        // key control
+        bool shadowsEnabled = true;
+        bool atShapeLevel = true;
+        std::vector<obj_type> obj_types;
+        int type_idx = 0;
+        int instance_idx = 0;
+        int obj_count = 0;
+        BaseObj *curr_obj = nullptr;
+
+        // objects
+        std::unordered_map<obj_type, BaseObj *> obj_map;
+    }
 
     // Note: either both of the shaders are default or neither are default
     Scene::Scene(char *vs, char *fs, int width, int height, bool use_full_ctrl) {
@@ -99,7 +105,6 @@ namespace sgl {
         lightShader->setVec3("lightPos", 6.2f, 7.0f, 5.0f);
         
         // configure depth map FBO
-        // -----------------------
         glGenFramebuffers(1, &depthMapFBO);
         // create depth texture
         glGenTextures(1, &depthMap);
@@ -170,7 +175,11 @@ namespace sgl {
         }
     }
 
-    std::error_condition Scene::render() {
+    void Scene::setSmoothing(double smooth) { smoothing = smooth; }
+    double Scene::getFramerate() { return framerate; }
+    std::chrono::milliseconds Scene::getDeltaFrameTime() { return deltaFrame; }
+
+    std::error_condition Scene::render(std::function<void(Scene *)> userFn) {
         if (obj_map.empty()) {
             std::cout << "Current scene has nothing to render.\n";
             return make_SimpleGL_error_condition(SIMPLEGL_EMPTY_SCENE);
@@ -183,13 +192,12 @@ namespace sgl {
         }
         
         // shader configuration
-        // --------------------
         lightShader->setInt("shadowMap", 0);
-        glm::vec3 lightPos(-2.0f, 4.0f, -1.0f);
+        lightPos = {-2.0f, 4.0f, -1.0f};
         
         // render loop
         while (!glfwWindowShouldClose(window)) {
-            // TODO: drop measurement code
+            auto t0 = std::chrono::high_resolution_clock::now();
             // per-frame time logic
             float currentFrame = glfwGetTime();
             deltaTime = currentFrame - lastFrame;
@@ -219,7 +227,6 @@ namespace sgl {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             
             // 2. render scene as normal using the generated depth/shadow map
-            // --------------------------------------------------------------
             glViewport(0, 0, scr_width, scr_height);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             lightShader->use();
@@ -239,13 +246,19 @@ namespace sgl {
             lightShader->setBool("shadowEnabled", shadowsEnabled);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, depthMap);
-            
+        
             render_meshes(lightShader);
             glCullFace(GL_BACK);
 
             // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
             glfwSwapBuffers(window);
             glfwPollEvents();
+            auto t1 = std::chrono::high_resolution_clock::now();
+            deltaFrame = std::chrono::duration_cast<std::chrono::milliseconds>(t1-t0);
+            framerate = (framerate * smoothing) + ((1.0/(deltaFrame.count()/1000.0)) * (1.0-smoothing));
+            if (userFn){
+                userFn(this);
+            }
         }
         return make_SimpleGL_error_condition(0);
     }

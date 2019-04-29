@@ -9,6 +9,8 @@
 
 #include <unordered_map>
 #include <variant>
+#include <chrono>
+#include <functional>
 
 #include "composite.hpp"
 #include "glp_wrapper.hpp"
@@ -29,9 +31,11 @@ namespace sgl {
                       obj_params params = obj_params());
             
         void remove_obj_all(obj_type t);
+        void setSmoothing(double smooth);
+        double getFramerate();
+        std::chrono::milliseconds getDeltaFrameTime();
+        std::error_condition render(std::function<void(Scene *)> userFn = nullptr);
         
-        std::error_condition render();
-
         // GLFW callbacks.
         static void error_callback(int error, const char* description);
         static void framebuffer_size_callback(GLFWwindow *window, const int width, const int height);
