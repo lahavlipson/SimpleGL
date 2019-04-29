@@ -34,9 +34,8 @@ namespace sgl {
         void setSmoothing(double smooth);
         double getFramerate();
         std::chrono::milliseconds getDeltaFrameTime();
-
         std::error_condition render(std::function<void(Scene *)> userFn = nullptr);
-       
+        
         // GLFW callbacks.
         static void error_callback(int error, const char* description);
         static void framebuffer_size_callback(GLFWwindow *window, const int width, const int height);

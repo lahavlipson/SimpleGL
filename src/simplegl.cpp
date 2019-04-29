@@ -246,7 +246,7 @@ namespace sgl {
             lightShader->setBool("shadowEnabled", shadowsEnabled);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, depthMap);
-            
+        
             render_meshes(lightShader);
             glCullFace(GL_BACK);
 
@@ -255,7 +255,6 @@ namespace sgl {
             glfwPollEvents();
             auto t1 = std::chrono::high_resolution_clock::now();
             deltaFrame = std::chrono::duration_cast<std::chrono::milliseconds>(t1-t0);
-            //std::cout << "DELTAFRAME: " << deltaFrame.count() << "\n";
             framerate = (framerate * smoothing) + ((1.0/(deltaFrame.count()/1000.0)) * (1.0-smoothing));
             if (userFn){
                 userFn(this);
