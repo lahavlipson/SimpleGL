@@ -2,10 +2,15 @@
  * A hello-world test for the SimpleGL library.
  */
 #include <iostream>
+#include <functional>
 
 #include "simplegl.hpp"
 
 using namespace sgl;
+
+void printFramerate(Scene *scene_ptr) {
+    std::cout << "Framerate: " << scene_ptr->getFramerate() << "\n";
+}
 
 int main(int argc, char *argv[]) {
     try {
@@ -57,9 +62,8 @@ int main(int argc, char *argv[]) {
         ObjId floor = s.add_obj(Shape::box, {0.6, 0.6, 0.6} );
         floor.translate(glm::vec3( -35, -4, -35));
         floor.scale({70, 0.01, 70});
-    
         // render the scene.
-        s.render();
+        s.render(printFramerate);
     } catch (std::runtime_error& err) {
         std::cout << err.what() << "\n";
     }
