@@ -14,8 +14,7 @@ void callbackFunc(Scene *){
 int main(int argc, char *argv[]) {
     try {
         // initialize the scene.
-        // Scene s(argv[1], argv[2], 800, 600, true);
-        Scene s;
+        Scene s(argv[1], argv[2], 800, 600, true);
         s.set_callback(callbackFunc);
 
         // world space positions for the ten boxes
