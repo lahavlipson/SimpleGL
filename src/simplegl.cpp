@@ -186,12 +186,12 @@ namespace sgl {
         // render loop
         while (!glfwWindowShouldClose(window)) {
             // TODO: drop measurement code
+            callback(this);
+            
             // per-frame time logic
             float currentFrame = glfwGetTime();
             deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
-            
-            callback(this);
             
             // input
             process_input(window);
