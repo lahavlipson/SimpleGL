@@ -7,10 +7,16 @@
 
 using namespace sgl;
 
+void callbackFunc(Scene *){
+    std::cout << "hello world!\n";
+}
+
 int main(int argc, char *argv[]) {
     try {
         // initialize the scene.
-        Scene s(argv[1], argv[2], 800, 600, true);
+        // Scene s(argv[1], argv[2], 800, 600, true);
+        Scene s;
+        s.set_callback(callbackFunc);
 
         // world space positions for the ten boxes
         glm::vec3 box_positions[] = {

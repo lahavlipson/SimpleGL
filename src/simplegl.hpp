@@ -41,6 +41,10 @@ namespace sgl {
         static void mouse_callback(GLFWwindow *window, const double xpos, const double ypos);
         static void process_input(GLFWwindow *window);
         static void scroll_callback(GLFWwindow *window, const double xoffset, const double yoffset);
+        
+        inline void set_callback(std::function<void(Scene *)> f){
+            callback = f;
+        }
 
     private:
         // for glfw window
@@ -57,6 +61,7 @@ namespace sgl {
         Shader *depthShader;
 
         void render_meshes(Shader *sh);
+        std::function<void(Scene *)> callback;
     };
 }
 #endif

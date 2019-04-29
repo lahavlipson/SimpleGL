@@ -191,6 +191,8 @@ namespace sgl {
             deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
             
+            callback(this);
+            
             // input
             process_input(window);
             
