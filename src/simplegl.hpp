@@ -34,7 +34,11 @@ namespace sgl {
         void setSmoothing(double smooth);
         double getFramerate();
         std::chrono::milliseconds getDeltaFrameTime();
-        std::error_condition render(std::function<void(Scene *)> userFn = nullptr);
+        std::error_condition render();
+        
+        inline void setCallback(std::function<void(Scene *)> callback){
+            userCallback = callback;
+        }
         
         // GLFW callbacks.
         static void error_callback(int error, const char* description);
@@ -51,7 +55,12 @@ namespace sgl {
         static glm::vec3 cameraUp;
         
         // lighting info
-        static glm::vec3 lightPos;
+        glm::vec3 lightPos = {-2.0f, 4.0f, -1.0f};
+        const glm::vec3 LIGHT_COLOR = {1.0f, 1.0f, 1.0f};
+        
+        inline void setLightPos(const glm::vec3 pos){
+            lightPos = pos;
+        }
         
         static bool firstMouse;
         // yaw is initialized to -90 degrees since a yaw of 0 results in a direction
@@ -93,6 +102,7 @@ namespace sgl {
         const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
         Shader *lightShader;
         Shader *depthShader;
+        std::function<void(Scene *)> userCallback = nullptr;
 
         void render_meshes(Shader *sh);
     };

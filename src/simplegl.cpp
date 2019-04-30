@@ -5,39 +5,6 @@
 
 namespace sgl {
 
-    // anonymous namespace to protect these values while still allowing access
-    // camera frame
-    glm::vec3 Scene::cameraPos   = glm::vec3(0.0f, 0.0f, 3.0f);
-    glm::vec3 Scene::cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 Scene::cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
-
-    // lighting info
-    glm::vec3 Scene::lightPos = glm::vec3(6.2f, 7.0f, 5.0f);
-
-    bool Scene::firstMouse = true;
-    // yaw is initialized to -90 degrees since a yaw of 0 results in a direction
-    // vector pointing to the right, so we initially rotate a bit to the left.
-    float Scene::yaw   = -90.0f;
-    float Scene::pitch =  0.0f;
-    float Scene::fov   =  45.0f;
-    float Scene::lastX =  0.0f;
-    float Scene::lastY =  0.0f;
-
-    // timing
-    float Scene::deltaTime = 0.0f; // time between current frame and last frame
-
-    // key control
-    bool Scene::shadowsEnabled = true;
-    bool Scene::atShapeLevel = true;
-    std::vector<obj_type> Scene::obj_types;
-    int Scene::type_idx = 0;
-    int Scene::instance_idx = 0;
-    int Scene::obj_count = 0;
-    BaseObj *Scene::curr_obj = nullptr;
-
-    // objects
-    std::unordered_map<obj_type, BaseObj *> Scene::obj_map;
-
     // Note: either both of the shaders are default or neither are default
     Scene::Scene(char *vs, char *fs, int width, int height, bool use_full_ctrl) {
         // glfw: initialize and configure
@@ -92,11 +59,6 @@ namespace sgl {
             lightShader = new Shader(ShaderType::light);
         }
         depthShader = new Shader(ShaderType::depth);
-        
-        // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-        lightShader->use();
-        lightShader->setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-        lightShader->setVec3("lightPos", 6.2f, 7.0f, 5.0f);
         
         // configure depth map FBO
         glGenFramebuffers(1, &depthMapFBO);
@@ -173,7 +135,7 @@ namespace sgl {
     double Scene::getFramerate() { return framerate; }
     std::chrono::milliseconds Scene::getDeltaFrameTime() { return deltaFrame; }
 
-    std::error_condition Scene::render(std::function<void(Scene *)> userFn) {
+    std::error_condition Scene::render() {
         if (obj_map.empty()) {
             std::cout << "Current scene has nothing to render.\n";
             return make_SimpleGL_error_condition(SIMPLEGL_EMPTY_SCENE);
@@ -187,7 +149,6 @@ namespace sgl {
         
         // shader configuration
         lightShader->setInt("shadowMap", 0);
-        lightPos = {-2.0f, 4.0f, -1.0f};
         
         // render loop
         while (!glfwWindowShouldClose(window)) {
@@ -250,8 +211,8 @@ namespace sgl {
             auto t1 = std::chrono::high_resolution_clock::now();
             deltaFrame = std::chrono::duration_cast<std::chrono::milliseconds>(t1-t0);
             framerate = (framerate * smoothing) + ((1.0/(deltaFrame.count()/1000.0)) * (1.0-smoothing));
-            if (userFn){
-                userFn(this);
+            if (userCallback){
+                userCallback(this);
             }
         }
         return make_SimpleGL_error_condition(0);
@@ -272,6 +233,43 @@ namespace sgl {
             }
         }
     }
+    
+    
+    
+    //////////////////////////////////////////////////////////////////
+    // STATIC CALLBACK FUNCTIONS
+    //////////////////////////////////////////////////////////////////
+    
+    
+    // anonymous namespace to protect these values while still allowing access
+    // camera frame
+    glm::vec3 Scene::cameraPos   = glm::vec3(0.0f, 0.0f, 3.0f);
+    glm::vec3 Scene::cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 Scene::cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
+    
+    bool Scene::firstMouse = true;
+    // yaw is initialized to -90 degrees since a yaw of 0 results in a direction
+    // vector pointing to the right, so we initially rotate a bit to the left.
+    float Scene::yaw   = -90.0f;
+    float Scene::pitch =  0.0f;
+    float Scene::fov   =  45.0f;
+    float Scene::lastX =  0.0f;
+    float Scene::lastY =  0.0f;
+    
+    // timing
+    float Scene::deltaTime = 0.0f; // time between current frame and last frame
+    
+    // key control
+    bool Scene::shadowsEnabled = true;
+    bool Scene::atShapeLevel = true;
+    std::vector<obj_type> Scene::obj_types;
+    int Scene::type_idx = 0;
+    int Scene::instance_idx = 0;
+    int Scene::obj_count = 0;
+    BaseObj *Scene::curr_obj = nullptr;
+    
+    // objects
+    std::unordered_map<obj_type, BaseObj *> Scene::obj_map;
 
     // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
     void Scene::process_input(GLFWwindow *window) {
