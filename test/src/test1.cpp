@@ -15,8 +15,9 @@ void printFramerate(Scene *scene_ptr) {
 int main(int argc, char *argv[]) {
     try {
         // initialize the scene.
-        Scene s(argv[1], argv[2], 800, 600, true);
-
+        Scene s(nullptr, nullptr, 800, 600, true);
+        s.setCallback(printFramerate);
+        
         // world space positions for the ten boxes
         glm::vec3 box_positions[] = {
             glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -63,7 +64,7 @@ int main(int argc, char *argv[]) {
         floor.translate(glm::vec3( -35, -4, -35));
         floor.scale({70, 0.01, 70});
         // render the scene.
-        s.render(printFramerate);
+        s.render();
     } catch (std::runtime_error& err) {
         std::cout << err.what() << "\n";
     }
