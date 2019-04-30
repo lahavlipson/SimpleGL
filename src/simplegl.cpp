@@ -5,44 +5,38 @@
 
 namespace sgl {
 
-    namespace { 
-        // anonymous namespace to protect these values while still allowing access
-        // camera frame
-        glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f, 3.0f);
-        glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-        glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
+    // anonymous namespace to protect these values while still allowing access
+    // camera frame
+    glm::vec3 Scene::cameraPos   = glm::vec3(0.0f, 0.0f, 3.0f);
+    glm::vec3 Scene::cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 Scene::cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 
-        // lighting info
-        glm::vec3 lightPos(6.2f, 7.0f, 5.0f);
+    // lighting info
+    glm::vec3 Scene::lightPos = glm::vec3(6.2f, 7.0f, 5.0f);
 
-        bool firstMouse = true;
-        // yaw is initialized to -90 degrees since a yaw of 0 results in a direction
-        // vector pointing to the right, so we initially rotate a bit to the left.
-        float yaw   = -90.0f;
-        float pitch =  0.0f;
-        float fov   =  45.0f;
-        float lastX =  0.0f;
-        float lastY =  0.0f;
+    bool Scene::firstMouse = true;
+    // yaw is initialized to -90 degrees since a yaw of 0 results in a direction
+    // vector pointing to the right, so we initially rotate a bit to the left.
+    float Scene::yaw   = -90.0f;
+    float Scene::pitch =  0.0f;
+    float Scene::fov   =  45.0f;
+    float Scene::lastX =  0.0f;
+    float Scene::lastY =  0.0f;
 
-        // timing
-        float deltaTime = 0.0f; // time between current frame and last frame
-        float lastFrame = 0.0f;
-        double framerate = 60; // dummy initial value
-        std::chrono::milliseconds deltaFrame;
-        double smoothing = 0.5;
+    // timing
+    float Scene::deltaTime = 0.0f; // time between current frame and last frame
 
-        // key control
-        bool shadowsEnabled = true;
-        bool atShapeLevel = true;
-        std::vector<obj_type> obj_types;
-        int type_idx = 0;
-        int instance_idx = 0;
-        int obj_count = 0;
-        BaseObj *curr_obj = nullptr;
+    // key control
+    bool Scene::shadowsEnabled = true;
+    bool Scene::atShapeLevel = true;
+    std::vector<obj_type> Scene::obj_types;
+    int Scene::type_idx = 0;
+    int Scene::instance_idx = 0;
+    int Scene::obj_count = 0;
+    BaseObj *Scene::curr_obj = nullptr;
 
-        // objects
-        std::unordered_map<obj_type, BaseObj *> obj_map;
-    }
+    // objects
+    std::unordered_map<obj_type, BaseObj *> Scene::obj_map;
 
     // Note: either both of the shaders are default or neither are default
     Scene::Scene(char *vs, char *fs, int width, int height, bool use_full_ctrl) {
