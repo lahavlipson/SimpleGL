@@ -15,7 +15,7 @@ void printFramerate(Scene *scene_ptr) {
 int main(int argc, char *argv[]) {
     try {
         // initialize the scene.
-        Scene s;//(argv[1], argv[2], 800, 600, true)
+        Scene s(nullptr, nullptr, 800, 600, true);
         s.setCallback(printFramerate);
         
         // world space positions for the ten boxes

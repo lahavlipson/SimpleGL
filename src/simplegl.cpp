@@ -172,14 +172,17 @@ namespace sgl {
                                             glm::vec3( 0.0f, 0.0f,  0.0f),
                                             glm::vec3( 0.0f, 1.0f,  0.0f));
             glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-            depthShader->use();
-            depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
             
-            glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-            glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-            glClear(GL_DEPTH_BUFFER_BIT);
-            render_meshes(depthShader);
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            if (shadowsEnabled){
+                depthShader->use();
+                depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+                
+                glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+                glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+                glClear(GL_DEPTH_BUFFER_BIT);
+                render_meshes(depthShader);
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            }
             
             // 2. render scene as normal using the generated depth/shadow map
             glViewport(0, 0, scr_width, scr_height);
