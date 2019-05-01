@@ -35,7 +35,7 @@ namespace sgl {
         double getFramerate();
         std::chrono::milliseconds getDeltaFrameTime();
         std::error_condition render();
-        
+        inline void setShadows(bool enableShadow){ shadowsEnabled = enableShadow; }
         inline void setCallback(std::function<void(Scene *)> callback){
             userCallback = callback;
         }

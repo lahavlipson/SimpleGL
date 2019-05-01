@@ -163,10 +163,6 @@ public:
     }
 
     // Methods for manipulating mesh instances.
-    void remove() {
-        hide();
-    }
-
     void hide() {
         obj_ptr->hide_instance(idx);
     }
@@ -175,7 +171,7 @@ public:
         obj_ptr->show_instance(idx);
     }
 
-    void set_color(glm::vec3 c) {
+    void set_color(color c) {
         obj_ptr->set_color(idx, c);
     }
 
