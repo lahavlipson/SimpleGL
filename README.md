@@ -1,6 +1,6 @@
 # SimpleGL
 
-A simpler, beginner-friendly version of OpenGL.
+A simpler, beginner-friendly version of OpenGL. See the [wiki](https://github.com/Lahav174/SimpleGL/wiki) for the documentation and a tutorial.
 
 ## Directory Structure
 
