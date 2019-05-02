@@ -11,7 +11,7 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-struct transformation {
+struct Transformation {
     glm::mat4 model;        // the overall model matrix
     glm::mat4 rotation;     // rotation matrix
     glm::mat4 translation;  // translation matrix
@@ -25,7 +25,7 @@ struct transformation {
     }
 };
 
-inline std::ostream& operator<<(std::ostream& os, transformation& t) {
+inline std::ostream& operator<<(std::ostream& os, Transformation& t) {
     return os << "\n\tmodel: \n\t" << glm::to_string(t.model) 
               << "\n\trotation: \n\t" << glm::to_string(t.rotation)
               << "\n\ttranslation: \n\t" << glm::to_string(t.translation) 
@@ -33,30 +33,30 @@ inline std::ostream& operator<<(std::ostream& os, transformation& t) {
               << "\n\thidden: " << t.hidden; 
 }
 
-class color : public glm::vec3 {
+class Color : public glm::vec3 {
 public:
     using glm::vec3::vec3;
 
-    color(const int r, const int g, const int b)
+    Color(const int r, const int g, const int b)
         : glm::vec3(r/255.0, g/255.0, b/255.0) {}
 
-    color(const int hex_value) 
+    Color(const int hex_value) 
         : glm::vec3(((hex_value >> 16) & 0xFF) / 255.0,
                     ((hex_value >> 8) & 0xFF) / 255.0,
                     ((hex_value) & 0xFF) / 255.0) {}
 };
 
-inline std::ostream& operator<<(std::ostream& os, color& c) {
+inline std::ostream& operator<<(std::ostream& os, Color& c) {
     return os << glm::to_string(glm::vec3(c));
 }
 
-// render_info: contains color and transformation for each instance
+// RenderInfo: contains Color and Transformation for each instance
 // and is used in the render loop in Scene class.
-typedef std::pair<color, transformation> render_info;
+typedef std::pair<Color, Transformation> RenderInfo;
 
-// components: contains ObjIds that form the Composite object.
+// Components: contains ObjIds that form the Composite object.
 class ObjId;
-typedef std::vector<ObjId> components;
+typedef std::vector<ObjId> Components;
 
 // BaseObj: encapsulates a geometry in OpenGL; provides a uniform interface.
 class BaseObj {
@@ -69,102 +69,102 @@ public:
 
     virtual int get_v_size() const { return 0; }
 
-    virtual int add_instance(const color col, const components comp = {}) {
-        render_infos.push_back(render_info(col, transformation()));
-        return render_infos.size() - 1;
+    virtual int add_instance(const Color col, const Components comp = {}) {
+        RenderInfos.push_back(RenderInfo(col, Transformation()));
+        return RenderInfos.size() - 1;
     }
 
     virtual int duplicate_instance(const int i) {
-        render_infos.push_back(render_infos[i]);
-        return render_infos.size() - 1;
+        RenderInfos.push_back(RenderInfos[i]);
+        return RenderInfos.size() - 1;
     }
 
     virtual void hide_all() {
-        for (auto& info : render_infos) {
+        for (auto& info : RenderInfos) {
             info.second.hidden = true;
         }
     }
 
     virtual void hide_instance(const int i) {
-        render_infos[i].second.hidden = true;
+        RenderInfos[i].second.hidden = true;
     }
 
     virtual void show_all() {
-        for (auto& info : render_infos) {
+        for (auto& info : RenderInfos) {
             info.second.hidden = false;
         }
     }
 
     virtual void show_instance(const int i) {
-        render_infos[i].second.hidden = false;
+        RenderInfos[i].second.hidden = false;
     }
 
-    virtual void set_color(const int i, const color c) {
-        render_infos[i].first = c;
+    virtual void set_color(const int i, const Color c) {
+        RenderInfos[i].first = c;
     }
 
     virtual void set_model(const int i, const glm::mat4 m) {
-        render_infos[i].second.model = m;
+        RenderInfos[i].second.model = m;
     }
     
     virtual void reset_model(const int i) {
-        render_infos[i].second = transformation();
+        RenderInfos[i].second = Transformation();
     }
     
     virtual void rotate(
         const int i, const float angle, const glm::vec3 axis) {
-        render_infos[i].second.rotation = glm::rotate(
-            render_infos[i].second.rotation, glm::radians(angle), axis);
+        RenderInfos[i].second.rotation = glm::rotate(
+            RenderInfos[i].second.rotation, glm::radians(angle), axis);
     }
 
     virtual void set_rotation(
         const int i, const float angle, const glm::vec3 axis) {
-        render_infos[i].second.rotation = 
+        RenderInfos[i].second.rotation = 
             glm::rotate(glm::radians(angle), axis);
     }
 
     virtual void translate(const int i, const glm::vec3 translation) {
-        render_infos[i].second.translation = glm::translate(
-            render_infos[i].second.translation, translation);
+        RenderInfos[i].second.translation = glm::translate(
+            RenderInfos[i].second.translation, translation);
     }
 
     virtual void set_translation(const int i, const glm::vec3 translation) {
-        render_infos[i].second.translation = glm::translate(translation);
+        RenderInfos[i].second.translation = glm::translate(translation);
     }
     
     virtual void scale(const int i, const glm::vec3 scale) {
-        render_infos[i].second.scaling = glm::scale(
-            render_infos[i].second.scaling, scale);
+        RenderInfos[i].second.scaling = glm::scale(
+            RenderInfos[i].second.scaling, scale);
     }
 
     virtual void set_scale(const int i, const glm::vec3 scale) {
-        render_infos[i].second.scaling = glm::scale(scale);
+        RenderInfos[i].second.scaling = glm::scale(scale);
     }
     
     // This gets the location from the model matrix, as explained
     // here: https://stackoverflow.com/a/19448411
     inline glm::vec3 get_loc(const int i) const {
-        return glm::vec3(render_infos[i].second.get_model()[3]);
+        return glm::vec3(RenderInfos[i].second.get_model()[3]);
     }
 
-    inline render_info get_instance_info(const int i) const {
-        return render_infos[i];
+    inline RenderInfo get_instance_info(const int i) const {
+        return RenderInfos[i];
     }
 
-    inline std::vector<render_info> obj_infos() const {
-        return render_infos;
+    inline std::vector<RenderInfo> obj_infos() const {
+        return RenderInfos;
     }
 
     inline int count() const {
-        return render_infos.size();
+        return RenderInfos.size();
     }
 
 protected:
-    std::vector<render_info> render_infos;
+    std::vector<RenderInfo> RenderInfos;
 };
 
 // ObjId: represents the id to a specific instance of BaseObj
-// to modify its model matrices and color.
+// to modify its model matrices and Color.
 class ObjId {
 public:
     ObjId(int idx, BaseObj *obj_p): idx(idx), obj_ptr(obj_p) {}
@@ -184,7 +184,7 @@ public:
         obj_ptr->show_instance(idx);
     }
 
-    void set_color(const color c) {
+    void set_color(const Color c) {
         obj_ptr->set_color(idx, c);
     }
 

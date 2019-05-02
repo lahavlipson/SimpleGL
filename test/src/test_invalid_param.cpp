@@ -15,8 +15,8 @@ int main(int argc, char *argv[]) {
         Scene s;
         
         // add one sphere with too low accuracy
-        color pink(0.7, 0.5, 0.5);
-        obj_params oparams;
+        Color pink(0.7, 0.5, 0.5);
+        ObjParams oparams;
         oparams.accuracy = 1;
         ObjId m_id = s.add_obj(Shape::sphere, pink, oparams);
         m_id.translate(glm::vec3(-0.2,-0.2,-0.2));

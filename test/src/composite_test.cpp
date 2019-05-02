@@ -15,14 +15,14 @@ int main(int argc, char *argv[]) {
     // initialize the scene.
     Scene s;
 
-    color pink(0.7, 0.5, 0.5);
-    obj_params oparams;
+    Color pink(0.7, 0.5, 0.5);
+    ObjParams oparams;
     std::unordered_map<std::string, int> mymap = {{"accuracy",7}};
     oparams.filepath = argv[1];
 
     // add a composite object of a kitten mesh and a default cone.
     ObjId cone = s.add_obj(Shape::cone, pink);
-    color peach(0.8, 0.6, 0.8);
+    Color peach(0.8, 0.6, 0.8);
     ObjId obj = s.add_obj("kitten", peach, oparams);
     oparams.comp = {cone, obj};
     ObjId c1 = s.add_obj(Shape::composite, peach, oparams);

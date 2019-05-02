@@ -11,21 +11,21 @@ int main(int argc, char** argv) {
     ObjId my_box = s.add_obj(Shape::box);
 
     // add a default box with a color
-    color my_color(0.6, 0.6, 0.6);
+    Color my_color(0.6, 0.6, 0.6);
     ObjId my_box2 = s.add_obj(Shape::box, my_color);
 
     // add pyramid with 7 sides 
-    obj_params oparams;
+    ObjParams oparams;
     oparams.sides = 7;
     ObjId my_pyramid = s.add_obj(Shape::pyramid, my_color, oparams);
 
     // add a composite object
-    obj_params op_composite;
+    ObjParams op_composite;
     op_composite.comp = {my_sphere.duplicate(), my_box.duplicate()};
     ObjId c = s.add_obj(Shape::composite, my_color, op_composite);
 
     // add an object loaded from .obj file
-    obj_params op_kitten;
+    ObjParams op_kitten;
     op_kitten.filepath = "/path/to/kitten.obj"; // replace with correct path
     ObjId my_kitten = s.add_obj("kitten", my_color, op_kitten);
 

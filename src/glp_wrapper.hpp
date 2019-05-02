@@ -15,10 +15,10 @@ enum Shape {
     sphere, truncatedCone, cylinder, cone, pyramid, torus, box, composite
 };
 
-struct obj_params {    
+struct ObjParams {    
     int accuracy = 6;
     int sides = 3;
-    components comp;
+    Components comp;
     std::string filepath;
 
     bool is_primitive() const {
@@ -26,9 +26,9 @@ struct obj_params {
     }
 };
 
-typedef std::variant<Shape, std::string> obj_type;
+typedef std::variant<Shape, std::string> ObjType;
 
-inline std::ostream& operator<<(std::ostream& os, obj_type& t) {
+inline std::ostream& operator<<(std::ostream& os, ObjType& t) {
     if (std::holds_alternative<Shape>(t)) {
         Shape s = std::get<Shape>(t);
         switch (s) {
@@ -48,7 +48,7 @@ inline std::ostream& operator<<(std::ostream& os, obj_type& t) {
 }
 
 inline std::variant<std::vector<double>, std::error_condition> createGLPObj(
-    const obj_type t, const obj_params params) {
+    const ObjType t, const ObjParams params) {
     
     if (std::holds_alternative<Shape>(t)) {
         // --- Creating GLP primitive ---

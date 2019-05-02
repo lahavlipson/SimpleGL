@@ -32,13 +32,13 @@ namespace sgl {
         std::chrono::milliseconds delta_frame_milli;
         // -- key control
         bool at_shape_level = true;
-        std::vector<obj_type> obj_types;
+        std::vector<ObjType> obj_types;
         int type_idx = 0;
         int obj_count = 0;
         BaseObj *curr_obj = nullptr;
         int instance_idx = 0;
         // -- objects
-        std::unordered_map<obj_type, BaseObj *> obj_map;
+        std::unordered_map<ObjType, BaseObj *> obj_map;
     }
 
     // Note: either both of the shaders are default or neither are default
@@ -127,7 +127,7 @@ namespace sgl {
         glfwTerminate();
     }
 
-    ObjId Scene::add_obj(obj_type t, const color c, obj_params params) {
+    ObjId Scene::add_obj(ObjType t, const Color c, ObjParams params) {
         int id = 0;
         BaseObj *obj_ptr;
         if (obj_map.find(t) != obj_map.end()) { // contains(s) is c++20
@@ -161,7 +161,7 @@ namespace sgl {
         return ObjId(id, obj_ptr);
     }
 
-    void Scene::remove_obj_all(obj_type t) {
+    void Scene::remove_obj_all(ObjType t) {
         if (obj_map.find(t) != obj_map.end()) { // contains(s) is c++20
             delete obj_map[t];
             obj_map.erase(t);
@@ -370,7 +370,7 @@ namespace sgl {
             } else if (key == GLFW_KEY_9 && action == GLFW_PRESS) {
                 curr_obj->rotate(instance_idx, rot_angle, {0, 0, 1});
             } else if (key == GLFW_KEY_P && action == GLFW_PRESS) {
-                render_info info = curr_obj->get_instance_info(instance_idx);
+                RenderInfo info = curr_obj->get_instance_info(instance_idx);
                 std::cout << "\ncolor: " << info.first
                           << "\ntransformation: " << info.second << "\n";
             }

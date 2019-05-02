@@ -25,7 +25,7 @@ int main(int argc, char *argv[]){
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
     // add ten boxes and remove all instances of box
-    color pink(1.0,0.5,0.71);
+    Color pink(1.0,0.5,0.71);
     for (unsigned int i = 0; i < 10; i++) {
         ObjId m_id = s.add_obj(Shape::box, pink);
         m_id.translate(box_positions[i]);
@@ -34,9 +34,8 @@ int main(int argc, char *argv[]){
     }
     s.remove_obj_all(Shape::box);
 
-    color pink_gray(0.7, 0.5, 0.5);
-
     // add two spheres and hide the first one
+    Color pink_gray(0.7, 0.5, 0.5);
     ObjId m_id = s.add_obj(Shape::sphere, pink_gray, {.accuracy = 7});
     m_id.translate(glm::vec3(-0.2,-0.2,-0.2));
     m_id.hide();

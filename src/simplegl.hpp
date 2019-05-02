@@ -26,10 +26,10 @@ namespace sgl {
               bool use_full_ctrl = false);
         ~Scene();
 
-        ObjId add_obj(obj_type t, const color c = {0.4, 0.4, 0.4},
-                      obj_params params = obj_params());
+        ObjId add_obj(ObjType t, const Color c = {0.4, 0.4, 0.4},
+                      ObjParams params = ObjParams());
             
-        void remove_obj_all(obj_type t);
+        void remove_obj_all(ObjType t);
 
         std::error_condition render();
 

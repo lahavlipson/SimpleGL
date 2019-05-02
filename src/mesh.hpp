@@ -7,7 +7,7 @@
 class Mesh : public BaseObj {
 public:
     // When first initializing, generate buffers and store the vertices data.
-    Mesh(std::vector<double>& vertices, const color col)
+    Mesh(std::vector<double>& vertices, const Color col)
         : v_size(vertices.size()) {
 
         add_instance(col);

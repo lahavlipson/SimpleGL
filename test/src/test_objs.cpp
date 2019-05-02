@@ -26,15 +26,15 @@ int main(int argc, char *argv[]) {
                 std::cout << i << " " << argv[i] << "\n";
 
                 // Expected error: if fpath doesn't exist, will terminate.
-                obj_params oparams;
+                ObjParams oparams;
                 oparams.filepath = argv[i];
                 ObjId obj_m_id = s.add_obj(get_obj_name(argv[i]), 
-                    color(0.1*i, 0.15*i, 0.2*i), oparams);
+                    Color(0.1*i, 0.15*i, 0.2*i), oparams);
                 /* Comment the above and uncommment the following two lines to 
                  * see the expected error when we didn't provide a filepath. */
                 // oparams.accuracy = 1;
                 // ObjId obj_m_id = s.add_obj(get_obj_name(argv[i]), 
-                //     color(0.5, 0.7, 0.3), oparams);
+                //     Color(0.5, 0.7, 0.3), oparams);
                 
                 obj_m_id.rotate(i, glm::vec3(1, 1, 1));
                 obj_m_id.translate(glm::vec3(i, i, i));
