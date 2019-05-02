@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
         // initialize the scene.
         Scene s(nullptr, nullptr, 800, 600, true);
         s.set_callback(print_frame_rate);
+        s.set_smooth(0.8);
         
         // world space positions for the ten boxes
         glm::vec3 box_positions[] = {
