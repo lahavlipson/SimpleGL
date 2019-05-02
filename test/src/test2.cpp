@@ -35,23 +35,19 @@ int main(int argc, char *argv[]){
     s.remove_obj_all(Shape::box);
 
     color = glm::vec3(0.7, 0.5, 0.5);
-    obj_params oparams;
-    params p = {.accuracy = 7};
-    oparams.glp_params = p;
 
     // add two spheres and hide the first one
-    ObjId m_id = s.add_obj(Shape::sphere, color, oparams);
+    ObjId m_id = s.add_obj(Shape::sphere, color, {.accuracy = 7});
     m_id.translate(glm::vec3(-0.2,-0.2,-0.2));
     m_id.hide();
-    m_id = s.add_obj(Shape::sphere, color, oparams);
+    m_id = s.add_obj(Shape::sphere, color, {.accuracy = 7});
     m_id.translate(glm::vec3(-0.6,-0.6,-0.6));
     m_id.show();
     // s.remove_obj_all(Shape::sphere);
 
     // add one obj
     if (argc > 1) {
-        oparams.glp_params = argv[1];
-        ObjId obj_m_id = s.add_obj("object1", color, oparams);
+        ObjId obj_m_id = s.add_obj("object1", color, {.filepath = argv[1]});
         obj_m_id.scale(0.08);
     }
     // s.remove_obj_all("object1");

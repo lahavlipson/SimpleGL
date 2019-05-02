@@ -13,14 +13,17 @@
 
 enum Shape { sphere, truncatedCone, cylinder, cone, pyramid, torus, box, composite };
 
-struct params {
-	int accuracy = 6;
-	int sides = 3;
-};
-
 struct obj_params {
-    std::variant<params, std::string> glp_params;
+    
+    bool isPrimitive() const {
+        return filepath.empty();
+    }
+    
     components comp;
+    int accuracy = 6;
+    int sides = 3;
+    std::string filepath;
+
 };
 
 typedef std::variant<Shape, std::string> obj_type;
@@ -45,12 +48,12 @@ inline std::string obj_type_to_str(obj_type t) {
 }
 
 inline std::variant<std::vector<double>, std::error_condition> createGLPObj(
-    const obj_type t, const std::variant<params, std::string> varP) {
+    const obj_type t, const obj_params varP) {
 	
     if (std::holds_alternative<Shape>(t)) {
-		if (std::holds_alternative<params>(varP)) {
+		if (varP.isPrimitive()) {
 			// Get GLP parameters from the input params.
-			auto paramsP = std::get<params>(varP);
+			auto paramsP = varP;
 			if (paramsP.accuracy <= 1 || paramsP.sides <= 0) {
 				return make_SimpleGL_error_condition(SIMPLEGL_INVALID_PARAM);
 			}
@@ -79,9 +82,10 @@ inline std::variant<std::vector<double>, std::error_condition> createGLPObj(
 		}
     } else {
     	// --- Loading from .obj file ---
-		if (std::holds_alternative<std::string>(varP)) {
+        const std::string filepath = varP.filepath;
+		if (filepath.substr(filepath.find_last_of(".") + 1) == "obj") {
 			// Get the filepath to the .obj file and load the vertices.
-			std::string filepath = std::get<std::string>(varP);
+			std::string filepath = varP.filepath;
 			objl::Loader loader;
 			if (!loader.LoadFile(filepath)) {
 	        	return make_SimpleGL_error_condition(SIMPLEGL_INVALID_OBJ_FILE);
@@ -99,10 +103,10 @@ inline std::variant<std::vector<double>, std::error_condition> createGLPObj(
 	        	return make_SimpleGL_error_condition(SIMPLEGL_OBJ_LOAD_FAIL);
 			}
 			return output;
-		} else {
-			// provided params when we need a .obj filepath
-    		return make_SimpleGL_error_condition(SIMPLEGL_OBJ_NO_FILE);	
-		}
+        } else {
+            // provided params when we need a .obj filepath
+            return make_SimpleGL_error_condition(SIMPLEGL_OBJ_NO_FILE);
+        }
     }
 }
 

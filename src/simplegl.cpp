@@ -110,7 +110,7 @@ namespace sgl {
                 obj_ptr = new Composite();
                 id = obj_ptr->add_instance(c, params.comp);
             } else {
-                auto res = createGLPObj(t, params.glp_params);
+                auto res = createGLPObj(t, params);
                 if (std::holds_alternative<std::vector<double>>(res)) {
                     obj_ptr = new Mesh(std::get<std::vector<double>>(res), c);
                     obj_map.insert(std::make_pair(t, obj_ptr));

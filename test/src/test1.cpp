@@ -32,31 +32,25 @@ int main(int argc, char *argv[]) {
             glm::vec3(-1.3f,  1.0f, -1.5f)
         };
         // add ten boxes
-        glm::vec3 color = glm::vec3(1.0,0.5,0.71);
+        color pink(1.0,0.5,0.71);
         for (unsigned int i = 0; i < 10; i++) {
-            ObjId m_id = s.add_obj(Shape::box, color);
+            ObjId m_id = s.add_obj(Shape::box, pink);
             m_id.translate(box_positions[i]);
             float angle = 20.0f * i;
             m_id.rotate(angle, glm::vec3(1.0f, 0.3f, 0.5f));
         }
         
-        color = glm::vec3(0.7, 0.5, 0.5);
-        obj_params oparams;
-        params p = {.accuracy = 7};
-        oparams.glp_params = p;
+        color brown(0.7, 0.5, 0.5);
         
         // add two spheres
-        ObjId m_id = s.add_obj(Shape::sphere, color, oparams);
+        ObjId m_id = s.add_obj(Shape::sphere, brown, {.accuracy = 5});
         m_id.translate(glm::vec3(-0.2,-0.2,-0.2));
         m_id.scale(0.5);
-        m_id = s.add_obj(Shape::sphere, color);
+        m_id = s.add_obj(Shape::sphere, brown);
         m_id.translate(glm::vec3(-0.6,-0.6,0.6));
         m_id.scale(0.3);
         
-        // add pyramid
-        p = {.sides = 7};
-        oparams.glp_params = p;
-        m_id = s.add_obj(Shape::pyramid, color, oparams);
+        m_id = s.add_obj(Shape::pyramid, brown, {.sides = 7});
         m_id.translate(glm::vec3(4.2,1.2,-0.2));
         m_id.scale(0.5);
         

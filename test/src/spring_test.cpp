@@ -98,11 +98,8 @@ int main(int argc, char *argv[]){
     Scene s;
     const double height = -2.5;
     
-    obj_params params;
-    params.glp_params = argv[2];
-
     color col = glm::vec3(0.7, 0.5, 0.5);
-    ObjId center_obj = s.add_obj("kitten", col, params);
+    ObjId center_obj = s.add_obj("kitten", col, {.filepath = argv[2]});
     center_obj.translate(glm::vec3(0,height + 3.5,-3));
     center_obj.scale(3.0);
 
@@ -113,15 +110,15 @@ int main(int argc, char *argv[]){
     ball_1.translate(glm::vec3(0, height, -3));
     ball_1.scale(0.5);
 
-    params.glp_params = argv[1];
-    ObjId spring_1 = s.add_obj("spring_1", {0.4, 0.4, 0.4}, params);
+    //params.glp_params = argv[1];
+    ObjId spring_1 = s.add_obj("spring_1", {0.4, 0.4, 0.4}, {.filepath = argv[1]});
     spring_1.translate(glm::vec3(0, height, -3));
     springs.push_back(Spring(ball_1, center_obj, spring_1, 4.0, spring_constant));
     
     ObjId ball_2 = s.add_obj(Shape::sphere, col );
     ball_2.translate(glm::vec3(-3, height, -3));
     ball_2.scale(0.5);
-    ObjId spring_2 = s.add_obj("spring_2", {0.4, 0.4, 0.4}, params);
+    ObjId spring_2 = s.add_obj("spring_2", {0.4, 0.4, 0.4}, {.filepath = argv[1]});
     spring_2.translate(glm::vec3(-3, height, -3));
     springs.push_back(Spring(ball_2, center_obj, spring_2, 4.0, spring_constant));
     
@@ -129,7 +126,7 @@ int main(int argc, char *argv[]){
     ObjId ball_3 = s.add_obj(Shape::sphere, col );
     ball_3.translate(glm::vec3(-1.5, height, -6));
     ball_3.scale(0.5);
-    ObjId spring_3 = s.add_obj("spring_3", {0.4, 0.4, 0.4}, params);
+    ObjId spring_3 = s.add_obj("spring_3", {0.4, 0.4, 0.4}, {.filepath = argv[1]});
     spring_3.translate(glm::vec3(-1.5, height, -6));
     springs.push_back(Spring(ball_3, center_obj, spring_3, 4.0, spring_constant));
     
