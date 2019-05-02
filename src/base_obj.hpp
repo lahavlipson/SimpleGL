@@ -70,97 +70,97 @@ public:
     virtual int get_v_size() const { return 0; }
 
     virtual int add_instance(const Color col, const Components comp = {}) {
-        RenderInfos.push_back(RenderInfo(col, Transformation()));
-        return RenderInfos.size() - 1;
+        render_infos.push_back(RenderInfo(col, Transformation()));
+        return render_infos.size() - 1;
     }
 
     virtual int duplicate_instance(const int i) {
-        RenderInfos.push_back(RenderInfos[i]);
-        return RenderInfos.size() - 1;
+        render_infos.push_back(render_infos[i]);
+        return render_infos.size() - 1;
     }
 
     virtual void hide_all() {
-        for (auto& info : RenderInfos) {
+        for (auto& info : render_infos) {
             info.second.hidden = true;
         }
     }
 
     virtual void hide_instance(const int i) {
-        RenderInfos[i].second.hidden = true;
+        render_infos[i].second.hidden = true;
     }
 
     virtual void show_all() {
-        for (auto& info : RenderInfos) {
+        for (auto& info : render_infos) {
             info.second.hidden = false;
         }
     }
 
     virtual void show_instance(const int i) {
-        RenderInfos[i].second.hidden = false;
+        render_infos[i].second.hidden = false;
     }
 
     virtual void set_color(const int i, const Color c) {
-        RenderInfos[i].first = c;
+        render_infos[i].first = c;
     }
 
     virtual void set_model(const int i, const glm::mat4 m) {
-        RenderInfos[i].second.model = m;
+        render_infos[i].second.model = m;
     }
     
     virtual void reset_model(const int i) {
-        RenderInfos[i].second = Transformation();
+        render_infos[i].second = Transformation();
     }
     
     virtual void rotate(
         const int i, const float angle, const glm::vec3 axis) {
-        RenderInfos[i].second.rotation = glm::rotate(
-            RenderInfos[i].second.rotation, glm::radians(angle), axis);
+        render_infos[i].second.rotation = glm::rotate(
+            render_infos[i].second.rotation, glm::radians(angle), axis);
     }
 
     virtual void set_rotation(
         const int i, const float angle, const glm::vec3 axis) {
-        RenderInfos[i].second.rotation = 
+        render_infos[i].second.rotation = 
             glm::rotate(glm::radians(angle), axis);
     }
 
     virtual void translate(const int i, const glm::vec3 translation) {
-        RenderInfos[i].second.translation = glm::translate(
-            RenderInfos[i].second.translation, translation);
+        render_infos[i].second.translation = glm::translate(
+            render_infos[i].second.translation, translation);
     }
 
     virtual void set_translation(const int i, const glm::vec3 translation) {
-        RenderInfos[i].second.translation = glm::translate(translation);
+        render_infos[i].second.translation = glm::translate(translation);
     }
     
     virtual void scale(const int i, const glm::vec3 scale) {
-        RenderInfos[i].second.scaling = glm::scale(
-            RenderInfos[i].second.scaling, scale);
+        render_infos[i].second.scaling = glm::scale(
+            render_infos[i].second.scaling, scale);
     }
 
     virtual void set_scale(const int i, const glm::vec3 scale) {
-        RenderInfos[i].second.scaling = glm::scale(scale);
+        render_infos[i].second.scaling = glm::scale(scale);
     }
     
     // This gets the location from the model matrix, as explained
     // here: https://stackoverflow.com/a/19448411
     inline glm::vec3 get_loc(const int i) const {
-        return glm::vec3(RenderInfos[i].second.get_model()[3]);
+        return glm::vec3(render_infos[i].second.get_model()[3]);
     }
 
     inline RenderInfo get_instance_info(const int i) const {
-        return RenderInfos[i];
+        return render_infos[i];
     }
 
     inline std::vector<RenderInfo> obj_infos() const {
-        return RenderInfos;
+        return render_infos;
     }
 
     inline int count() const {
-        return RenderInfos.size();
+        return render_infos.size();
     }
 
 protected:
-    std::vector<RenderInfo> RenderInfos;
+    std::vector<RenderInfo> render_infos;
 };
 
 // ObjId: represents the id to a specific instance of BaseObj
