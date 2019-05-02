@@ -3,6 +3,7 @@
 
 #include "base_obj.hpp"
 
+// Composite: special geometry made up of more than one BaseObj.
 class Composite : public BaseObj {
 public:
     ~Composite() {
@@ -12,13 +13,13 @@ public:
     //=================Overriding Base class methods======================//
     bool is_composite() override { return true; }
 
-    int add_instance(const color col, const components comp = {}) override {
-        comp_infos.push_back(components(comp));
+    int add_instance(const Color col, const Components comp = {}) override {
+        comp_infos.push_back(Components(comp));
         return BaseObj::add_instance(col);
     }
 
     int duplicate_instance(const int i) override {
-        components ith_comp;
+        Components ith_comp;
         for (auto& id : comp_infos[i]) {
             ith_comp.push_back(id.duplicate());
         }
@@ -58,7 +59,7 @@ public:
         }
     }
 
-    void set_color(const int i, const color c) override {
+    void set_color(const int i, const Color c) override {
         BaseObj::set_color(i, c);
         for (auto& id : comp_infos[i]) {
             id.set_color(c);
@@ -79,7 +80,8 @@ public:
         }
     }
 
-    void rotate(const int i, const float angle, const glm::vec3 axis) override {
+    void rotate(
+        const int i, const float angle, const glm::vec3 axis) override {
         BaseObj::rotate(i, angle, axis);
         for (auto& id : comp_infos[i]) {
             id.rotate(angle, axis);
@@ -123,7 +125,7 @@ public:
     }
 
 private:
-    std::vector<components> comp_infos;
+    std::vector<Components> comp_infos;
 };
 
 #endif

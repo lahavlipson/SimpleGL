@@ -155,7 +155,7 @@ int main(int argc, char *argv[]){
     Scene s;
     const double height = 2.5;
     
-    color col = glm::vec3(0.7, 0.5, 0.5);
+    Color col(0.7, 0.5, 0.5);
     std::vector<Mass> masses;
     
     ObjId ball_0 = s.add_obj(Shape::sphere, col);
@@ -185,29 +185,27 @@ int main(int argc, char *argv[]){
     std::vector<Spring> springs;
     const double spring_constant = 32.5;
     
-    obj_params params;
-    params.glp_params = argv[1];
-    ObjId spring_1 = s.add_obj("spring_1", {0.4, 0.4, 0.4}, params);
+    ObjId spring_1 = s.add_obj("spring_1", {0.4, 0.4, 0.4}, {.filepath = argv[1]});
     spring_1.translate(glm::vec3(0, height, -3));
     springs.push_back(Spring(m1, m0, spring_1, 4.0, spring_constant));
     
-    ObjId spring_2 = s.add_obj("spring_2", {0.4, 0.4, 0.4}, params);
+    ObjId spring_2 = s.add_obj("spring_2", {0.4, 0.4, 0.4}, {.filepath = argv[1]});
     spring_2.translate(glm::vec3(-3, height, -3));
     springs.push_back(Spring(m2 ,m0, spring_2, 4.0, spring_constant));
     
-    ObjId spring_3 = s.add_obj("spring_3", {0.4, 0.4, 0.4}, params);
+    ObjId spring_3 = s.add_obj("spring_3", {0.4, 0.4, 0.4}, {.filepath = argv[1]});
     spring_3.translate(glm::vec3(-1.5, height, -6));
     springs.push_back(Spring(m3, m0, spring_3, 4.0, spring_constant));
 
-    ObjId spring_4 = s.add_obj("spring_4", {0.4, 0.4, 0.4}, params);
+    ObjId spring_4 = s.add_obj("spring_4", {0.4, 0.4, 0.4}, {.filepath = argv[1]});
     spring_4.translate(glm::vec3(0, height, -3));
     springs.push_back(Spring(m1, m2, spring_4, 4.0, spring_constant));
     
-    ObjId spring_5 = s.add_obj("spring_5", {0.4, 0.4, 0.4}, params);
+    ObjId spring_5 = s.add_obj("spring_5", {0.4, 0.4, 0.4}, {.filepath = argv[1]});
     spring_5.translate(glm::vec3(0, height, -3));
     springs.push_back(Spring(m1, m3, spring_5, 4.0, spring_constant));
     
-    ObjId spring_6 = s.add_obj("spring_6", {0.4, 0.4, 0.4}, params);
+    ObjId spring_6 = s.add_obj("spring_6", {0.4, 0.4, 0.4}, {.filepath = argv[1]});
     spring_6.translate(glm::vec3(0, height, -3));
     springs.push_back(Spring(m2, m3, spring_6, 4.0, spring_constant));
     

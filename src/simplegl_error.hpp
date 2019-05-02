@@ -1,8 +1,8 @@
 #ifndef SIMPLEGL_ERROR_HPP
 #define SIMPLEGL_ERROR_HPP
 
-#include <system_error>
 #include <string>
+#include <system_error>
 
 #include <GLFW/glfw3.h>
 
@@ -14,11 +14,11 @@
 #define SIMPLEGL_EMPTY_SCENE 0x00020006
 
 // ref: https://stackoverflow.com/questions/13093576/mapping-external-error-codes-to-stderror-condition
-class SimpleGL_error : public std::error_category {
+class SimpleGLError : public std::error_category {
 public:
     const char* name() const noexcept { return "SimpleGL status code"; }
-    std::string message(int errCode) const {
-        switch (errCode) {
+    std::string message(int error_code) const {
+        switch (error_code) {
         // ref for glfw error codes: https://www.glfw.org/docs/latest/group__errors.html
         case 0: return "Success";
         case SIMPLEGL_INVALID_PARAM: return "SimpleGL status: invalid parameter";
@@ -31,17 +31,18 @@ public:
         default: return "Unknown status code";
         }
     }
-    std::error_condition default_error_condition(int errCode) const noexcept {
-        return std::error_condition(errCode, *this);
+    std::error_condition default_error_condition(int error_code) const noexcept {
+        return std::error_condition(error_code, *this);
     }
 };
 
-inline SimpleGL_error const& SimpleGL_error_static() {
-    static class SimpleGL_error res;
+inline SimpleGLError const& SimpleGLError_static() {
+    static class SimpleGLError res;
     return res;
 }
 
 inline std::error_condition make_SimpleGL_error_condition(int status) {
-    return std::error_condition(status, SimpleGL_error_static());
+    return std::error_condition(status, SimpleGLError_static());
 }
+
 #endif
