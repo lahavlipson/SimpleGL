@@ -14,11 +14,11 @@ namespace sgl {
         glm::vec3 camera_up(0.0f, 1.0f, 0.0f);
         // yaw is initialized to -90 degrees since a yaw of 0 results in a direction
         // vector pointing to the right, so we initially rotate a bit to the left.
-        float yaw   = -90.0f;
-        float pitch =  0.0f;
-        float fov   =  45.0f;
-        float lastX =  0.0f;
-        float lastY =  0.0f;
+        float yaw = -90.0f;
+        float pitch = 0.0f;
+        float fov = 45.0f;
+        float last_x = 0.0f;
+        float last_y = 0.0f;
         // -- lighting
         glm::vec3 light_pos(6.2f, 7.0f, 5.0f);
         bool shadow_enabled = true;
@@ -60,8 +60,8 @@ namespace sgl {
         scr_height = height;
         window = glfwCreateWindow(scr_width, scr_height, "SimpleGL", nullptr, nullptr);
         glfwGetFramebufferSize(window, &scr_width, &scr_height);
-        lastX = (float) scr_width / 2.0;
-        lastY = (float) scr_height / 2.0;
+        last_x = (float) scr_width / 2.0;
+        last_y = (float) scr_height / 2.0;
         if (window == nullptr) {
             std::cout << "Failed to create GLFW window\n";
             glfwTerminate();
@@ -387,15 +387,16 @@ namespace sgl {
     // glfw: whenever the mouse moves, this callback is called
     void Scene::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
         if (first_mouse) {
-            lastX = xpos;
-            lastY = ypos;
+            last_x
+ = xpos;
+            last_y = ypos;
             first_mouse = false;
         }
         
-        float xoffset = xpos - lastX;
-        float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-        lastX = xpos;
-        lastY = ypos;
+        float xoffset = xpos - last_x;
+        float yoffset = last_y - ypos; // reversed since y-coordinates go from bottom to top
+        last_x = xpos;
+        last_y = ypos;
         
         float sensitivity = 0.1f; // change this value to your liking
         xoffset *= sensitivity;
