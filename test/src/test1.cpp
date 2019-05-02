@@ -15,7 +15,7 @@ void print_frame_rate(Scene *scene_ptr) {
 int main(int argc, char *argv[]) {
     try {
         // initialize the scene.
-        Scene s(nullptr, nullptr, 800, 600, true);
+        Scene s(true);
         s.set_callback(print_frame_rate);
         s.set_smooth(0.8);
         

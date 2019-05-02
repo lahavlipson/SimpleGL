@@ -21,9 +21,8 @@ namespace sgl {
 
     class Scene {
     public:
-        Scene(char *vs = nullptr, char *fs = nullptr, 
-              const int width = 800, const int height = 600, 
-              bool use_full_ctrl = false);
+        Scene(bool use_full_ctrl = false, char *vs = nullptr, 
+            char *fs = nullptr, const int width = 800, const int height = 600);
         ~Scene();
 
         ObjId add_obj(ObjType t, const Color c = {0.4, 0.4, 0.4},

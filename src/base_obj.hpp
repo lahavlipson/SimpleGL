@@ -37,8 +37,8 @@ class Color : public glm::vec3 {
 public:
     using glm::vec3::vec3;
 
-    Color(const int r, const int g, const int b)
-        : glm::vec3(r/255.0, g/255.0, b/255.0) {}
+    Color(const char r, const char g, const char b)
+        : glm::vec3((double)r/255.0, (double)g/255.0, (double)b/255.0) {}
 
     Color(const int hex_value) 
         : glm::vec3(((hex_value >> 16) & 0xFF) / 255.0,
@@ -205,19 +205,27 @@ public:
     }
 
     void scale(const glm::vec3 factor) {
-        obj_ptr->scale(idx, factor);
+        if (factor[0] >= 0 && factor[1] >= 0 && factor[2] >= 0){
+            obj_ptr->scale(idx, factor);
+        }
     }
 
     void scale(const double factor) {
-        obj_ptr->scale(idx, {factor, factor, factor});
+        if (factor >= 0){
+            obj_ptr->scale(idx, {factor, factor, factor});
+        }
     }
 
     void set_scale(const glm::vec3 factor) {
-        obj_ptr->set_scale(idx, factor);
+        if (factor[0] >= 0 && factor[1] >= 0 && factor[2] >= 0){
+            obj_ptr->set_scale(idx, factor);
+        }
     }
 
     void set_scale(const double factor) {
-        obj_ptr->set_scale(idx, {factor, factor, factor});
+        if (factor >= 0){
+            obj_ptr->set_scale(idx, {factor, factor, factor});
+        }
     }
 
     void rotate(const float angle, const glm::vec3 axis) {
@@ -235,23 +243,9 @@ public:
     bool operator==(const ObjId& b) const {
         return idx == b.idx && obj_ptr == b.obj_ptr;
     }
-
+private:
     int idx;
     BaseObj *obj_ptr;
 };
-
-namespace std {
-    template <>
-    struct hash<ObjId> {
-        std::size_t operator()(const ObjId& k) const {
-            using std::size_t;
-            using std::hash;
-            using std::string;
-
-            return ((hash<int>()(k.idx)
-                     ^ (hash<BaseObj *>()(k.obj_ptr) << 1)) >> 1);
-        }
-    };
-}
 
 #endif

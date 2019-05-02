@@ -42,7 +42,7 @@ namespace sgl {
     }
 
     // Note: either both of the shaders are default or neither are default
-    Scene::Scene(char *vs, char *fs, int width, int height, bool use_full_ctrl) {
+    Scene::Scene(bool use_full_ctrl, char *vs, char *fs, int width, int height) {
         // glfw: initialize and configure
         glfwSetErrorCallback(error_callback);
         glfwInit();
