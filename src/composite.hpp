@@ -3,6 +3,7 @@
 
 #include "base_obj.hpp"
 
+// Composite: special geometry made up of more than one BaseObj.
 class Composite : public BaseObj {
 public:
     ~Composite() {
@@ -79,7 +80,8 @@ public:
         }
     }
 
-    void rotate(const int i, const float angle, const glm::vec3 axis) override {
+    void rotate(
+        const int i, const float angle, const glm::vec3 axis) override {
         BaseObj::rotate(i, angle, axis);
         for (auto& id : comp_infos[i]) {
             id.rotate(angle, axis);

@@ -3,6 +3,7 @@
 
 #include "base_obj.hpp"
 
+// Mesh: custom mesh geometry.
 class Mesh : public BaseObj {
 public:
     // When first initializing, generate buffers and store the vertices data.
@@ -28,7 +29,7 @@ public:
         glEnableVertexAttribArray(1);  
     }
 
-    // Delete the buffers on destrunction.
+    // Delete the buffers on destruction.
     ~Mesh() {
         glDeleteVertexArrays(1, &vao_id);
         glDeleteBuffers(1, &vbo_id);

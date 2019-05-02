@@ -1,16 +1,16 @@
 #ifndef SIMPLEGL_HPP
 #define SIMPLEGL_HPP
 
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <unordered_map>
-#include <variant>
 #include <chrono>
 #include <functional>
+#include <unordered_map>
+#include <variant>
 
 #include "composite.hpp"
 #include "glp_wrapper.hpp"
@@ -31,12 +31,15 @@ namespace sgl {
                       obj_params params = obj_params());
             
         void remove_obj_all(obj_type t);
-        void setSmoothing(double smooth);
-        double getFramerate();
-        std::chrono::milliseconds getDeltaFrameTime();
+
         std::error_condition render();
-        inline void setShadows(bool enableShadow){ shadowsEnabled = enableShadow; }
-        inline void setCallback(std::function<void(Scene *)> callback){
+
+        double getFramerate() const;
+        std::chrono::milliseconds getDeltaFrameTime();
+        void setSmoothing(const double smooth);
+        inline void setShadows(bool enableShadow) { shadowsEnabled = enableShadow; }
+        inline void setLightPos(const glm::vec3 pos) { lightPos = pos; }
+        inline void setCallback(std::function<void(Scene *)> callback) {
             userCallback = callback;
         }
         
@@ -58,14 +61,11 @@ namespace sgl {
         glm::vec3 lightPos = {-2.0f, 4.0f, -1.0f};
         const glm::vec3 LIGHT_COLOR = {1.0f, 1.0f, 1.0f};
         
-        inline void setLightPos(const glm::vec3 pos){
-            lightPos = pos;
-        }
-        
         static bool firstMouse;
-        // yaw is initialized to -90 degrees since a yaw of 0 results in a direction
-        // vector pointing to the right, so we initially rotate a bit to the left.
-        static float yaw;
+        // yaw is initialized to -90 degrees since a yaw of 0 results in 
+        // a direction vector pointing to the right, so we initially 
+        // rotate a bit to the left.
+        static float yaw = -90.0f;
         static float pitch;
         static float fov;
         static float lastX;
@@ -91,19 +91,22 @@ namespace sgl {
         static std::unordered_map<obj_type, BaseObj *> obj_map;
 
     private:
-        // for glfw window
+        // glfw window
         int scr_width, scr_height;
         GLFWwindow *window;
 
-        // for light & shadow shading
+        // light and shadow shading
         unsigned int depthMapFBO;
         unsigned int depthMap;
         float borderColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
         const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
         Shader *lightShader;
         Shader *depthShader;
+
+        // custom render loop callback
         std::function<void(Scene *)> userCallback = nullptr;
 
+        // private helper
         void render_meshes(Shader *sh);
     };
 }

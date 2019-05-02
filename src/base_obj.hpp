@@ -37,10 +37,13 @@ class color : public glm::vec3 {
 public:
     using glm::vec3::vec3;
 
-    color(const int r, const int g, const int b):glm::vec3(r/255.0,g/255.0,b/255.0){}
-    color(const int hexValue):glm::vec3(((hexValue >> 16) & 0xFF) / 255.0,
-                                    ((hexValue >> 8) & 0xFF) / 255.0,
-                                    ((hexValue) & 0xFF) / 255.0){}
+    color(const int r, const int g, const int b)
+        : glm::vec3(r/255.0, g/255.0, b/255.0) {}
+
+    color(const int hexValue) 
+        : glm::vec3(((hexValue >> 16) & 0xFF) / 255.0,
+                    ((hexValue >> 8) & 0xFF) / 255.0,
+                    ((hexValue) & 0xFF) / 255.0) {}
 };
 
 inline std::ostream& operator<<(std::ostream& os, color& c) {
@@ -55,6 +58,7 @@ typedef std::pair<color, transformation> render_info;
 class ObjId;
 typedef std::vector<ObjId> components;
 
+// BaseObj: encapsulates a geometry in OpenGL; provides a uniform interface.
 class BaseObj {
 public:
     virtual ~BaseObj() {}
@@ -107,14 +111,16 @@ public:
         render_infos[i].second = transformation();
     }
     
-    virtual void rotate(const int i, const float angle, const glm::vec3 axis) {
+    virtual void rotate(
+        const int i, const float angle, const glm::vec3 axis) {
         render_infos[i].second.rotation = glm::rotate(
             render_infos[i].second.rotation, glm::radians(angle), axis);
     }
 
     virtual void set_rotation(
         const int i, const float angle, const glm::vec3 axis) {
-        render_infos[i].second.rotation = glm::rotate(glm::radians(angle), axis);
+        render_infos[i].second.rotation = 
+            glm::rotate(glm::radians(angle), axis);
     }
 
     virtual void translate(const int i, const glm::vec3 translation) {
@@ -135,9 +141,9 @@ public:
         render_infos[i].second.scaling = glm::scale(scale);
     }
     
+    // This gets the location from the model matrix, as explained
+    // here: https://stackoverflow.com/a/19448411
     inline glm::vec3 get_loc(const int i) const {
-        // This gets the location from the model matrix, as explained here:
-        // https://stackoverflow.com/a/19448411
         return glm::vec3(render_infos[i].second.get_model()[3]);
     }
 
@@ -178,11 +184,11 @@ public:
         obj_ptr->show_instance(idx);
     }
 
-    void set_color(color c) {
+    void set_color(const color c) {
         obj_ptr->set_color(idx, c);
     }
 
-    void set_model(glm::mat4 m) {
+    void set_model(const glm::mat4 m) {
         obj_ptr->set_model(idx, m);
     }
 
@@ -190,7 +196,7 @@ public:
         obj_ptr->reset_model(idx);
     }
 
-    void translate(glm::vec3 translation) {
+    void translate(const glm::vec3 translation) {
         obj_ptr->translate(idx, translation);
     }
 
@@ -198,11 +204,11 @@ public:
         obj_ptr->set_translation(idx, translation);
     }
 
-    void scale(glm::vec3 factor) {
+    void scale(const glm::vec3 factor) {
         obj_ptr->scale(idx, factor);
     }
 
-    void scale(double factor) {
+    void scale(const double factor) {
         obj_ptr->scale(idx, {factor, factor, factor});
     }
 
@@ -214,15 +220,15 @@ public:
         obj_ptr->set_scale(idx, {factor, factor, factor});
     }
 
-    void rotate(float angle, glm::vec3 axis) {
+    void rotate(const float angle, const glm::vec3 axis) {
         obj_ptr->rotate(idx, angle, axis);
     }
 
-    void set_rotation(const float angle, glm::vec3 axis) {
+    void set_rotation(const float angle, const glm::vec3 axis) {
         obj_ptr->set_rotation(idx, angle, axis);
     }
 
-    glm::vec3 get_loc() {
+    glm::vec3 get_loc() const {
         return obj_ptr->get_loc(idx);
     }
 

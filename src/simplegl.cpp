@@ -132,8 +132,8 @@ namespace sgl {
     }
 
     void Scene::setSmoothing(double smooth) { 
-	if (smooth <=1.0 && smooth >= 0.0)
-		    smoothing = smooth; 
+    if (smooth <=1.0 && smooth >= 0.0)
+            smoothing = smooth; 
     }
     double Scene::getFramerate() { return framerate; }
     std::chrono::milliseconds Scene::getDeltaFrameTime() { return deltaFrame; }

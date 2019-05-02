@@ -7,10 +7,10 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-#include <string>
 #include <fstream>
-#include <sstream>
 #include <iostream>
+#include <sstream>
+#include <string>
 
 enum ShaderType { light, depth };
 
