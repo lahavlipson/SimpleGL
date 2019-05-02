@@ -40,17 +40,17 @@ int main(int argc, char *argv[]) {
             m_id.rotate(angle, glm::vec3(1.0f, 0.3f, 0.5f));
         }
         
-        color brown(0.7, 0.5, 0.5);
+        color teal(0x47BECB);
         
         // add two spheres
-        ObjId m_id = s.add_obj(Shape::sphere, brown, {.accuracy = 5});
+        ObjId m_id = s.add_obj(Shape::sphere, teal, {.accuracy = 5});
         m_id.translate(glm::vec3(-0.2,-0.2,-0.2));
         m_id.scale(0.5);
-        m_id = s.add_obj(Shape::sphere, brown);
+        m_id = s.add_obj(Shape::sphere, teal);
         m_id.translate(glm::vec3(-0.6,-0.6,0.6));
         m_id.scale(0.3);
         
-        m_id = s.add_obj(Shape::pyramid, brown, {.sides = 7});
+        m_id = s.add_obj(Shape::pyramid, teal, {.sides = 7});
         m_id.translate(glm::vec3(4.2,1.2,-0.2));
         m_id.scale(0.5);
         
