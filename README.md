@@ -1,6 +1,6 @@
 # SimpleGL
 
-A simpler, beginner-friendly version of OpenGL. See the [wiki](https://github.com/Lahav174/SimpleGL/wiki) for the documentation and a [tutorial.md](tutorial.md).
+A simpler, beginner-friendly version of OpenGL. See the [wiki](https://github.com/Lahav174/SimpleGL/wiki) for the documentation [here](https://github.com/Lahav174/SimpleGL/wiki/Maintainer's-Notes) and [here](https://github.com/Lahav174/SimpleGL/wiki/SimpleGL-API) and for a [tutorial](https://github.com/Lahav174/SimpleGL/wiki/SimpleGL-Tutorial).
 
 
 ## Directory Structure
@@ -37,7 +37,3 @@ And you're running on a Mac, please install the xcode commandline tools: `xcode-
 ## Notes
 
 This README referenced https://github.com/wodeni/Animate-plus-plus/blob/master/README.md
-
-## TODO
-
-- create version of kitten bouncing on springs without using SimpleGL
