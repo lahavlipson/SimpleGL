@@ -27,15 +27,14 @@ int main(int argc, char *argv[]) {
 
                 // Expected error: if fpath doesn't exist, will terminate.
                 obj_params oparams;
-                oparams.glp_params = argv[i];
+                oparams.filepath = argv[i];
                 ObjId obj_m_id = s.add_obj(get_obj_name(argv[i]), 
-                    glm::vec3(0.1*i, 0.15*i, 0.2*i), oparams);
+                    color(0.1*i, 0.15*i, 0.2*i), oparams);
                 /* Comment the above and uncommment the following two lines to 
                  * see the expected error when we didn't provide a filepath. */
-                // params p = {.accuracy = 1};
-                // oparams.glp_params = p;
+                // oparams.accuracy = 1;
                 // ObjId obj_m_id = s.add_obj(get_obj_name(argv[i]), 
-                //     glm::vec3(0.5, 0.7, 0.3), oparams);
+                //     color(0.5, 0.7, 0.3), oparams);
                 
                 obj_m_id.rotate(i, glm::vec3(1, 1, 1));
                 obj_m_id.translate(glm::vec3(i, i, i));

@@ -155,7 +155,7 @@ int main(int argc, char *argv[]){
     Scene s;
     const double height = 2.5;
     
-    color col = glm::vec3(0.7, 0.5, 0.5);
+    color col(0.7, 0.5, 0.5);
     std::vector<Mass> masses;
     
     ObjId ball_0 = s.add_obj(Shape::sphere, col);

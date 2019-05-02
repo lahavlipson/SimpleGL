@@ -40,10 +40,10 @@ public:
     color(const int r, const int g, const int b)
         : glm::vec3(r/255.0, g/255.0, b/255.0) {}
 
-    color(const int hexValue) 
-        : glm::vec3(((hexValue >> 16) & 0xFF) / 255.0,
-                    ((hexValue >> 8) & 0xFF) / 255.0,
-                    ((hexValue) & 0xFF) / 255.0) {}
+    color(const int hex_value) 
+        : glm::vec3(((hex_value >> 16) & 0xFF) / 255.0,
+                    ((hex_value >> 8) & 0xFF) / 255.0,
+                    ((hex_value) & 0xFF) / 255.0) {}
 };
 
 inline std::ostream& operator<<(std::ostream& os, color& c) {

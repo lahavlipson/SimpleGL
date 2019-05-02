@@ -8,15 +8,15 @@
 
 using namespace sgl;
 
-void printFramerate(Scene *scene_ptr) {
-    std::cout << "Framerate: " << scene_ptr->getFramerate() << "\n";
+void print_frame_rate(Scene *scene_ptr) {
+    std::cout << "Framerate: " << scene_ptr->get_frame_rate() << "\n";
 }
 
 int main(int argc, char *argv[]) {
     try {
         // initialize the scene.
         Scene s(nullptr, nullptr, 800, 600, true);
-        s.setCallback(printFramerate);
+        s.set_callback(print_frame_rate);
         
         // world space positions for the ten boxes
         glm::vec3 box_positions[] = {
@@ -39,10 +39,9 @@ int main(int argc, char *argv[]) {
             float angle = 20.0f * i;
             m_id.rotate(angle, glm::vec3(1.0f, 0.3f, 0.5f));
         }
-        
-        color teal(0x47BECB);
-        
+                
         // add two spheres
+        color teal(0x47BECB);
         ObjId m_id = s.add_obj(Shape::sphere, teal, {.accuracy = 5});
         m_id.translate(glm::vec3(-0.2,-0.2,-0.2));
         m_id.scale(0.5);
@@ -55,7 +54,7 @@ int main(int argc, char *argv[]) {
         m_id.scale(0.5);
         
         ObjId floor = s.add_obj(Shape::box, {0.6, 0.6, 0.6} );
-        floor.translate(glm::vec3( -35, -4, -35));
+        floor.translate(glm::vec3(-35, -4, -35));
         floor.scale({70, 0.01, 70});
         // render the scene.
         s.render();

@@ -5,6 +5,42 @@
 
 namespace sgl {
 
+    // anonymous namespace to protect these values from being set by outside
+    // while still allowing access within SimpleGL implementation
+    namespace {
+        // -- camera frame
+        glm::vec3 camera_pos(0.0f, 0.0f, 3.0f);
+        glm::vec3 camera_front(0.0f, 0.0f, -1.0f);
+        glm::vec3 camera_up(0.0f, 1.0f, 0.0f);
+        // yaw is initialized to -90 degrees since a yaw of 0 results in a direction
+        // vector pointing to the right, so we initially rotate a bit to the left.
+        float yaw   = -90.0f;
+        float pitch =  0.0f;
+        float fov   =  45.0f;
+        float lastX =  0.0f;
+        float lastY =  0.0f;
+        // -- lighting
+        glm::vec3 light_pos(6.2f, 7.0f, 5.0f);
+        bool shadow_enabled = true;
+        // -- cursor
+        bool first_mouse = true;
+        // -- timing
+        float delta_time = 0.0f; // time between current frame and last frame
+        float last_frame = 0.0f;
+        double frame_rate = 60; // dummy initial value
+        double smoothing = 0.5; // initial smoothing
+        std::chrono::milliseconds delta_frame_milli;
+        // -- key control
+        bool at_shape_level = true;
+        std::vector<obj_type> obj_types;
+        int type_idx = 0;
+        int obj_count = 0;
+        BaseObj *curr_obj = nullptr;
+        int instance_idx = 0;
+        // -- objects
+        std::unordered_map<obj_type, BaseObj *> obj_map;
+    }
+
     // Note: either both of the shaders are default or neither are default
     Scene::Scene(char *vs, char *fs, int width, int height, bool use_full_ctrl) {
         // glfw: initialize and configure
@@ -54,26 +90,26 @@ namespace sgl {
         
         // build and compile our shader program
         if (vs && fs) {
-            lightShader = new Shader(vs, fs);
+            light_shader = new Shader(vs, fs);
         } else {
-            lightShader = new Shader(ShaderType::light);
+            light_shader = new Shader(ShaderType::light);
         }
-        depthShader = new Shader(ShaderType::depth);
+        depth_shader = new Shader(ShaderType::depth);
         
         // configure depth map FBO
-        glGenFramebuffers(1, &depthMapFBO);
+        glGenFramebuffers(1, &depth_map_fbo);
         // create depth texture
-        glGenTextures(1, &depthMap);
-        glBindTexture(GL_TEXTURE_2D, depthMap);
+        glGenTextures(1, &depth_map);
+        glBindTexture(GL_TEXTURE_2D, depth_map);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border_color);
         // attach depth texture as FBO's depth buffer
-        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_map, 0);
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -85,8 +121,8 @@ namespace sgl {
             delete entry.second;
         }
         // Delete shaders.
-        delete lightShader;
-        delete depthShader;
+        delete light_shader;
+        delete depth_shader;
         // glfw: terminate, clearing all previously allocated GLFW resources.
         glfwTerminate();
     }
@@ -117,7 +153,8 @@ namespace sgl {
                 } else {
                     // consideration: the user needs to use throw-try-catch 
                     // to handle the error case themselves
-                    throw std::runtime_error{std::get<std::error_condition>(res).message()};
+                    throw std::runtime_error{
+                            std::get<std::error_condition>(res).message()};
                 }
             }
         }
@@ -131,13 +168,6 @@ namespace sgl {
         }
     }
 
-    void Scene::setSmoothing(double smooth) { 
-    if (smooth <=1.0 && smooth >= 0.0)
-            smoothing = smooth; 
-    }
-    double Scene::getFramerate() { return framerate; }
-    std::chrono::milliseconds Scene::getDeltaFrameTime() { return deltaFrame; }
-
     std::error_condition Scene::render() {
         if (obj_map.empty()) {
             std::cout << "Current scene has nothing to render.\n";
@@ -150,77 +180,79 @@ namespace sgl {
             obj_count = curr_obj->count();
         }
         
-        // shader configuration
-        lightShader->setInt("shadowMap", 0);
-        
         // render loop
         while (!glfwWindowShouldClose(window)) {
+            // start measuring frame time
             auto t0 = std::chrono::high_resolution_clock::now();
             // per-frame time logic
-            float currentFrame = glfwGetTime();
-            deltaTime = currentFrame - lastFrame;
-            lastFrame = currentFrame;
+            float current_frame = glfwGetTime();
+            delta_time = current_frame - last_frame;
+            last_frame = current_frame;
 
             // input
             process_input(window);
             
-            // render
+            // start rendering
             glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             
             float near_plane = 1.0f, far_plane = 17.5f;
-            glm::mat4 lightProjection = glm::ortho(
+            glm::mat4 light_pojection = glm::ortho(
                 -10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-            glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f),
-                                            glm::vec3( 0.0f, 0.0f,  0.0f),
-                                            glm::vec3( 0.0f, 1.0f,  0.0f));
-            glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+            glm::mat4 light_view = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f),
+                                               glm::vec3( 0.0f, 0.0f,  0.0f),
+                                               glm::vec3( 0.0f, 1.0f,  0.0f));
+            glm::mat4 light_space_matrix = light_pojection * light_view;
             
-            if (shadowsEnabled){
-                depthShader->use();
-                depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
-                
+            // 1. render shadows if enabled
+            if (shadow_enabled) {
+                depth_shader->use();
+                depth_shader->setMat4("lightSpaceMatrix", light_space_matrix);
                 glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-                glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+                glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo);
                 glClear(GL_DEPTH_BUFFER_BIT);
-                render_meshes(depthShader);
+                render_meshes(depth_shader);
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                light_shader->setInt("shadowMap", 0);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, depth_map);
             }
             
             // 2. render scene as normal using the generated depth/shadow map
             glViewport(0, 0, scr_width, scr_height);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            lightShader->use();
+            light_shader->use();
             glCullFace(GL_FRONT);
             // (note that in this case matrices below could change every frame)
             // pass projection matrix to shader
             glm::mat4 projection = glm::perspective(
                 glm::radians(fov), (float)scr_width/(float)scr_height, 0.1f, 100.0f);
-            lightShader->setMat4("projection", projection);
+            light_shader->setMat4("projection", projection);
             // pass camera/view transformation to shade
-            glm::mat4 view = glm::lookAt(cameraPos, cameraPos+cameraFront, cameraUp);
-            lightShader->setMat4("view", view);
+            glm::mat4 view = glm::lookAt(
+                camera_pos, camera_pos + camera_front, camera_up);
+            light_shader->setMat4("view", view);
             // set light uniforms
-            lightShader->setVec3("viewPos", cameraPos);
-            lightShader->setVec3("lightPos", lightPos);
-            lightShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
-            lightShader->setBool("shadowEnabled", shadowsEnabled);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, depthMap);
-        
-            render_meshes(lightShader);
+            light_shader->setVec3("viewPos", camera_pos);
+            light_shader->setVec3("lightPos", light_pos);
+            light_shader->setMat4("lightSpaceMatrix", light_space_matrix);
+            light_shader->setBool("shadowEnabled", shadow_enabled);        
+            render_meshes(light_shader);
             glCullFace(GL_BACK);
 
-            // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+            // swap buffers and poll IO events (keys, mouse etc.)
             glfwSwapBuffers(window);
             glfwPollEvents();
+
+            // compute frame time and frame rate.
             auto t1 = std::chrono::high_resolution_clock::now();
-            deltaFrame = std::chrono::duration_cast<std::chrono::milliseconds>(t1-t0);
-            framerate = (framerate * smoothing) + ((1.0/(deltaFrame.count()/1000.0)) * (1.0-smoothing));
-            if (userCallback){
-                userCallback(this);
-            }
+            delta_frame_milli = std::chrono::duration_cast<std::chrono::milliseconds>(t1-t0);
+            frame_rate = (frame_rate * smoothing) + ((1.0/(delta_frame_milli.count()/1000.0)) * (1.0-smoothing));
+            
+            // call user-defined callback
+            if (user_callback) { user_callback(this); }
         }
+
         return make_SimpleGL_error_condition(0);
     }
 
@@ -240,72 +272,51 @@ namespace sgl {
         }
     }
     
-    
-    
+    //////////////////////////////////////////////////////////////////
+    // SHORT METHODS THAT INVOLVE GLOBAL VARIABLES
+    //////////////////////////////////////////////////////////////////
+
+    double Scene::get_frame_rate() const { return frame_rate; }
+    std::chrono::milliseconds Scene::get_delta_frame_milli() const 
+        { return delta_frame_milli; }
+    void Scene::set_smooth(const double smooth) { smoothing = smooth; }
+    void Scene::set_shadow(bool enable) { shadow_enabled = enable; }
+    void Scene::set_light_pos(const glm::vec3 pos) { light_pos = pos; }
+
     //////////////////////////////////////////////////////////////////
     // STATIC CALLBACK FUNCTIONS
     //////////////////////////////////////////////////////////////////
-    
-    
-    // anonymous namespace to protect these values while still allowing access
-    // camera frame
-    glm::vec3 Scene::cameraPos   = glm::vec3(0.0f, 0.0f, 3.0f);
-    glm::vec3 Scene::cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 Scene::cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
-    
-    bool Scene::firstMouse = true;
-    // yaw is initialized to -90 degrees since a yaw of 0 results in a direction
-    // vector pointing to the right, so we initially rotate a bit to the left.
-    float Scene::yaw   = -90.0f;
-    float Scene::pitch =  0.0f;
-    float Scene::fov   =  45.0f;
-    float Scene::lastX =  0.0f;
-    float Scene::lastY =  0.0f;
-    
-    // timing
-    float Scene::deltaTime = 0.0f; // time between current frame and last frame
-    
-    // key control
-    bool Scene::shadowsEnabled = true;
-    bool Scene::atShapeLevel = true;
-    std::vector<obj_type> Scene::obj_types;
-    int Scene::type_idx = 0;
-    int Scene::instance_idx = 0;
-    int Scene::obj_count = 0;
-    BaseObj *Scene::curr_obj = nullptr;
-    
-    // objects
-    std::unordered_map<obj_type, BaseObj *> Scene::obj_map;
 
-    // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
+    // process all input: 
+    // query GLFW which keys are pressed/released this frame and act accordingly
     void Scene::process_input(GLFWwindow *window) {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, true);
         } else {
-            float cameraSpeed = 2.5 * deltaTime;
+            float cameraSpeed = 2.5 * delta_time;
             if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-                cameraPos += cameraSpeed * cameraFront;
+                camera_pos += cameraSpeed * camera_front;
             } else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-                cameraPos -= cameraSpeed * cameraFront;
+                camera_pos -= cameraSpeed * camera_front;
             } else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-                cameraPos -= 
-                    glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+                camera_pos -= glm::normalize(
+                    glm::cross(camera_front, camera_up)) * cameraSpeed;
             } else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-                cameraPos += 
-                    glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+                camera_pos += glm::normalize(
+                    glm::cross(camera_front, camera_up)) * cameraSpeed;
             } else if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
-                cameraPos += cameraUp * cameraSpeed;
+                camera_pos += camera_up * cameraSpeed;
             } else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
-                cameraPos += -cameraUp * cameraSpeed;
+                camera_pos += -camera_up * cameraSpeed;
             } else if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS) {
-                shadowsEnabled = !shadowsEnabled;
+                shadow_enabled = !shadow_enabled;
             }
         }
     }
 
     void Scene::key_callback(
         GLFWwindow* window, int key, int scancode, int action, int mods) {
-        if (atShapeLevel) {
+        if (at_shape_level) {
             if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
                 type_idx = (type_idx + 1) % obj_types.size();
                 if (obj_map.find(obj_types[type_idx]) != obj_map.end()) {
@@ -313,9 +324,9 @@ namespace sgl {
                     obj_count = curr_obj->count();
                 }
                 std::cout << "switched to shape category " 
-                          << obj_type_to_str(obj_types[type_idx]) << "\n";
+                          << obj_types[type_idx] << "\n";
             } else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
-                atShapeLevel = false;
+                at_shape_level = false;
                 instance_idx = 0;
                 std::cout << "at instance level\n";
             } else if (key == GLFW_KEY_H && action == GLFW_PRESS) {
@@ -324,8 +335,8 @@ namespace sgl {
                 curr_obj->show_all();
             }
         } else {
-            float speed = 5.0 * deltaTime;
-            float rot_angle = 10.0 * deltaTime;
+            float speed = 5.0 * delta_time;
+            float rot_angle = 10.0 * delta_time;
             if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
                 instance_idx = (instance_idx + 1) % obj_count;
                 std::cout << "switched to instance at idx " << instance_idx << "\n";
@@ -334,7 +345,7 @@ namespace sgl {
                 if (instance_idx < 0) instance_idx += obj_count;
                 std::cout << "switched to instance at idx " << instance_idx << "\n";
             } else if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-                atShapeLevel = true;
+                at_shape_level = true;
                 std::cout << "at shape level\n";
             } else if (key == GLFW_KEY_H && action == GLFW_PRESS) {
                 curr_obj->hide_instance(instance_idx);
@@ -359,10 +370,6 @@ namespace sgl {
             } else if (key == GLFW_KEY_9 && action == GLFW_PRESS) {
                 curr_obj->rotate(instance_idx, rot_angle, {0, 0, 1});
             } else if (key == GLFW_KEY_P && action == GLFW_PRESS) {
-                if (curr_obj == nullptr) {
-                    std::cout << "NULLPTR!!!!\n";
-                    return;
-                }
                 render_info info = curr_obj->get_instance_info(instance_idx);
                 std::cout << "\ncolor: " << info.first
                           << "\ntransformation: " << info.second << "\n";
@@ -379,10 +386,10 @@ namespace sgl {
 
     // glfw: whenever the mouse moves, this callback is called
     void Scene::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-        if (firstMouse) {
+        if (first_mouse) {
             lastX = xpos;
             lastY = ypos;
-            firstMouse = false;
+            first_mouse = false;
         }
         
         float xoffset = xpos - lastX;
@@ -407,7 +414,7 @@ namespace sgl {
         front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
         front.y = sin(glm::radians(pitch));
         front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        cameraFront = glm::normalize(front);
+        camera_front = glm::normalize(front);
     }
 
     // glfw: whenever the mouse scroll wheel scrolls, this callback is called

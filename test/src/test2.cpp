@@ -25,29 +25,29 @@ int main(int argc, char *argv[]){
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
     // add ten boxes and remove all instances of box
-    glm::vec3 color = glm::vec3(1.0,0.5,0.71);
+    color pink(1.0,0.5,0.71);
     for (unsigned int i = 0; i < 10; i++) {
-        ObjId m_id = s.add_obj(Shape::box, color);
+        ObjId m_id = s.add_obj(Shape::box, pink);
         m_id.translate(box_positions[i]);
         float angle = 20.0f * i;
         m_id.rotate(angle, glm::vec3(1.0f, 0.3f, 0.5f));
     }
     s.remove_obj_all(Shape::box);
 
-    color = glm::vec3(0.7, 0.5, 0.5);
+    color pink_gray(0.7, 0.5, 0.5);
 
     // add two spheres and hide the first one
-    ObjId m_id = s.add_obj(Shape::sphere, color, {.accuracy = 7});
+    ObjId m_id = s.add_obj(Shape::sphere, pink_gray, {.accuracy = 7});
     m_id.translate(glm::vec3(-0.2,-0.2,-0.2));
     m_id.hide();
-    m_id = s.add_obj(Shape::sphere, color, {.accuracy = 7});
+    m_id = s.add_obj(Shape::sphere, pink_gray, {.accuracy = 7});
     m_id.translate(glm::vec3(-0.6,-0.6,-0.6));
     m_id.show();
     // s.remove_obj_all(Shape::sphere);
 
     // add one obj
     if (argc > 1) {
-        ObjId obj_m_id = s.add_obj("object1", color, {.filepath = argv[1]});
+        ObjId obj_m_id = s.add_obj("object1", pink_gray, {.filepath = argv[1]});
         obj_m_id.scale(0.08);
     }
     // s.remove_obj_all("object1");

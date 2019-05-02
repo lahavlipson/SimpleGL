@@ -98,7 +98,7 @@ int main(int argc, char *argv[]){
     Scene s;
     const double height = -2.5;
     
-    color col = glm::vec3(0.7, 0.5, 0.5);
+    color col(0.7, 0.5, 0.5);
     ObjId center_obj = s.add_obj("kitten", col, {.filepath = argv[2]});
     center_obj.translate(glm::vec3(0,height + 3.5,-3));
     center_obj.scale(3.0);
