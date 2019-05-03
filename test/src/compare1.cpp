@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     lastX = (float) SCR_WIDTH / 2.0;
     lastY = (float) SCR_HEIGHT / 2.0;
     // glfw window creation
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "SimpleGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "OpenGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -391,15 +391,15 @@ int main(int argc, char *argv[]) {
             }
         }
         
+        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+
         // compute frame time and frame rate.
         auto t1 = std::chrono::high_resolution_clock::now();
         delta_frame_milli = std::chrono::duration_cast<std::chrono::milliseconds>(t1-t0);
         frame_rate = (frame_rate * smoothing) + ((1.0/(delta_frame_milli.count()/1000.0)) * (1.0-smoothing));
-        std::cout << "frame rate: " << frame_rate << "\n";
-        
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+        std::cout << frame_rate << "\n";
     }
     
     // optional: de-allocate all resources once they've outlived their purpose:
