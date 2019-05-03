@@ -1,11 +1,11 @@
 /*
- * A hello-world test for the SimpleGL library.
+ * Live demo for SimpleGL presentation.
  */
-#include <iostream>
-#include <functional>
-#include <math.h>
-#include "simplegl.hpp"
 
+#include <iostream>
+#include <math.h>
+
+#include "simplegl.hpp"
 
 using namespace sgl;
 
@@ -13,7 +13,6 @@ int main(int argc, char *argv[]) {
     try {
         // initialize the scene.
         Scene s(true);
-	
         s.set_shadow(true);
         s.set_light_pos({30,30,-30});
         

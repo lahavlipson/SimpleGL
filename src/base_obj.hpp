@@ -246,6 +246,7 @@ public:
     bool operator==(const ObjId& b) const {
         return idx == b.idx && obj_ptr == b.obj_ptr;
     }
+
 private:
     int idx;
     BaseObj *obj_ptr;

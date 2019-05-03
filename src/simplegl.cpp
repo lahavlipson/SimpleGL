@@ -74,9 +74,6 @@ namespace sgl {
         glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
         glfwSetCursorPosCallback(window, mouse_callback);
         glfwSetScrollCallback(window, scroll_callback);
-
-        // tell GLFW to capture our mouse
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         
         // glad: load all OpenGL function pointers
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -273,7 +270,7 @@ namespace sgl {
     }
     
     //////////////////////////////////////////////////////////////////
-    // SHORT METHODS THAT INVOLVE GLOBAL VARIABLES
+    // METHODS THAT INVOLVE GLOBAL VARIABLES
     //////////////////////////////////////////////////////////////////
 
     double Scene::get_frame_rate() const { return frame_rate; }
@@ -315,6 +312,7 @@ namespace sgl {
         }
     }
 
+    // provides interactive key controls
     void Scene::key_callback(
         GLFWwindow* window, int key, int scancode, int action, int mods) {
         if (at_shape_level) {
@@ -388,8 +386,7 @@ namespace sgl {
     // glfw: whenever the mouse moves, this callback is called
     void Scene::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
         if (first_mouse) {
-            last_x
- = xpos;
+            last_x = xpos;
             last_y = ypos;
             first_mouse = false;
         }
