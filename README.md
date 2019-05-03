@@ -1,3 +1,7 @@
+<p align="center">
+<img src="images/simplegl_logo.png" width=75%/>
+</p>
+
 # SimpleGL
 
 A simpler, beginner-friendly version of OpenGL. See the [wiki](https://github.com/Lahav174/SimpleGL/wiki) for the documentation [here](https://github.com/Lahav174/SimpleGL/wiki/Maintainer's-Notes) and [here](https://github.com/Lahav174/SimpleGL/wiki/SimpleGL-API) and for a [tutorial](https://github.com/Lahav174/SimpleGL/wiki/SimpleGL-Tutorial).
