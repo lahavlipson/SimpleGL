@@ -138,6 +138,23 @@ static const std::string DEPTH_FRAG_SHADER = "#version 330 core\n"
 "    // gl_FragDepth = gl_FragCoord.z;\n"
 "}\n";
 
+struct ShadowParams {
+    float near_plane = 1.0001f;
+    float far_plane = 70.0f;
+    float proj_frustum_size = 30.0f;
+    unsigned int depth_map_resolution = 1024;
+    glm::vec3 focus = glm::vec3(0,0,0);
+
+    void set_focus(const glm::vec3 f){
+        focus = f;
+    }
+
+    //light position also needed to set direction
+    void set_light_direction(const glm::vec3 dir, const glm::vec3 lightpos){
+        focus = lightpos + dir;
+    }
+};
+
 class Shader {
 public:
     

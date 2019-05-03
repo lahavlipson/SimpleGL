@@ -46,6 +46,9 @@ public:
                     ((hex_value) & 0xFF) / 255.0) {}
 };
 
+const Color RED(0xF20505), BLUE(0x3640FF), GREEN(0x06D104), YELLOW(0xFAFB4D), ORANGE(0xFC9736),
+PINK(0xFB53E9), TEAL(0x47FBA3), BROWN(0x985624), GREY(0x606060), WHITE(0XFFFFFF), BLACK(0x000000);
+
 inline std::ostream& operator<<(std::ostream& os, Color& c) {
     return os << glm::to_string(glm::vec3(c));
 }

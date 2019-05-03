@@ -4,7 +4,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <variant>
-
+#include <cmath>
 #include <glp/glp.h>
 #include <obj_loader/obj_loader.h>
 
@@ -18,6 +18,8 @@ enum Shape {
 struct ObjParams {    
     int accuracy = 6;
     int sides = 3;
+    double r1 = 1;
+    double r2 = 1;
     Components comp;
     std::string filepath;
 
@@ -58,19 +60,20 @@ inline std::variant<std::vector<double>, std::error_condition> createGLPObj(
                 // Error: invalid GLP parameters
                 return make_SimpleGL_error_condition(SIMPLEGL_INVALID_PARAM);
             }
+            const int exponential_acc = pow(2,params.accuracy);
             switch (std::get<Shape>(t)) {
             case sphere:
                 return glp::sphere(params.accuracy, 1);
             case truncatedCone:
-                return glp::truncatedCone(params.accuracy, 1, 1, 1);
+                return glp::truncatedCone(exponential_acc, 1, 1, 0.5);
             case cylinder:
-                return glp::cylinder(params.accuracy, 1, 1);
+                return glp::cylinder(exponential_acc, 1, 1);
             case cone:
-                return glp::cone(params.accuracy, 1, 1);
+                return glp::cone(exponential_acc, 1, 1);
             case pyramid:
                 return glp::pyramid(params.sides, 1, 1);
             case torus:
-                return glp::torus(1, 1, 1, 1);
+                return glp::torus(exponential_acc, exponential_acc, params.r1, params.r2);
             case box:
                 return glp::box(glm::dvec3(1, 1, 1));
             default:

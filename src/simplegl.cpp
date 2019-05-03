@@ -20,7 +20,7 @@ namespace sgl {
         float last_x = 0.0f;
         float last_y = 0.0f;
         // -- lighting
-        glm::vec3 light_pos(6.2f, 7.0f, 5.0f);
+        glm::vec3 light_pos(6.0f, 6.0f, -6.0f);
         bool shadow_enabled = true;
         // -- cursor
         bool first_mouse = true;
@@ -101,7 +101,7 @@ namespace sgl {
         // create depth texture
         glGenTextures(1, &depth_map);
         glBindTexture(GL_TEXTURE_2D, depth_map);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadow_params.depth_map_resolution, shadow_params.depth_map_resolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -193,22 +193,22 @@ namespace sgl {
             process_input(window);
             
             // start rendering
-            glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+            glClearColor(background_color[0], background_color[1], background_color[2], 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             
-            float near_plane = 1.0f, far_plane = 17.5f;
-            glm::mat4 light_pojection = glm::ortho(
-                -10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-            glm::mat4 light_view = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f),
-                                               glm::vec3( 0.0f, 0.0f,  0.0f),
-                                               glm::vec3( 0.0f, 1.0f,  0.0f));
+            glm::mat4 light_pojection = glm::ortho(-shadow_params.proj_frustum_size,
+                                                   shadow_params.proj_frustum_size,
+                                                   -shadow_params.proj_frustum_size,
+                                                   shadow_params.proj_frustum_size,
+                                                   shadow_params.near_plane, shadow_params.far_plane);
+            glm::mat4 light_view = glm::lookAt(light_pos, shadow_params.focus, camera_up);
             glm::mat4 light_space_matrix = light_pojection * light_view;
             
             // 1. render shadows if enabled
             if (shadow_enabled) {
                 depth_shader->use();
                 depth_shader->setMat4("lightSpaceMatrix", light_space_matrix);
-                glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+                glViewport(0, 0, shadow_params.depth_map_resolution, shadow_params.depth_map_resolution);
                 glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo);
                 glClear(GL_DEPTH_BUFFER_BIT);
                 render_meshes(depth_shader);
@@ -282,6 +282,7 @@ namespace sgl {
     void Scene::set_smooth(const double smooth) { smoothing = smooth; }
     void Scene::set_shadow(bool enable) { shadow_enabled = enable; }
     void Scene::set_light_pos(const glm::vec3 pos) { light_pos = pos; }
+    glm::vec3 Scene::get_light_pos() const { return light_pos; }
 
     //////////////////////////////////////////////////////////////////
     // STATIC CALLBACK FUNCTIONS

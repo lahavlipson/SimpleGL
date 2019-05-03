@@ -37,8 +37,10 @@ namespace sgl {
         void set_smooth(const double smooth);
         void set_shadow(bool enable);
         void set_light_pos(const glm::vec3 pos);
+        glm::vec3 get_light_pos() const;
         inline void set_callback(
             std::function<void(Scene *)> callback) { user_callback = callback; }
+        inline void set_background_color(const Color c) { background_color = c; }
         
         // GLFW callbacks.
         static void error_callback(int error, const char* description);
@@ -53,16 +55,17 @@ namespace sgl {
         int scr_width, scr_height;
         GLFWwindow *window;
         // light and shadow shading
+        ShadowParams shadow_params;
         unsigned int depth_map_fbo;
         unsigned int depth_map;
         const float border_color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-        const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
         Shader *light_shader;
         Shader *depth_shader;
         // custom render loop callback
         std::function<void(Scene *)> user_callback = nullptr;
         // private helper
         void render_meshes(Shader *sh);
+        Color background_color = {0.8f, 0.8f, 0.8f};
     };
 }
 

@@ -3,60 +3,53 @@
  */
 #include <iostream>
 #include <functional>
-
+#include <math.h>
 #include "simplegl.hpp"
 
-using namespace sgl;
 
-void print_frame_rate(Scene *scene_ptr) {
-    std::cout << "Framerate: " << scene_ptr->get_frame_rate() << "\n";
-}
+using namespace sgl;
 
 int main(int argc, char *argv[]) {
     try {
         // initialize the scene.
         Scene s(true);
-        s.set_callback(print_frame_rate);
-        s.set_smooth(0.8);
         
-        // world space positions for the ten boxes
-        glm::vec3 box_positions[] = {
-            glm::vec3( 0.0f,  0.0f,  0.0f),
-            glm::vec3( 2.0f,  5.0f, -15.0f),
-            glm::vec3(-1.5f, -2.2f, -2.5f),
-            glm::vec3(-3.8f, -2.0f, -12.3f),
-            glm::vec3( 2.4f, -0.4f, -3.5f),
-            glm::vec3(-1.7f,  3.0f, -7.5f),
-            glm::vec3( 1.3f, -2.0f, -2.5f),
-            glm::vec3( 1.5f,  2.0f, -2.5f),
-            glm::vec3( 1.5f,  0.2f, -1.5f),
-            glm::vec3(-1.3f,  1.0f, -1.5f)
-        };
-        // add ten boxes
-        Color pink(1.0,0.5,0.71);
-        for (unsigned int i = 0; i < 10; i++) {
-            ObjId m_id = s.add_obj(Shape::box, pink);
-            m_id.translate(box_positions[i]);
-            float angle = 20.0f * i;
-            m_id.rotate(angle, glm::vec3(1.0f, 0.3f, 0.5f));
+        s.set_shadow(true);
+        s.set_light_pos({30,30,-30});
+        
+        const double radius = 5;
+        for (int i=0; i<10; i++){
+            double angle = (M_PI/4)*(1+i);
+            ObjId id = s.add_obj(Shape::sphere, RED);
+            id.translate({radius*cos(angle),radius*sin(angle), -5 - i*6});
+            angle = (M_PI/4)*(2+i);
+            id = s.add_obj(Shape::truncatedCone, BLUE);
+            id.translate({radius*cos(angle),radius*sin(angle), -5 - i*6});
+            angle = (M_PI/4)*(3+i);
+            id = s.add_obj(Shape::cylinder, GREEN);
+            id.translate({radius*cos(angle),radius*sin(angle), -5 - i*6});
+            angle = (M_PI/4)*(4+i);
+            id = s.add_obj(Shape::cone, YELLOW);
+            id.translate({radius*cos(angle),radius*sin(angle), -5 - i*6});
+            angle = (M_PI/4)*(5+i);
+            id = s.add_obj(Shape::pyramid, PINK);
+            id.translate({radius*cos(angle),radius*sin(angle), -5 - i*6});
+            angle = (M_PI/4)*(6+i);
+            id = s.add_obj(Shape::torus, GREEN, {.r1 = 0.7, .r2 = 0.4, .accuracy=5});
+            id.translate({radius*cos(angle),radius*sin(angle), -5 - i*6});
+            angle = (M_PI/4)*(7+i);
+            id = s.add_obj(Shape::box, TEAL);
+            id.translate({radius*cos(angle),radius*sin(angle), -5 - i*6});
+            angle = (M_PI/4)*(8+i);
+            id = s.add_obj("cat", ORANGE, {.filepath = argv[2]});
+            id.translate({radius*cos(angle),radius*sin(angle), -5 - i*6});
+            id.scale(2);
         }
-                
-        // add two spheres
-        Color teal(0x47BECB);
-        ObjId m_id = s.add_obj(Shape::sphere, teal, {.accuracy = 5});
-        m_id.translate(glm::vec3(-0.2,-0.2,-0.2));
-        m_id.scale(0.5);
-        m_id = s.add_obj(Shape::sphere, teal);
-        m_id.translate(glm::vec3(-0.6,-0.6,0.6));
-        m_id.scale(0.3);
-        
-        m_id = s.add_obj(Shape::pyramid, teal, {.sides = 7});
-        m_id.translate(glm::vec3(4.2,1.2,-0.2));
-        m_id.scale(0.5);
         
         ObjId floor = s.add_obj(Shape::box, {0.6, 0.6, 0.6} );
-        floor.translate(glm::vec3(-35, -4, -35));
+        floor.translate(glm::vec3(-35, -7, -35));
         floor.scale({70, 0.01, 70});
+        
         // render the scene.
         s.render();
     } catch (std::runtime_error& err) {
