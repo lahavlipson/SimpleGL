@@ -27,7 +27,7 @@ CPPFLAGS  ?= $(INC_FLAGS) $(CMPFLAGS)
 
 # For every <test>.cpp file in the test/src/ directory, add it to TESTS.
 TESTS = test1 compare1 test2 compare2 test_invalid_param test_objs \
-		spring_test tetrahedron composite_test hellosimplegl 
+		spring_test tetrahedron composite_test hellosimplegl demo 
 TEST_EXECS = $(foreach t, $(TESTS), $(BUILD_DIR)/$(t))
 
 TEST_INC_FLAGS  := $(INC_FLAGS) -I$(TEST_SRC_DIR)
