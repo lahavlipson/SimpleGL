@@ -139,7 +139,7 @@ static const std::string DEPTH_FRAG_SHADER = "#version 330 core\n"
 "}\n";
 
 struct ShadowParams {
-    float near_plane = 1.0001f;
+    float near_plane = 0.1f;
     float far_plane = 70.0f;
     float proj_frustum_size = 30.0f;
     unsigned int depth_map_resolution = 1024;

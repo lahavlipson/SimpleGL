@@ -142,32 +142,149 @@ int main(int argc, char *argv[]) {
     // set up vertex data (and buffer(s)) and configure vertex attributes
     auto vertices = glp::box(glm::dvec3(1,1,1));
     // world space positions of our cubes
-    glm::vec3 cubePositions[] = {
-        glm::vec3( 0.0f,  0.0f,  0.0f),
-        glm::vec3( 2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f,  2.0f, -2.5f),
-        glm::vec3( 1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
 
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     glUseProgram(ID);
     glUniform3f(glGetUniformLocation(ID, "lightColor"),  1.0f, 1.0f, 1.0f);
     glUniform3f(glGetUniformLocation(ID, "lightPos"),  6.2f, 7.0f, 5.0f);
-    unsigned int VBO, VAO, vao_sphere, vbo_sphere, vao_p, vbo_p, vao_obj, vbo_obj;
+    unsigned int vbo_box, vao_box, vao_sphere, vbo_sphere, vao_p, vbo_p, vao_obj, vbo_obj, vao_cone, vbo_cone, vao_torus, vbo_torus, vao_cylinder, vbo_cylinder, vbo_tcone, vao_tcone;
+    
+    const glm::vec3 RED(0.95, 0.02, 0.02), BLUE(0.21, 0.25, 1), GREEN(0.02, 0.82, 0.02), YELLOW(0.98, 0.98, 0.30), ORANGE(0.99, 0.59, 0.21),
+    PINK(0.98, 0.32, 0.91), TEAL(0.28, 0.98, 0.64), GREY(0.38, 0.38, 0.38);
 
+    std::chrono::milliseconds delta_frame_milli;
+    double frame_rate = 60; // dummy initial value
+    double smoothing = 0.5; // initial smoothing
+    
+    // render boxes
+    glGenVertexArrays(1, &vao_box);
+    glBindVertexArray(vao_box);
+    glGenBuffers(1, &vbo_box);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_box);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(double), vertices.data(), GL_STATIC_DRAW);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
+    glEnableVertexAttribArray(0);
+    // texture coord attribute
+    glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)(3 * sizeof(double)));
+    glEnableVertexAttribArray(1);
+    
+    // render spheres
+    auto verticesSphere = glp::sphere(3, 1);
+    glGenVertexArrays(1, &vao_sphere);
+    glBindVertexArray(vao_sphere);
+    glGenBuffers(1, &vbo_sphere);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_sphere);
+    glBufferData(GL_ARRAY_BUFFER, verticesSphere.size()*sizeof(double), verticesSphere.data(), GL_STATIC_DRAW);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
+    glEnableVertexAttribArray(0);
+    // normal attribute
+    glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE,6*sizeof(double), (void*)(3*sizeof(double)));
+    glEnableVertexAttribArray(1);
+    
+    // render toruses
+    auto verticesTorus = glp::torus(10, 10, 0.7, 0.4);
+    glGenVertexArrays(1, &vao_torus);
+    glBindVertexArray(vao_torus);
+    glGenBuffers(1, &vbo_torus);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_torus);
+    glBufferData(GL_ARRAY_BUFFER, verticesTorus.size()*sizeof(double), verticesTorus.data(), GL_STATIC_DRAW);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
+    glEnableVertexAttribArray(0);
+    // normal attribute
+    glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE,6*sizeof(double), (void*)(3*sizeof(double)));
+    glEnableVertexAttribArray(1);
+    
+    // render cones
+    auto verticesCone = glp::cone(4, 2, 1);
+    glGenVertexArrays(1, &vao_cone);
+    glBindVertexArray(vao_cone);
+    glGenBuffers(1, &vbo_cone);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_cone);
+    glBufferData(GL_ARRAY_BUFFER, verticesCone.size()*sizeof(double), verticesCone.data(), GL_STATIC_DRAW);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
+    glEnableVertexAttribArray(0);
+    // normal attribute
+    glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE,6*sizeof(double), (void*)(3*sizeof(double)));
+    glEnableVertexAttribArray(1);
+    
+    // render truncated cones
+    auto verticesTCone = glp::truncatedCone(32, 2, 1, 0.2);
+    glGenVertexArrays(1, &vao_tcone);
+    glBindVertexArray(vao_tcone);
+    glGenBuffers(1, &vbo_tcone);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_tcone);
+    glBufferData(GL_ARRAY_BUFFER, verticesTCone.size()*sizeof(double), verticesTCone.data(), GL_STATIC_DRAW);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
+    glEnableVertexAttribArray(0);
+    // normal attribute
+    glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE,6*sizeof(double), (void*)(3*sizeof(double)));
+    glEnableVertexAttribArray(1);
+    
+    // render cylinders
+    auto verticesCylinder = glp::cylinder(6, 1, 1);
+    glGenVertexArrays(1, &vao_cylinder);
+    glBindVertexArray(vao_cylinder);
+    glGenBuffers(1, &vbo_cylinder);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_cylinder);
+    glBufferData(GL_ARRAY_BUFFER, verticesCylinder.size()*sizeof(double), verticesCylinder.data(), GL_STATIC_DRAW);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
+    glEnableVertexAttribArray(0);
+    // normal attribute
+    glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE,6*sizeof(double), (void*)(3*sizeof(double)));
+    glEnableVertexAttribArray(1);
+    
+    // render pyramid
+    auto verticesPyramid = glp::pyramid(3, 1, 1);
+    glGenVertexArrays(1, &vao_p);
+    glBindVertexArray(vao_p);
+    glGenBuffers(1, &vbo_p);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_p);
+    glBufferData(GL_ARRAY_BUFFER, verticesPyramid.size()*sizeof(double), verticesPyramid.data(), GL_STATIC_DRAW);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
+    glEnableVertexAttribArray(0);
+    // normal attribute
+    glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE,6*sizeof(double), (void*)(3*sizeof(double)));
+    glEnableVertexAttribArray(1);
+    
+    //render obj
+    std::vector<double> verticesObj;
+    if (argc > 3) {
+        objl::Loader loader;
+        loader.LoadFile(*(argv+3));
+        for (int i = 0; i < loader.LoadedVertices.size(); i++){
+            verticesObj.push_back(loader.LoadedVertices[i].Position.X);
+            verticesObj.push_back(loader.LoadedVertices[i].Position.Y);
+            verticesObj.push_back(loader.LoadedVertices[i].Position.Z);
+            verticesObj.push_back(loader.LoadedVertices[i].Normal.X);
+            verticesObj.push_back(loader.LoadedVertices[i].Normal.Y);
+            verticesObj.push_back(loader.LoadedVertices[i].Normal.Z);
+        }
+        assert (verticesObj.size() == 6 * loader.LoadedVertices.size());
+        glGenVertexArrays(1, &vao_obj);
+        glBindVertexArray(vao_obj);
+        glGenBuffers(1, &vbo_obj);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_obj);
+        glBufferData(GL_ARRAY_BUFFER, verticesObj.size()*sizeof(double), verticesObj.data(), GL_STATIC_DRAW);
+        // position attribute
+        glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
+        glEnableVertexAttribArray(0);
+        // normal attribute
+        glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE,6*sizeof(double), (void*)(3*sizeof(double)));
+        glEnableVertexAttribArray(1);
+    }
+    
     // render loop
     while (!glfwWindowShouldClose(window))
     {
-        // per-frame time logic
-        float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+        // start measuring frame time
+        auto t0 = std::chrono::high_resolution_clock::now();
         
         // input
         processInput(window);
@@ -191,114 +308,94 @@ int main(int argc, char *argv[]) {
         glUniformMatrix4fv(glGetUniformLocation(ID, "view"), 1, GL_FALSE, &view[0][0]);
         glUniform3f(glGetUniformLocation(ID, "objectColor"), 1.0f, 0.5f, 0.71f);
         
-        // render boxes
-        glGenVertexArrays(1, &VAO);
-        glBindVertexArray(VAO);
-        glGenBuffers(1, &VBO);    
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(double), vertices.data(), GL_STATIC_DRAW);
-        // position attribute
-        glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
-        glEnableVertexAttribArray(0);
-        // texture coord attribute
-        glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)(3 * sizeof(double)));
-        glEnableVertexAttribArray(1);
-        glBindVertexArray(VAO);
-        for (unsigned int i = 0; i < 10; i++)
-        {
-            // calculate the model matrix for each object and pass it to shader before drawing
-            glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model[0][0]);            
-            glDrawArrays(GL_TRIANGLES, 0, (int) (vertices.size() / 6));
-        }
-
-        // render spheres
-        auto color = glm::vec3(0.7, 0.5, 0.5);
-        auto verticesSphere = glp::sphere(7, 1);
-        glGenVertexArrays(1, &vao_sphere);
-        glBindVertexArray(vao_sphere);  
-        glGenBuffers(1, &vbo_sphere);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_sphere);
-        glBufferData(GL_ARRAY_BUFFER, verticesSphere.size()*sizeof(double), verticesSphere.data(), GL_STATIC_DRAW);
-        // position attribute
-        glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
-        glEnableVertexAttribArray(0);
-        // normal attribute
-        glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE,6*sizeof(double), (void*)(3*sizeof(double)));
-        glEnableVertexAttribArray(1);  
-
-        glBindVertexArray(vao_sphere);
+        //floor
+        glBindVertexArray(vao_box);
+        // calculate the model matrix for each object and pass it to shader before drawing
         glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-        model = glm::translate(model, glm::vec3(-0.2,-0.2,-0.2));
-        model = glm::scale(model, glm::vec3(.5,.5,.5));
-        glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model[0][0]);            
-        glUniform3fv(glGetUniformLocation(ID, "objectColor"), 1, &color[0]);
-        glDrawArrays(GL_TRIANGLES, 0, (int) (verticesSphere.size() / 6));
+        model = glm::translate(model, {-35, -7, -35});
+        model = glm::scale(model, glm::vec3(70, 0.2, 70));
+        glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model[0][0]);
+        glUniform3fv(glGetUniformLocation(ID, "objectColor"), 1, &GREY[0]);
+        glDrawArrays(GL_TRIANGLES, 0, (int) (vertices.size() / 6));
+        
+        double angle;
+        const double radius = 5;
+        
+        for (int i=0; i<10; i++){
+            glBindVertexArray(vao_box);
+            // calculate the model matrix for each object and pass it to shader before drawing
+            model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+            angle = (M_PI/4)*(7+i);
+            model = glm::translate(model, {radius*cos(angle),radius*sin(angle), -5 - i*6});
+            glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model[0][0]);
+            glUniform3fv(glGetUniformLocation(ID, "objectColor"), 1, &TEAL[0]);
+            glDrawArrays(GL_TRIANGLES, 0, (int) (vertices.size() / 6));
+            
+            glBindVertexArray(vao_sphere);
+            model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+            angle = (M_PI/4)*(1+i);
+            model = glm::translate(model, {radius*cos(angle),radius*sin(angle), -5 - i*6});
+            glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model[0][0]);
+            glUniform3fv(glGetUniformLocation(ID, "objectColor"), 1, &RED[0]);
+            glDrawArrays(GL_TRIANGLES, 0, (int) (verticesSphere.size() / 6));
+            
+            glBindVertexArray(vao_cone);
+            model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+            angle = (M_PI/4)*(4+i);
+            model = glm::translate(model, {radius*cos(angle),radius*sin(angle), -5 - i*6});
+            glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model[0][0]);
+            glUniform3fv(glGetUniformLocation(ID, "objectColor"), 1, &YELLOW[0]);
+            glDrawArrays(GL_TRIANGLES, 0, (int) (verticesSphere.size() / 6));
+            
+            glBindVertexArray(vao_tcone);
+            model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+            angle = (M_PI/4)*(2+i);
+            model = glm::translate(model, {radius*cos(angle),radius*sin(angle), -5 - i*6});
+            glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model[0][0]);
+            glUniform3fv(glGetUniformLocation(ID, "objectColor"), 1, &BLUE[0]);
+            glDrawArrays(GL_TRIANGLES, 0, (int) (verticesSphere.size() / 6));
+            
+            glBindVertexArray(vao_cylinder);
+            model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+            angle = (M_PI/4)*(3+i);
+            model = glm::translate(model, {radius*cos(angle),radius*sin(angle), -5 - i*6});
+            glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model[0][0]);
+            glUniform3fv(glGetUniformLocation(ID, "objectColor"), 1, &GREEN[0]);
+            glDrawArrays(GL_TRIANGLES, 0, (int) (verticesSphere.size() / 6));
+            
+            glBindVertexArray(vao_torus);
+            model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+            angle = (M_PI/4)*(6+i);
+            model = glm::translate(model, {radius*cos(angle),radius*sin(angle), -5 - i*6});
+            glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model[0][0]);
+            glUniform3fv(glGetUniformLocation(ID, "objectColor"), 1, &GREEN[0]);
+            glDrawArrays(GL_TRIANGLES, 0, (int) (verticesSphere.size() / 6));
 
-        glm::mat4 model2 = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-        model2 = glm::translate(model2, glm::vec3(-0.6,-0.6,-0.6));
-        model2 = glm::scale(model2, glm::vec3(.3,.3,.3));
-        glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model2[0][0]);            
-        glUniform3fv(glGetUniformLocation(ID, "objectColor"), 1, &color[0]);
-        glDrawArrays(GL_TRIANGLES, 0, (int) (verticesSphere.size() / 6));
+            glBindVertexArray(vao_p);
+            model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+            angle = (M_PI/4)*(5+i);
+            model = glm::translate(model, {radius*cos(angle),radius*sin(angle), -5 - i*6});
+            glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model[0][0]);
+            glUniform3fv(glGetUniformLocation(ID, "objectColor"), 1, &PINK[0]);
+            glDrawArrays(GL_TRIANGLES, 0, (int) (verticesPyramid.size() / 6));
 
-        // render pyramid
-        auto verticesPyramid = glp::pyramid(7, 1, 1);
-        glGenVertexArrays(1, &vao_p);
-        glBindVertexArray(vao_p);  
-        glGenBuffers(1, &vbo_p);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_p);
-        glBufferData(GL_ARRAY_BUFFER, verticesPyramid.size()*sizeof(double), verticesPyramid.data(), GL_STATIC_DRAW);
-        // position attribute
-        glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
-        glEnableVertexAttribArray(0);
-        // normal attribute
-        glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE,6*sizeof(double), (void*)(3*sizeof(double)));
-        glEnableVertexAttribArray(1);  
-
-        glBindVertexArray(vao_p);
-        glm::mat4 modelp = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-        modelp = glm::translate(modelp, glm::vec3(4.2,1.2,-0.2));
-        modelp = glm::scale(modelp, glm::vec3(.5,.5,.5));
-        glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &modelp[0][0]);            
-        glUniform3fv(glGetUniformLocation(ID, "objectColor"), 1, &color[0]);
-        glDrawArrays(GL_TRIANGLES, 0, (int) (verticesPyramid.size() / 6));
-
-        // render .obj files
-        if (argc > 3) {
-            objl::Loader loader;
-            loader.LoadFile(*(argv+3));
-            std::vector<double> verticesObj;
-            for (int i = 0; i < loader.LoadedVertices.size(); i++){
-                verticesObj.push_back(loader.LoadedVertices[i].Position.X);
-                verticesObj.push_back(loader.LoadedVertices[i].Position.Y);
-                verticesObj.push_back(loader.LoadedVertices[i].Position.Z);
-                verticesObj.push_back(loader.LoadedVertices[i].Normal.X);
-                verticesObj.push_back(loader.LoadedVertices[i].Normal.Y);
-                verticesObj.push_back(loader.LoadedVertices[i].Normal.Z);
+            if (argc > 3) {
+                glBindVertexArray(vao_obj);
+                model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+                angle = (M_PI/4)*(8+i);
+                model = glm::translate(model, {radius*cos(angle),radius*sin(angle), -5 - i*6});
+                model = glm::scale(model, glm::vec3(2,2,2));
+                glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model[0][0]);
+                glUniform3fv(glGetUniformLocation(ID, "objectColor"), 1, &ORANGE[0]);
+                glDrawArrays(GL_TRIANGLES, 0, (int) (verticesObj.size() / 6));
             }
-            assert (verticesObj.size() == 6 * loader.LoadedVertices.size());
-            glGenVertexArrays(1, &vao_obj);
-            glBindVertexArray(vao_obj);  
-            glGenBuffers(1, &vbo_obj);
-            glBindBuffer(GL_ARRAY_BUFFER, vbo_obj);
-            glBufferData(GL_ARRAY_BUFFER, verticesObj.size()*sizeof(double), verticesObj.data(), GL_STATIC_DRAW);
-            // position attribute
-            glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 6*sizeof(double), (void*)0);
-            glEnableVertexAttribArray(0);
-            // normal attribute
-            glVertexAttribPointer(1, 3, GL_DOUBLE, GL_FALSE,6*sizeof(double), (void*)(3*sizeof(double)));
-            glEnableVertexAttribArray(1);  
-            glBindVertexArray(vao_obj);
-            glm::mat4 model3 = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-            glUniformMatrix4fv(glGetUniformLocation(ID,"model"), 1, GL_FALSE, &model3[0][0]);  
-            model3 = glm::scale(model3, glm::vec3(.08,.08,.08));  
-            model3 = glm::translate(model3, glm::vec3(-0.6,-70.2,-0.6));        
-            glDrawArrays(GL_TRIANGLES, 0, (int) (verticesObj.size() / 6));
         }
+        
+        // compute frame time and frame rate.
+        auto t1 = std::chrono::high_resolution_clock::now();
+        delta_frame_milli = std::chrono::duration_cast<std::chrono::milliseconds>(t1-t0);
+        frame_rate = (frame_rate * smoothing) + ((1.0/(delta_frame_milli.count()/1000.0)) * (1.0-smoothing));
+        std::cout << "frame rate: " << frame_rate << "\n";
         
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         glfwSwapBuffers(window);
@@ -306,14 +403,23 @@ int main(int argc, char *argv[]) {
     }
     
     // optional: de-allocate all resources once they've outlived their purpose:
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &vao_box);
+    glDeleteBuffers(1, &vbo_box);
     glDeleteVertexArrays(1, &vao_obj);
     glDeleteBuffers(1, &vbo_obj);
     glDeleteVertexArrays(1, &vao_sphere);
     glDeleteBuffers(1, &vbo_sphere);
     glDeleteVertexArrays(1, &vao_p);
-    glDeleteBuffers(1, &vbo_p);   
+    glDeleteBuffers(1, &vbo_p);
+    glDeleteVertexArrays(1, &vao_cylinder);
+    glDeleteBuffers(1, &vbo_cylinder);
+    glDeleteVertexArrays(1, &vao_tcone);
+    glDeleteBuffers(1, &vbo_tcone);
+    glDeleteVertexArrays(1, &vao_cone);
+    glDeleteBuffers(1, &vbo_cone);
+    glDeleteVertexArrays(1, &vao_torus);
+    glDeleteBuffers(1, &vbo_torus);
+    
     // glfw: terminate, clearing all previously allocated GLFW resources.
     glfwTerminate();
     return 0;

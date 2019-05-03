@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     try {
         // initialize the scene.
         Scene s(true);
-	    s.set_callback(print_frame_rate);
+        s.set_callback(print_frame_rate);
         s.set_shadow(true);
         s.set_light_pos({30,30,-30});
         
@@ -60,3 +60,4 @@ int main(int argc, char *argv[]) {
         std::cout << err.what() << "\n";
     }
 }
+
