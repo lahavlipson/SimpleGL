@@ -9,11 +9,20 @@
 
 using namespace sgl;
 
+void print_frame_rate(Scene *scene_ptr) {
+    std::cout << "Framerate: " << scene_ptr->get_frame_rate() << "\n";
+}
+
 int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        std::cout << "Usage: " << *argv << " <cat_obj_filepath> \n";
+        return 0;
+    }
     try {
         // initialize the scene.
         Scene s(true);
-        
+	
+	s.set_callback(print_frame_rate);        
         s.set_shadow(true);
         s.set_light_pos({30,30,-30});
         
@@ -41,7 +50,7 @@ int main(int argc, char *argv[]) {
             id = s.add_obj(Shape::box, TEAL);
             id.translate({radius*cos(angle),radius*sin(angle), -5 - i*6});
             angle = (M_PI/4)*(8+i);
-            id = s.add_obj("cat", ORANGE, {.filepath = argv[2]});
+            id = s.add_obj("cat", ORANGE, {.filepath = argv[1]});
             id.translate({radius*cos(angle),radius*sin(angle), -5 - i*6});
             id.scale(2);
         }
