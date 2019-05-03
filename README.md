@@ -6,7 +6,7 @@
 
 A simpler, beginner-friendly version of OpenGL. 
 
-See the [wiki](https://github.com/Lahav174/SimpleGL/wiki) for all supporting documents.
+See the [wiki](https://github.com/Lahav174/SimpleGL/wiki) for all supporting documents (all documents are also in pdf form in the `documentation/` folder).
 - The [Maintainer's Notes](https://github.com/Lahav174/SimpleGL/wiki/Maintainer's-Notes) and [API](https://github.com/Lahav174/SimpleGL/wiki/SimpleGL-API) contain the implementation details for future maintainers and usage details for SimpleGL users respectively. 
 - The [tutorial](https://github.com/Lahav174/SimpleGL/wiki/SimpleGL-Tutorial) walks through creating a SimpleGL program from scratch.
 - The [design document](https://github.com/Lahav174/SimpleGL/wiki/Design-Document) describes the major design decisions we made over the course of creating this library.
